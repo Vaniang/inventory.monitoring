@@ -21,7 +21,7 @@
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* SIDEBAR (Darker for Admin) */
+        /* SIDEBAR */
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; letter-spacing: 1px;}
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
@@ -51,14 +51,17 @@
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
         .data-table tr:hover { background-color: #f9f9f9; }
+        
+        /* GROUP HEADERS (For Functional Divisions) */
+        .group-header { background-color: #2c3e50; color: white; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .group-header td { padding: 10px 15px; }
 
-        /* BADGES */
+        /* BADGES & BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* ACTION BUTTONS */
         .action-btn { border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; transition: transform 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em; }
         .action-btn:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .btn-approve { background: var(--green); }
@@ -83,6 +86,7 @@
             <h2>Admin Panel</h2>
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
             <div class="nav-link" onclick="nav('master-list', this)">Master Inventory</div>
+            <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
@@ -92,6 +96,10 @@
                 <div class="header-title"><h1>Admin Dashboard</h1></div>
 
                 <div class="cards-grid">
+                    <div class="card" style="border-color: #3498db;">
+                        <h3>PPMPs Uploaded</h3>
+                        <div class="number" id="adm-ppmp-count">0</div>
+                    </div>
                     <div class="card" style="border-color: #2c3e50;">
                         <h3>Total Requests</h3>
                         <div class="number" id="adm-total">0</div>
@@ -107,19 +115,10 @@
                 </div>
 
                 <div class="content-box">
-                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print Report</button>
                     <h3>🔔 Incoming Requests</h3>
-                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Review and manage supply requests from all divisions.</p>
-                    
                     <table class="data-table">
                         <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Division</th>
-                                <th>Items Requested</th>
-                                <th>Status</th>
-                                <th class="no-print">Actions</th>
-                            </tr>
+                            <tr><th>Date</th><th>Division</th><th>Items</th><th>Status</th><th class="no-print">Actions</th></tr>
                         </thead>
                         <tbody id="requestTable"></tbody>
                     </table>
@@ -130,18 +129,26 @@
                 <div class="header-title"><h1>Master Inventory List</h1></div>
                 <div class="content-box">
                     <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print List</button>
-                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">A complete view of all stock uploaded by every division.</p>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Inventory consolidated by Functional Division and Unit/Section.</p>
                     <table class="data-table">
                         <thead>
-                            <tr>
-                                <th>Division</th>
-                                <th>Item Name</th>
-                                <th>Initial Qty</th>
-                                <th>Current Stock</th>
-                                <th>Unit Price</th>
-                            </tr>
+                            <tr><th>Unit / Section</th><th>Item Name</th><th>Initial Qty</th><th>Current Stock</th><th>Unit Price</th></tr>
                         </thead>
                         <tbody id="masterInventoryTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="consolidated-supplies" class="section">
+                <div class="header-title"><h1>Consolidated Supplies</h1></div>
+                <div class="content-box">
+                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print Summary</button>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Total count of every supply item across ALL divisions.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Item Name</th><th>Total Quantity</th><th>Average Unit Price</th></tr>
+                        </thead>
+                        <tbody id="consolidatedTable"></tbody>
                     </table>
                 </div>
             </div>
@@ -164,6 +171,17 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // FUNCTIONAL DIVISION MAPPING
+        const funcDivMap = {
+            "Records": "Administrative Division", "GSU": "Administrative Division", "Procurement Unit": "Administrative Division",
+            "Cash Unit": "Administrative Division", "Personnel Section": "Administrative Division", "Admin Proper": "Administrative Division", "RPSU": "Administrative Division",
+            "Legal Unit": "Office of Regional Director", "ICT Unit": "Office of Regional Director", "Public Affairs Unit": "Office of Regional Director",
+            "OARD": "Office of Regional Director", "ORD Proper": "Office of Regional Director",
+            "CLMD Proper": "CLMD", "CLMD-LR": "CLMD",
+            "Accounting Section": "Finance Division", "Budget Section": "Finance Division"
+        };
+        // Default catch-all for others (FTAD, PPRD, ESSD, QAD, HRDD) map to themselves if not listed above.
+
         // 2. AUTH CHECK
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
@@ -172,16 +190,12 @@
                     if (doc.exists && doc.data().role === 'admin') {
                         initAdminDashboard();
                         initMasterInventory();
-                    } else {
-                        window.location.href = "../user/user.html";
-                    }
+                    } else window.location.href = "../user/user.html";
                 });
             }
         });
 
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
-
-        // 3. NAVIGATION
         function nav(id, btn) {
             document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -189,12 +203,21 @@
             btn.classList.add('active');
         }
 
-        // 4. REQUESTS DASHBOARD
+        // 3. DASHBOARD LOGIC
         function initAdminDashboard() {
+            // Count PPMPs (Unique Divisions in Inventory)
+            db.collection('inventory').onSnapshot(snap => {
+                const divisions = new Set();
+                snap.forEach(doc => {
+                    const div = doc.data().division;
+                    if(div) divisions.add(div);
+                });
+                document.getElementById('adm-ppmp-count').innerText = divisions.size;
+            });
+
+            // Requests
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
-                let total = 0, pending = 0, approved = 0;
-                let html = '';
-                
+                let total = 0, pending = 0, approved = 0, html = '';
                 snap.forEach(doc => {
                     const r = doc.data();
                     total++;
@@ -204,28 +227,17 @@
                     const itemsStr = r.items.map(i => `${i.itemName} (${i.reqQty})`).join(', ');
                     const dateStr = new Date(r.date).toLocaleDateString();
                     const status = r.status || 'Pending';
-                    const userId = r.userId || ''; 
+                    const userId = r.userId || '';
 
-                    // Buttons
                     let actions = '<span style="color:#aaa;">—</span>';
                     if(status === 'Pending') {
                         actions = `
-                            <button class="action-btn btn-approve" title="Approve" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
-                            <button class="action-btn btn-reject" title="Reject" onclick="setStatus('${doc.id}', 'Rejected', '${userId}')">✗</button>
-                        `;
+                            <button class="action-btn btn-approve" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
+                            <button class="action-btn btn-reject" onclick="setStatus('${doc.id}', 'Rejected', '${userId}')">✗</button>`;
                     }
 
-                    html += `
-                        <tr>
-                            <td>${dateStr}</td>
-                            <td><strong style="color:#2c3e50;">${r.division}</strong></td>
-                            <td style="font-size:0.9em; color:#555;">${itemsStr}</td>
-                            <td><span class="badge badge-${status}">${status}</span></td>
-                            <td class="no-print">${actions}</td>
-                        </tr>
-                    `;
+                    html += `<tr><td>${dateStr}</td><td><strong>${r.division}</strong></td><td style="font-size:0.9em;">${itemsStr}</td><td><span class="badge badge-${status}">${status}</span></td><td class="no-print">${actions}</td></tr>`;
                 });
-
                 document.getElementById('adm-total').innerText = total;
                 document.getElementById('adm-pending').innerText = pending;
                 document.getElementById('adm-approved').innerText = approved;
@@ -233,56 +245,67 @@
             });
         }
 
-        // 5. MASTER INVENTORY (All Divisions)
+        // 4. MASTER INVENTORY & CONSOLIDATED SUPPLIES
         function initMasterInventory() {
             db.collection('inventory').onSnapshot(snap => {
-                let html = '';
-                let items = [];
-                snap.forEach(doc => items.push(doc.data()));
+                const items = [];
+                const supplyMap = {}; // For Consolidated Tab
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const unit = d.division || "Unknown";
+                    const funcDiv = funcDivMap[unit] || unit; // Map to Functional Division
+                    
+                    // Add to Master List
+                    items.push({ ...d, funcDiv, unit });
+
+                    // Add to Consolidated Map
+                    const key = d.itemName.trim().toLowerCase();
+                    if(!supplyMap[key]) {
+                        supplyMap[key] = { name: d.itemName, qty: 0, prices: [] };
+                    }
+                    supplyMap[key].qty += d.currentQty;
+                    supplyMap[key].prices.push(d.unitPrice);
+                });
+
+                // RENDER MASTER LIST (Grouped)
+                items.sort((a,b) => a.funcDiv.localeCompare(b.funcDiv) || a.unit.localeCompare(b.unit));
                 
-                // Sort by Division then Item Name
-                items.sort((a,b) => (a.division || '').localeCompare(b.division || '') || a.itemName.localeCompare(b.itemName));
+                let masterHtml = '';
+                let lastFuncDiv = '';
 
                 items.forEach(i => {
-                    html += `
-                        <tr>
-                            <td><strong>${i.division || 'Unknown'}</strong></td>
-                            <td>${i.itemName}</td>
-                            <td>${i.initialQty}</td>
-                            <td style="font-weight:bold; color:${i.currentQty < 5 ? 'red' : 'green'}">${i.currentQty}</td>
-                            <td>${i.unitPrice}</td>
-                        </tr>
-                    `;
+                    if(i.funcDiv !== lastFuncDiv) {
+                        masterHtml += `<tr class="group-header"><td colspan="5">${i.funcDiv}</td></tr>`;
+                        lastFuncDiv = i.funcDiv;
+                    }
+                    masterHtml += `<tr><td style="padding-left:20px;">${i.unit}</td><td>${i.itemName}</td><td>${i.initialQty}</td><td style="font-weight:bold;">${i.currentQty}</td><td>${i.unitPrice}</td></tr>`;
                 });
-                document.getElementById('masterInventoryTable').innerHTML = html;
+                document.getElementById('masterInventoryTable').innerHTML = masterHtml;
+
+                // RENDER CONSOLIDATED LIST
+                let consolHtml = '';
+                Object.values(supplyMap).forEach(s => {
+                    const avgPrice = (s.prices.reduce((a,b)=>a+b, 0) / s.prices.length).toFixed(2);
+                    consolHtml += `<tr><td>${s.name}</td><td style="font-size:1.1em; font-weight:bold;">${s.qty}</td><td>${avgPrice}</td></tr>`;
+                });
+                document.getElementById('consolidatedTable').innerHTML = consolHtml;
             });
         }
 
-        // 6. APPROVE/REJECT & NOTIFY
+        // 5. ACTIONS
         function setStatus(docId, status, userId) {
             if(!confirm(`Mark as ${status}?`)) return;
-            
             const batch = db.batch();
-            const reqRef = db.collection('requisitions').doc(docId);
-            batch.update(reqRef, { status: status });
-
-            // Send Notification
-            if(userId && userId !== 'undefined') {
-                const notifRef = db.collection('notifications').doc();
-                batch.set(notifRef, {
-                    userId: userId,
-                    title: `Request ${status}`,
-                    message: status === 'Approved' 
-                        ? "Good news! Your supplies request has been approved." 
-                        : "Your supplies request has been rejected.",
-                    status: 'unread',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            batch.update(db.collection('requisitions').doc(docId), { status: status });
+            if(userId) {
+                batch.set(db.collection('notifications').doc(), {
+                    userId: userId, title: `Request ${status}`,
+                    message: status === 'Approved' ? "Your request is approved." : "Your request was rejected.",
+                    status: 'unread', timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
-
-            batch.commit()
-                .then(() => alert(`Updated & Notified!`))
-                .catch(err => alert("Error: " + err.message));
+            batch.commit().then(() => alert(`Updated!`));
         }
     </script>
 </body>
