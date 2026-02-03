@@ -1,4 +1,6 @@
-// 1. CONFIGURATION
+// ==========================================
+// 1. CONFIGURATION (Compat Version)
+// ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
     authDomain: "supplies-monitoring.firebaseapp.com",
@@ -9,7 +11,7 @@ const firebaseConfig = {
     measurementId: "G-033SS1BHK1"
 };
 
-// Initialize
+// Initialize Firebase (Global Namespace)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -19,14 +21,21 @@ let inventoryData = [], slipItems = [];
 let currentUserDivision = ""; 
 
 // ==========================================
-// AUTHENTICATION LOGIC
+// 2. AUTHENTICATION LOGIC
 // ==========================================
 function login() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
-    auth.signInWithEmailAndPassword(email, pass).catch(err => {
-        document.getElementById('login-error').innerText = err.message;
-    });
+    
+    auth.signInWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            console.log("Logged in:", userCredential.user.uid);
+            // The onAuthStateChanged listener will handle the redirect
+        })
+        .catch((error) => {
+            console.error("Login Failed:", error);
+            document.getElementById('login-error').innerText = error.message;
+        });
 }
 
 function logout() {
@@ -49,7 +58,7 @@ auth.onAuthStateChanged(user => {
                     // Show Admin View
                     document.getElementById('admin-view').classList.remove('hidden');
                 } else {
-                    // Show User View (Your Code)
+                    // Show User View
                     document.getElementById('user-view').classList.remove('hidden');
                     document.getElementById('user-division-name').innerText = `(${currentUserDivision})`;
                     // Update the Division Name on the RIS Form automatically
@@ -72,7 +81,7 @@ auth.onAuthStateChanged(user => {
 });
 
 // ==========================================
-// USER DASHBOARD LOGIC (YOUR ORIGINAL CODE)
+// 3. USER DASHBOARD LOGIC
 // ==========================================
 function nav(id, btn) {
     document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
@@ -134,7 +143,7 @@ function updateChart() {
 }
 
 // ==========================================
-// MODAL & SLIP LOGIC
+// 4. MODAL & SLIP LOGIC
 // ==========================================
 function openModal() { 
     document.getElementById('reqModal').classList.add('open'); 
@@ -163,7 +172,6 @@ function addItemToSlip() {
 }
 
 function renderSlip() {
-    // We only have one table ID in the merged HTML for simplicity, or loop if you added both
     const tableIds = ['risTableBody_1']; 
     tableIds.forEach(tableId => {
         const tbody = document.getElementById(tableId);
@@ -191,8 +199,8 @@ async function submitRequisition() {
     batch.set(reqRef, { 
         date: today, 
         items: slipItems,
-        division: currentUserDivision, // Track who ordered
-        status: 'Pending' // New Status field
+        division: currentUserDivision, 
+        status: 'Pending'
     });
 
     // Deduct from Inventory
@@ -211,7 +219,7 @@ async function submitRequisition() {
 }
 
 // ==========================================
-// EXCEL & UPLOAD LOGIC
+// 5. EXCEL & UPLOAD LOGIC
 // ==========================================
 function exportToExcel() {
     let data = [];
