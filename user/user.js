@@ -25,8 +25,10 @@ auth.onAuthStateChanged(user => {
             if(doc.exists) {
                 const data = doc.data();
                 currentUserDivision = data.division || "Unknown Division";
+                
                 // Update text on Dashboard
                 if(document.getElementById('division-name')) document.getElementById('division-name').innerText = currentUserDivision;
+                
                 // Update text on RIS Forms (Copy 1 & 2)
                 if(document.getElementById('ris-div-name-1')) document.getElementById('ris-div-name-1').innerText = currentUserDivision;
                 if(document.getElementById('ris-div-name-2')) document.getElementById('ris-div-name-2').innerText = currentUserDivision;
@@ -51,9 +53,10 @@ function nav(id, btn) {
     btn.classList.add('active');
 }
 
-// 4. DATA LOGIC
+// 4. DATA LOGIC (NOW WITH FILTERING)
 function initUserDashboard() {
-    db.collection('inventory').onSnapshot(snap => {
+    // IMPORTANT: This .where() ensures you ONLY see items uploaded by YOUR division
+    db.collection('inventory').where('division', '==', currentUserDivision).onSnapshot(snap => {
         const tbody = document.getElementById('inventoryTable');
         const select = document.getElementById('itemSelect');
         
@@ -78,6 +81,7 @@ function initUserDashboard() {
             }
         });
         
+        // Show "0" if list is empty
         if(document.getElementById('dash-total-items')) 
             document.getElementById('dash-total-items').innerText = totalStock;
     });
@@ -89,21 +93,30 @@ function initUserDashboard() {
     });
 }
 
-// 5. UPLOAD EXCEL
+// 5. UPLOAD EXCEL (ADDS DIVISION TAG)
 function handleFileUpload(input) {
     const reader = new FileReader();
     reader.onload = (e) => {
         const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
         const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         const batch = db.batch();
+        let count = 0;
+
         json.forEach(row => {
             if(row.Name && row.Qty) {
+                count++;
+                // TAG DATA WITH DIVISION so it matches the filter above
                 batch.set(db.collection('inventory').doc(), {
-                    itemName: String(row.Name), initialQty: Number(row.Qty), currentQty: Number(row.Qty), unitPrice: Number(row.Price||0), requestDates: []
+                    itemName: String(row.Name), 
+                    initialQty: Number(row.Qty), 
+                    currentQty: Number(row.Qty), 
+                    unitPrice: Number(row.Price||0), 
+                    division: currentUserDivision, // CRITICAL: This links the item to this user!
+                    requestDates: []
                 });
             }
         });
-        batch.commit().then(()=>alert('Upload Successful!'));
+        batch.commit().then(()=>alert(count + ' Items Uploaded Successfully!'));
     };
     reader.readAsArrayBuffer(input.files[0]);
 }
