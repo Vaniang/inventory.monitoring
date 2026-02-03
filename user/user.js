@@ -98,3 +98,198 @@ window.logout = logout;
 window.nav = nav;
 window.handleFileUpload = handleFileUpload;
 // Add window.openModal = openModal; etc. if you pasted the Modal code in HTML
+
+
+   function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function loadInventory() {
+            db.collection('inventory').onSnapshot(snap => {
+                inventoryData = [];
+                let totalStock = 0;
+                const tbody = document.getElementById('inventoryTable');
+                const select = document.getElementById('itemSelect');
+                tbody.innerHTML = ''; select.innerHTML = '<option value="">Select Item...</option>';
+
+                snap.forEach(doc => {
+                    const d = doc.data(); d.id = doc.id;
+                    inventoryData.push(d);
+                    totalStock += d.currentQty;
+                });
+                
+                inventoryData.sort((a,b) => a.itemName.localeCompare(b.itemName));
+
+                inventoryData.forEach(item => {
+                    let dates = item.requestDates ? item.requestDates.map(d=>new Date(d).toLocaleDateString()).join(', ') : '-';
+                    tbody.innerHTML += `<tr><td>${item.itemName}</td><td>${item.initialQty}</td><td>${item.unitPrice}</td><td>${dates}</td><td style="font-weight:bold;">${item.currentQty}</td></tr>`;
+                    select.innerHTML += `<option value="${item.id}">${item.itemName} (Stock: ${item.currentQty})</option>`;
+                });
+                document.getElementById('dash-total-items').innerText = totalStock;
+                updateChart();
+            });
+        }
+        
+        function loadStats() { db.collection('requisitions').onSnapshot(s => document.getElementById('dash-total-reqs').innerText = s.size); }
+
+        function updateChart() {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            const data = inventoryData.slice(0, 15);
+            if(window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: data.map(i=>i.itemName), datasets: [{ label:'Stock', data: data.map(i=>i.currentQty), backgroundColor:'#3498db' }] }
+            });
+        }
+
+        function handleFileUpload(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const batch = db.batch();
+                let count = 0;
+                json.forEach(row => {
+                    if(row.Name && row.Qty) {
+                        count++;
+                        batch.set(db.collection('inventory').doc(), {
+                            itemName: String(row.Name), initialQty: Number(row.Qty), currentQty: Number(row.Qty), unitPrice: Number(row.Price||0), requestDates: []
+                        });
+                    }
+                });
+                batch.commit().then(()=>alert(count + ' Items Imported!'));
+            };
+            reader.readAsArrayBuffer(input.files[0]);
+        }
+
+        function openModal() { 
+    document.getElementById('reqModal').classList.add('open'); 
+    
+    // CHANGED: We now set these to empty strings instead of generating a random number
+    document.getElementById('risNo_1').innerText = '';
+    document.getElementById('risNo_2').innerText = '';
+    
+    slipItems=[]; 
+    renderSlip(); 
+}
+        function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
+
+        function addItemToSlip() {
+            const id = document.getElementById('itemSelect').value;
+            const qty = Number(document.getElementById('itemQty').value);
+            if(!id || qty<=0) return;
+            const item = inventoryData.find(i=>i.id===id);
+            if(qty > item.currentQty) return alert('Not enough stock!');
+            slipItems.push({ ...item, reqQty: qty });
+            renderSlip();
+        }
+
+       function renderSlip() {
+    ['risTableBody_1', 'risTableBody_2'].forEach(tableId => {
+        const tbody = document.getElementById(tableId);
+        tbody.innerHTML = '';
+        
+        slipItems.forEach((item, i) => {
+            // CHANGED: Split by comma (,) AND semicolon (;) then take the first part
+            // "AIR FRESHENER, aerosol..." -> "AIR FRESHENER"
+            let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
+
+            tbody.innerHTML += `
+                <tr>
+                    <td></td> 
+                    
+                    <td>pc</td>
+                    <td style="text-align:left">${cleanName}</td>
+                    <td>${item.reqQty}</td>
+                    
+                    <td></td><td></td>
+                    <td></td><td></td>
+                </tr>`;
+        });
+        
+        // Fill empty rows
+        for(let i=0; i < (10 - slipItems.length); i++) {
+            tbody.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+        }
+    });
+}
+
+     function exportToExcel() {
+    let data = [];
+    for(let k=0; k<2; k++) {
+        data.push(["", "", "", "", "", "", "Appendix 63"]);
+        data.push(["REQUISITION AND ISSUE SLIP"]);
+        data.push(["Entity Name :", "", "DepED RO I", "", "", "", "Fund Cluster :", "01"]);
+        data.push(["Division :", "ORD-PAU", "", "", "", "Responsibility Center Code :", ""]);
+        data.push(["Office :", "", "", "", "", "RIS No. :", ""]); 
+        data.push(["Requisition", "", "", "", "Stock Available?", "", "Issue", ""]);
+        data.push(["Stock No.", "Unit", "Description", "Quantity", "Yes", "No", "Quantity", "Remarks"]);
+        
+        slipItems.forEach((item) => {
+            // CHANGED: Clean name using comma split
+            let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
+            
+            // CHANGED: First item in array is now "" (Empty Stock No)
+            data.push(["", "pc", cleanName, item.reqQty, "", "", "", ""]);
+        });
+
+        for(let i=0; i < (10 - slipItems.length); i++) data.push(["", "", "", "", "", "", "", ""]);
+        
+        data.push(["Purpose: Office Use"]);
+        data.push(["", "Requested by:", "Approved by:", "Issued by:", "", "Received by:", ""]);
+        data.push(["Signature:", "", "", "", "", "", ""]);
+        data.push(["Printed Name:", "JOVANIE M. MAZON", "CESAR S. BUCSIT", "", "", "", ""]);
+        data.push(["Designation:", "Admin Assistant I", "Admin Officer V", "", "", "", ""]);
+        data.push(["Date:", "", "", "", "", "", ""]);
+        data.push(["", "", "", "", "", "", "", ""]); 
+    }
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "RIS_Double");
+    XLSX.writeFile(wb, "Requisition_Issue_Slip_Double.xlsx");
+}
+        async function submitRequisition() {
+            if(!slipItems.length) return alert("No items!");
+            const batch = db.batch();
+            const today = new Date().toISOString();
+            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems });
+            slipItems.forEach(item => {
+                const ref = db.collection('inventory').doc(item.id);
+                const current = inventoryData.find(i=>i.id===item.id).currentQty;
+                batch.update(ref, { currentQty: current - item.reqQty, requestDates: firebase.firestore.FieldValue.arrayUnion(today) });
+            });
+            await batch.commit();
+            alert("Inventory Updated!");
+            closeModal();
+        }
+
+       // --- NEW RESET FUNCTION (Resets Stock AND Deletes Req History) ---
+        async function resetInventory() {
+            if(!confirm("⚠ WARNING: This will reset ALL items back to their Initial Quantity AND DELETE all Requisition history (setting the count to 0).\n\nAre you sure you want to proceed?")) return;
+            
+            const batch = db.batch();
+
+            // 1. Reset Inventory Stock
+            inventoryData.forEach(item => {
+                const ref = db.collection('inventory').doc(item.id);
+                batch.update(ref, { currentQty: item.initialQty, requestDates: [] });
+            });
+
+            // 2. Delete All Requisitions (This makes the count go to 0)
+            const reqSnapshot = await db.collection('requisitions').get();
+            reqSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            // 3. Commit Changes
+            try {
+                await batch.commit();
+                alert("Reset Succesfully!");
+            } catch (error) {
+                console.error("Error resetting:", error);
+                alert("Error resetting. See console.");
+            }
+        }
