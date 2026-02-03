@@ -130,7 +130,7 @@
                 
                 <div class="content-box">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your division's inventory list using Excel. (Reads: General Description, Quantity, Unit of Measure, Unit Price)</p>
+                    <p>Update your division's inventory list using Excel. (Automatic Column Detection)</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
@@ -317,14 +317,28 @@
             alert("Cleared!");
         }
 
+        // --- SMART UPLOAD: DETECT HEADER & COLUMNS ---
         function handleFileUpload(input) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                
+                // 1. Convert to Array of Arrays to Find Header
+                const rawData = XLSX.utils.sheet_to_json(ws, {header: 1});
+                
+                let headerIndex = 0;
+                rawData.forEach((row, i) => {
+                    if(row.some(cell => cell && cell.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) {
+                        headerIndex = i;
+                    }
+                });
+
+                // 2. Parse again starting from Header Row
+                const json = XLSX.utils.sheet_to_json(ws, {range: headerIndex});
                 const batch = db.batch();
                 
-                // 1. Save File Record for Admin
+                // 3. Save File Record for Admin
                 const uploadRef = db.collection('ppmp_uploads').doc();
                 batch.set(uploadRef, {
                     division: currentUserDivision,
@@ -334,19 +348,19 @@
                     itemCount: json.length
                 });
 
-                // 2. Save Item Details
+                // 4. Save Item Details (Mapping Columns)
                 let count = 0;
                 json.forEach(row => {
-                    // SMART PARSING: Look for keys
-                    const name = row['General Description'] || row['Item Name'] || row['Description'] || row['Item Description'];
-                    const qty = row['Quantity'] || row['Qty'] || row['Initial Qty'];
-                    const unit = row['Unit of Measure'] || row['Unit'] || row['UOM'];
-                    const price = row['Unit Price'] || row['Unit Cost'] || row['Price'];
+                    // Try to match column names from your specific Excel file
+                    const name = row['GENERAL DESCRIPTION'] || row['General Description'] || row['Item Name'];
+                    const qty = row['QUANTITY/'] || row['Quantity'] || row['Qty'] || row['Initial Qty']; // Handles the "QUANTITY/" column
+                    const unit = row['UNIT OF MEASURE'] || row['Unit of Measure'] || row['Unit'];
+                    const price = row['UNIT PRICE'] || row['Unit Price'] || row['Price'];
 
                     if(name && qty) {
                         count++;
                         batch.set(db.collection('inventory').doc(), {
-                            itemName: String(name), 
+                            itemName: String(name).trim(), 
                             initialQty: Number(qty), 
                             currentQty: Number(qty), 
                             unit: String(unit || 'pc'), 
@@ -356,7 +370,7 @@
                         });
                     }
                 });
-                batch.commit().then(()=>alert(count + ' Items Uploaded & Extracted!'));
+                batch.commit().then(()=>alert(`${count} Items Uploaded Successfully!`));
             };
             reader.readAsArrayBuffer(input.files[0]);
         }
@@ -381,9 +395,8 @@
                 if(!tbody) return;
                 tbody.innerHTML = '';
                 slipItems.forEach((item) => {
-                    // Try to clean name (remove commas if too long)
-                    let cleanName = item.itemName.split(',')[0].trim();
-                    tbody.innerHTML += `<tr><td></td><td>${item.unit || 'pc'}</td><td style="text-align:left">${cleanName}</td><td>${item.reqQty}</td><td></td><td></td><td></td><td></td></tr>`;
+                    let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
+                    tbody.innerHTML += `<tr><td></td><td>${item.unit}</td><td style="text-align:left">${cleanName}</td><td>${item.reqQty}</td><td></td><td></td><td></td><td></td></tr>`;
                 });
                 for(let i=0; i < (10 - slipItems.length); i++) {
                     tbody.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
