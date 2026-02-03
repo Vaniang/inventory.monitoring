@@ -1,5 +1,5 @@
 // ==========================================
-// 1. CONFIGURATION (Compat Version)
+// 1. CONFIGURATION (NO IMPORTS ALLOWED HERE)
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
@@ -11,7 +11,7 @@ const firebaseConfig = {
     measurementId: "G-033SS1BHK1"
 };
 
-// Initialize Firebase (Global Namespace)
+// Initialize Firebase (This works because we added the scripts in HTML)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -281,3 +281,4 @@ window.submitRequisition = submitRequisition;
 window.exportToExcel = exportToExcel;
 window.handleFileUpload = handleFileUpload;
 window.resetInventory = resetInventory;
+
