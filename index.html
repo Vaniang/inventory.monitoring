@@ -3,24 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Inventory System</title>
+    <title>Login - DepEd Inventory System</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <link rel="stylesheet" href="styles.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* RESET */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #003366 0%, #0056b3 100%); /* DepEd Blue */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* CARD DESIGN */
+        .login-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .login-container:hover { transform: translateY(-5px); }
+
+        /* LOGO & TEXT */
+        .logo-circle {
+            width: 80px; height: 80px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; color: #003366;
+            border: 2px solid #003366;
+        }
+        
+        h2 { color: #003366; margin-bottom: 5px; font-weight: 700; }
+        p.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* INPUTS */
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; color: #333; font-size: 0.9rem; font-weight: 600; }
+        
+        input {
+            width: 100%; padding: 12px 15px;
+            border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 1rem; transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        input:focus { outline: none; border-color: #0056b3; background-color: #f9fbff; }
+
+        /* BUTTON */
+        button {
+            width: 100%; padding: 14px;
+            background: #003366; color: white;
+            border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        button:hover { background: #002244; transform: scale(1.02); }
+        button:active { transform: scale(0.98); }
+
+        #login-error { color: #e74c3c; font-size: 0.85rem; margin-top: 15px; min-height: 20px; }
+        .footer { margin-top: 25px; font-size: 0.8rem; color: #888; }
+    </style>
 </head>
 <body>
-    <div id="login-section">
-        <div class="login-box">
-            <h2>Inventory System</h2>
-            <p>Department of Education - Region I</p>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="login()">Log In</button>
-            <p id="login-error" style="color:red; margin-top:10px;"></p>
+
+    <div class="login-container">
+        <div class="logo-circle">🏛️</div> 
+        
+        <h2>Inventory System</h2>
+        <p class="subtitle">DepEd Region I</p>
+
+        <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="enter your email..." onkeypress="handleEnter(event)">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" onkeypress="handleEnter(event)">
+        </div>
+
+        <button onclick="login()">Log In</button>
+        
+        <p id="login-error"></p>
+
+        <div class="footer">
+            &copy; 2026 Asset Management Division
         </div>
     </div>
 
     <script src="auth.js"></script>
+    
+    <script>
+        function handleEnter(e) {
+            if(e.key === 'Enter') login();
+        }
+    </script>
 </body>
 </html>
