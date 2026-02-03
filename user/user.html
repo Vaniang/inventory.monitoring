@@ -4,70 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - IMS</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --red: #e74c3c; --green: #27ae60; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
+
+        /* SIDEBAR */
         .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 500; display: flex; align-items: center; }
+        .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
         .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
+
+        /* MAIN */
         .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
+        
         .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
         .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
         .bell-icon:hover { color: var(--accent); }
         .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
+        
         .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
         .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
         .notif-header { background: var(--primary); color: white; padding: 10px 15px; font-weight: bold; font-size: 0.9rem; }
         .notif-list { max-height: 300px; overflow-y: auto; }
-        .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; background: #fff; }
+        .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; transition: 0.2s; background: #fff; }
         .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
+        .notif-time { font-size: 0.75rem; color: #888; margin-top: 5px; display: block; }
+
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
         .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
         .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+
+        /* TABLES */
         .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; margin-top: 20px; border-left: 5px solid #007bff; }
         .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
         .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
         .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
+        
         .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
-        .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; z-index: 2000; padding: 20px 0; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
         .modal-overlay.open { display: flex; }
-        .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; }
+        .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 3000; }
+        .modal-actions button { width: 160px; padding: 12px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; }
         .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
-        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 5mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; position: relative; }
+        
+        /* PAPER SLIP */
+        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm; box-shadow: 0 0 30px rgba(0,0,0,0.5); margin-top: 0; margin-bottom: 50px; position: relative; font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; }
         .ris-container { margin-bottom: 10px; }
-        .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
-        .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -10px; background: white; padding: 0 5px; font-size: 14px;}
+        .cut-line { border-top: 1px dashed black; margin: 20px 0; position: relative; }
         .ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; text-decoration: underline; }
         .info-table, .ris-table, .footer-table { width: 100%; border-collapse: collapse; }
         .ris-table th, .ris-table td { border: 1px solid black; padding: 2px; text-align: center; }
         .ris-table th { background: #eee; font-weight: bold; }
-        .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px;}
+        .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
         .footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; }
-        @media print { @page { margin: 0; } body * { visibility: hidden; } .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: block !important; padding: 0; overflow: visible; z-index: 9999; } .paper-slip, .paper-slip * { visibility: visible; } .paper-slip { transform: scale(1); width: 100%; margin: 0; padding: 10mm; position: absolute; top: 0; left: 0; box-shadow: none; } .modal-actions, .add-item-controls { display: none !important; } }
+
+        @media print {
+            @page { margin: 0; }
+            body * { visibility: hidden; }
+            .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: block !important; padding: 0; overflow: visible; z-index: 9999; }
+            .paper-slip, .paper-slip * { visibility: visible; }
+            .paper-slip { transform: scale(1); width: 100%; margin: 0; padding: 10mm; position: absolute; top: 0; left: 0; box-shadow: none; }
+            .modal-actions, .add-item-controls, .sidebar, .header-flex, .btn-req { display: none !important; }
+        }
     </style>
 </head>
 <body>
+
     <div class="view-container">
         <div class="sidebar">
             <h2>IMS User</h2>
@@ -75,39 +104,49 @@
             <div class="nav-link" onclick="nav('inventory', this)">Inventory List</div>
             <div class="nav-link logout-btn" onclick="logout()">Logout</div>
         </div>
+
         <div class="main">
             <div class="header-flex">
-                <div class="header-title"><h1>Welcome, <span id="division-name">Loading...</span></h1></div>
+                <div class="header-title">
+                    <h1>Welcome, <span id="division-name">Loading...</span></h1>
+                </div>
                 <div class="notification-wrapper" onclick="toggleNotifications()">
-                    <i class="fas fa-bell bell-icon"></i><span id="notif-badge" class="badge">0</span>
+                    <i class="fas fa-bell bell-icon"></i>
+                    <span id="notif-badge" class="badge">0</span>
                 </div>
                 <div id="notif-dropdown" class="notif-dropdown">
                     <div class="notif-header">Notifications</div>
-                    <div id="notif-list" class="notif-list"><div style="padding:15px; color:#777;">No notifications</div></div>
+                    <div id="notif-list" class="notif-list">
+                        <div style="padding:15px; color:#777; text-align:center;">No notifications</div>
+                    </div>
                 </div>
             </div>
+
             <div id="dashboard" class="section active">
                 <div class="cards-grid">
                     <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
                     <div class="card"><h3>My Requests</h3><div class="number" id="dash-total-reqs">0</div></div>
                 </div>
+                
                 <div class="content-box">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your division's inventory list using Excel.</p>
+                    <p>Update your division's inventory list using Excel. (Reads: General Description, Quantity, Unit of Measure, Unit Price)</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
             </div> 
+
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
                 <table class="inventory-table">
-                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit Price</th><th>Current Stock</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit</th><th>Price</th><th>Current Stock</th><th>Action</th></tr></thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
             </div>
         </div>
     </div>
+
     <div class="modal-overlay" id="reqModal">
         <div class="modal-actions">
             <button style="background:#e74c3c;" onclick="closeModal()">Close</button>
@@ -117,9 +156,9 @@
         </div>
         <div class="add-item-controls">
             <b>Add:</b>
-            <select id="itemSelect" style="padding:5px;"><option value="">Select Item...</option></select>
-            <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:5px;">
-            <button onclick="addItemToSlip()" style="background:#27ae60; color:white; border:none; padding:5px 10px;">Add</button>
+            <select id="itemSelect" style="padding:8px; border:1px solid #ccc; border-radius:4px;"><option value="">Select Item...</option></select>
+            <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <button onclick="addItemToSlip()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Add</button>
         </div>
         <div class="paper-slip" id="printableArea">
             <div class="ris-container">
@@ -138,6 +177,8 @@
                     <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
                     <tr><td>Signature:</td><td style="border-bottom:1px solid black; height:20px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                     <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I<br>ORD-PAU</div></td><td><div class="sig-title">Admin Officer V<br>ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                 </table>
             </div>
             <div class="cut-line"></div>
@@ -157,19 +198,32 @@
                     <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
                     <tr><td>Signature:</td><td style="border-bottom:1px solid black; height:20px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                     <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I<br>ORD-PAU</div></td><td><div class="sig-title">Admin Officer V<br>ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                 </table>
             </div>
         </div>
     </div>
+
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s", authDomain: "supplies-monitoring.firebaseapp.com", projectId: "supplies-monitoring", storageBucket: "supplies-monitoring.firebasestorage.app", messagingSenderId: "524755577094", appId: "1:524755577094:web:cd3c45819698c3380a1687", measurementId: "G-033SS1BHK1" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
+            authDomain: "supplies-monitoring.firebaseapp.com",
+            projectId: "supplies-monitoring",
+            storageBucket: "supplies-monitoring.firebasestorage.app",
+            messagingSenderId: "524755577094",
+            appId: "1:524755577094:web:cd3c45819698c3380a1687",
+            measurementId: "G-033SS1BHK1"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        let inventoryData=[], slipItems=[], currentUserDivision="", currentUserId="";
+
+        let inventoryData = [], slipItems = [];
+        let currentUserDivision = "", currentUserId = "";
 
         auth.onAuthStateChanged(user => {
-            if(user) {
+            if (user) {
                 currentUserId = user.uid;
                 db.collection('users').doc(user.uid).get().then(doc => {
                     if(doc.exists) {
@@ -177,47 +231,90 @@
                         document.getElementById('division-name').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-1').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-2').innerText = currentUserDivision;
-                        initUserDashboard(); initNotifications();
+                        initUserDashboard(); 
+                        initNotifications();
                     }
                 });
-            } else window.location.href="../index.html";
+            } else { window.location.href = "../index.html"; }
         });
 
         function initNotifications() {
-            db.collection('notifications').where('userId','==',currentUserId).onSnapshot(snap => {
-                const list=document.getElementById('notif-list'), badge=document.getElementById('notif-badge');
-                let unread=0, notifs=[];
-                snap.forEach(d => notifs.push({id:d.id, ...d.data()}));
-                notifs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-                list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777; text-align:center;">No notifications</div>';
-                notifs.forEach(n => {
-                    if(n.status==='unread') unread++;
-                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}<br><span class="notif-time">${n.timestamp?new Date(n.timestamp.toDate()).toLocaleString():''}</span></div>`;
-                });
-                badge.style.display = unread>0?'block':'none'; badge.innerText=unread;
-            });
+            db.collection('notifications')
+              .where('userId', '==', currentUserId)
+              .onSnapshot(snap => {
+                  const list = document.getElementById('notif-list');
+                  const badge = document.getElementById('notif-badge');
+                  let unreadCount = 0;
+                  let notifs = [];
+                  snap.forEach(doc => notifs.push({id: doc.id, ...doc.data()}));
+                  notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                  let html = '';
+                  if (notifs.length === 0) {
+                      html = '<div style="padding:15px; color:#777; text-align:center;">No notifications</div>';
+                  } else {
+                      notifs.forEach(n => {
+                          if(n.status === 'unread') unreadCount++;
+                          const date = n.timestamp ? new Date(n.timestamp.toDate()).toLocaleString() : '';
+                          html += `<div class="notif-item ${n.status === 'unread' ? 'unread' : ''}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}<br><span class="notif-time">${date}</span></div>`;
+                      });
+                  }
+                  list.innerHTML = html;
+                  badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                  badge.innerText = unreadCount;
+              });
         }
-        function markRead(id) { db.collection('notifications').doc(id).update({status:'read'}); }
+
         function toggleNotifications() { document.getElementById('notif-dropdown').classList.toggle('show'); }
-        function logout() { auth.signOut().then(()=>window.location.href="../index.html"); }
-        function nav(id,btn) { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-link').forEach(e=>e.classList.remove('active')); btn.classList.add('active'); }
+        function markRead(id) { db.collection('notifications').doc(id).update({ status: 'read' }); }
+        function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
+        function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
         function initUserDashboard() {
-            db.collection('inventory').where('division','==',currentUserDivision).onSnapshot(snap => {
-                const tbody=document.getElementById('inventoryTable'), select=document.getElementById('itemSelect');
-                tbody.innerHTML=''; select.innerHTML='<option value="">Select Item...</option>';
-                let total=0; inventoryData=[];
+            db.collection('inventory').where('division', '==', currentUserDivision).onSnapshot(snap => {
+                const tbody = document.getElementById('inventoryTable');
+                const select = document.getElementById('itemSelect');
+                if(tbody) tbody.innerHTML = ''; 
+                if(select) select.innerHTML = '<option value="">Select Item...</option>';
+                let totalStock = 0;
+                inventoryData = [];
+
                 snap.forEach(doc => {
-                    const d=doc.data(); d.id=doc.id; inventoryData.push(d); total+=d.currentQty;
+                    const d = doc.data(); d.id = doc.id;
+                    inventoryData.push(d);
+                    totalStock += d.currentQty;
                 });
-                inventoryData.sort((a,b)=>a.itemName.localeCompare(b.itemName));
+                inventoryData.sort((a, b) => a.itemName.localeCompare(b.itemName));
+
                 inventoryData.forEach(d => {
-                    tbody.innerHTML+=`<tr><td>${d.itemName}</td><td>${d.initialQty}</td><td>${d.unitPrice}</td><td>${d.currentQty}</td><td><button class="btn-delete" onclick="deleteItem('${d.id}')">Delete</button></td></tr>`;
-                    select.innerHTML+=`<option value="${d.id}">${d.itemName} (Stock: ${d.currentQty})</option>`;
+                    if(tbody) {
+                        tbody.innerHTML += `<tr><td>${d.itemName}</td><td>${d.initialQty}</td><td>${d.unit || 'pc'}</td><td>${d.unitPrice}</td><td>${d.currentQty}</td><td><button class="btn-delete" onclick="deleteItem('${d.id}')">Delete</button></td></tr>`;
+                    }
+                    if(select) select.innerHTML += `<option value="${d.id}">${d.itemName} (Stock: ${d.currentQty})</option>`;
                 });
-                document.getElementById('dash-total-items').innerText=total;
+                if(document.getElementById('dash-total-items')) document.getElementById('dash-total-items').innerText = totalStock;
             });
-            db.collection('requisitions').where('division','==',currentUserDivision).onSnapshot(s=>document.getElementById('dash-total-reqs').innerText=s.size);
+            db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => {
+                if(document.getElementById('dash-total-reqs')) document.getElementById('dash-total-reqs').innerText = s.size;
+            });
+        }
+
+        function deleteItem(id) { if(!confirm("Delete this item?")) return; db.collection('inventory').doc(id).delete(); }
+        
+        async function clearMyInventory() {
+            if(!confirm("⚠ Clear ALL inventory and requests?")) return;
+            const batch = db.batch();
+            const invSnap = await db.collection('inventory').where('division', '==', currentUserDivision).get();
+            invSnap.forEach(doc => batch.delete(doc.ref));
+            const reqSnap = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
+            reqSnap.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert("Cleared!");
         }
 
         function handleFileUpload(input) {
@@ -226,64 +323,88 @@
                 const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
                 const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 const batch = db.batch();
-                // 1. Save File Record for Admin Master Inventory
+                
+                // 1. Save File Record for Admin
                 const uploadRef = db.collection('ppmp_uploads').doc();
                 batch.set(uploadRef, {
                     division: currentUserDivision,
                     fileName: input.files[0].name,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    data: JSON.stringify(json), // Store data to allow re-download
+                    data: JSON.stringify(json),
                     itemCount: json.length
                 });
-                // 2. Save Individual Items for User Inventory
+
+                // 2. Save Item Details
+                let count = 0;
                 json.forEach(row => {
-                    if(row.Name && row.Qty) {
+                    // SMART PARSING: Look for keys
+                    const name = row['General Description'] || row['Item Name'] || row['Description'] || row['Item Description'];
+                    const qty = row['Quantity'] || row['Qty'] || row['Initial Qty'];
+                    const unit = row['Unit of Measure'] || row['Unit'] || row['UOM'];
+                    const price = row['Unit Price'] || row['Unit Cost'] || row['Price'];
+
+                    if(name && qty) {
+                        count++;
                         batch.set(db.collection('inventory').doc(), {
-                            itemName: String(row.Name), initialQty: Number(row.Qty), currentQty: Number(row.Qty), unitPrice: Number(row.Price||0), division: currentUserDivision, requestDates: []
+                            itemName: String(name), 
+                            initialQty: Number(qty), 
+                            currentQty: Number(qty), 
+                            unit: String(unit || 'pc'), 
+                            unitPrice: Number(price || 0), 
+                            division: currentUserDivision, 
+                            requestDates: []
                         });
                     }
                 });
-                batch.commit().then(()=>alert("PPMP Uploaded Successfully!"));
+                batch.commit().then(()=>alert(count + ' Items Uploaded & Extracted!'));
             };
             reader.readAsArrayBuffer(input.files[0]);
         }
 
-        function deleteItem(id){ if(confirm("Delete item?")) db.collection('inventory').doc(id).delete(); }
-        async function clearMyInventory() {
-            if(!confirm("Clear ALL inventory?")) return;
-            const batch=db.batch();
-            const inv=await db.collection('inventory').where('division','==',currentUserDivision).get();
-            inv.forEach(d=>batch.delete(d.ref));
-            await batch.commit(); alert("Cleared!");
+        function openModal() { document.getElementById('reqModal').classList.add('open'); document.getElementById('risNo_1').innerText = ''; document.getElementById('risNo_2').innerText = ''; slipItems=[]; renderSlip(); }
+        function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
+
+        function addItemToSlip() {
+            const id = document.getElementById('itemSelect').value;
+            const qty = Number(document.getElementById('itemQty').value);
+            if(!id || qty<=0) return;
+            const item = inventoryData.find(i=>i.id===id);
+            if(qty > item.currentQty) return alert('Not enough stock!');
+            const existing = slipItems.find(i => i.id === id);
+            if(existing) { existing.reqQty += qty; } else { slipItems.push({ ...item, reqQty: qty }); }
+            renderSlip();
         }
-        
-        function openModal(){ document.getElementById('reqModal').classList.add('open'); slipItems=[]; renderSlip(); }
-        function closeModal(){ document.getElementById('reqModal').classList.remove('open'); }
-        function addItemToSlip(){ 
-            const id=document.getElementById('itemSelect').value, qty=Number(document.getElementById('itemQty').value);
-            if(!id||qty<=0) return;
-            const item=inventoryData.find(i=>i.id===id);
-            if(qty>item.currentQty) return alert("Low Stock!");
-            slipItems.push({...item, reqQty:qty}); renderSlip();
-        }
+
         function renderSlip() {
-            ['risTableBody_1','risTableBody_2'].forEach(tid => {
-                const b=document.getElementById(tid); b.innerHTML='';
-                slipItems.forEach(i => b.innerHTML+=`<tr><td></td><td>pc</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
-                for(let k=0;k<(10-slipItems.length);k++) b.innerHTML+=`<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            ['risTableBody_1', 'risTableBody_2'].forEach(tableId => {
+                const tbody = document.getElementById(tableId);
+                if(!tbody) return;
+                tbody.innerHTML = '';
+                slipItems.forEach((item) => {
+                    // Try to clean name (remove commas if too long)
+                    let cleanName = item.itemName.split(',')[0].trim();
+                    tbody.innerHTML += `<tr><td></td><td>${item.unit || 'pc'}</td><td style="text-align:left">${cleanName}</td><td>${item.reqQty}</td><td></td><td></td><td></td><td></td></tr>`;
+                });
+                for(let i=0; i < (10 - slipItems.length); i++) {
+                    tbody.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                }
             });
         }
+
         async function submitRequisition() {
-            if(!slipItems.length) return alert("No items");
-            const batch=db.batch(), today=new Date().toISOString();
-            batch.set(db.collection('requisitions').doc(), { date:today, items:slipItems, division:currentUserDivision, userId:currentUserId, status:'Pending' });
-            slipItems.forEach(i => {
-                const ref=db.collection('inventory').doc(i.id);
-                batch.update(ref, { currentQty: i.currentQty - i.reqQty });
+            if(!slipItems.length) return alert("No items!");
+            const batch = db.batch();
+            const today = new Date().toISOString();
+            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending' });
+            slipItems.forEach(item => {
+                const ref = db.collection('inventory').doc(item.id);
+                const current = inventoryData.find(i=>i.id===item.id).currentQty;
+                batch.update(ref, { currentQty: current - item.reqQty, requestDates: firebase.firestore.FieldValue.arrayUnion(today) });
             });
-            await batch.commit(); alert("Submitted!"); closeModal();
+            await batch.commit();
+            alert("Submitted!"); closeModal();
         }
-        function exportToExcel() { alert("Export placeholder"); }
+        function exportToExcel() { alert("Export feature placeholder."); }
     </script>
 </body>
 </html>
