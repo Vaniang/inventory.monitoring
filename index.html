@@ -8,9 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     
-   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,7 +23,7 @@
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Password">
             <button onclick="login()">Log In</button>
-            <p id="login-error" style="color:red"></p>
+            <p id="login-error" style="color:red; margin-top: 10px;"></p>
         </div>
     </div>
 
@@ -39,9 +39,17 @@
         <div class="main">
             <div id="dashboard" class="section active">
                 <h1>Dashboard <span id="user-division-name" style="font-size:0.6em; color:#777;"></span></h1>
+                
                 <div class="cards-grid">
                     <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
                     <div class="card"><h3>My Requisitions</h3><div class="number" id="dash-total-reqs">0</div></div>
+                </div>
+
+                <div style="background:white; padding:20px; border-radius:8px; margin-bottom: 20px; border-left: 5px solid #007bff;">
+                    <h3>📂 Upload Stock / PPMP (Excel)</h3>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Select your Excel file (.xlsx) to update the inventory list.</p>
+                    <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
+                    <p style="color: #666; font-size: 0.8em; margin-top: 5px;">*Format: Name, Qty, Price</p>
                 </div>
                 
                 <div style="background:white; padding:20px; border-radius:8px;"><canvas id="stockChart"></canvas></div>
@@ -68,10 +76,8 @@
             <p>Welcome, Asset Management. Here you can manage stock and approvals.</p>
             
             <div style="margin-top: 30px; border: 1px solid #ccc; padding: 20px; background:white;">
-                <h3>Database Controls</h3>
-                <p>Upload new stock list via Excel:</p>
-                <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
-                <br><br>
+                <h3>System Maintenance</h3>
+                <p>Use this button only to clear the entire database.</p>
                 <button onclick="resetInventory()" style="background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                     ⚠ Reset All Stock
                 </button>
@@ -122,14 +128,11 @@
             <div class="cut-line"></div>
             
             <div class="ris-container">
-                <center>(Duplicate Copy Output Here)</center>
+                <center style="color:#ccc; padding:20px;">(Duplicate Copy)</center>
             </div>
         </div>
     </div>
 
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
-
-
-
