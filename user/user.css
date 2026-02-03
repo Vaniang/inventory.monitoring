@@ -1,8 +1,21 @@
-/* user/user.css */
+/* =========================================
+   GLOBAL & LAYOUT
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
 
-/* --- LAYOUT & MAIN --- */
+:root { 
+    --primary: #2c3e50; 
+    --secondary: #34495e; 
+    --accent: #3498db; 
+    --bg: #f0f2f5; 
+    --white: #ffffff; 
+}
+
 body {
-    background-color: #f0f2f5; /* Light grey background for contrast */
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background-color: var(--bg);
+    color: #333;
 }
 
 .view-container {
@@ -11,7 +24,11 @@ body {
     overflow: hidden;
 }
 
-/* --- SIDEBAR --- */
+.hidden { display: none !important; }
+
+/* =========================================
+   SIDEBAR (Modern Gradient Style)
+   ========================================= */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
@@ -49,7 +66,7 @@ body {
 }
 
 .nav-link.active {
-    background: #3498db;
+    background: var(--accent);
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
 }
 
@@ -64,7 +81,9 @@ body {
     background: #e74c3c;
 }
 
-/* --- MAIN CONTENT AREA --- */
+/* =========================================
+   MAIN CONTENT AREA
+   ========================================= */
 .main {
     flex: 1;
     padding: 40px;
@@ -78,19 +97,21 @@ body {
 .section.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- HEADER --- */
+/* Header */
 header h1 {
-    color: #2c3e50;
+    color: var(--primary);
     font-size: 2rem;
     margin-bottom: 30px;
 }
 
 #division-name {
-    color: #3498db;
+    color: var(--accent);
     font-weight: bold;
 }
 
-/* --- STAT CARDS --- */
+/* =========================================
+   DASHBOARD CARDS
+   ========================================= */
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -105,7 +126,7 @@ header h1 {
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     text-align: center;
     transition: transform 0.3s ease;
-    border-top: 4px solid #3498db;
+    border-top: 4px solid var(--accent);
 }
 
 .card:hover {
@@ -123,11 +144,13 @@ header h1 {
 .card .number {
     font-size: 3rem;
     font-weight: 800;
-    color: #2c3e50;
+    color: var(--primary);
     margin-top: 10px;
 }
 
-/* --- UPLOAD SECTION --- */
+/* =========================================
+   UPLOAD SECTION
+   ========================================= */
 .content-box {
     background: white;
     padding: 30px;
@@ -142,13 +165,16 @@ input[type="file"] {
     border-radius: 8px;
     width: 100%;
     cursor: pointer;
+    box-sizing: border-box;
 }
 input[type="file"]:hover {
     background: #eef2f7;
-    border-color: #3498db;
+    border-color: var(--accent);
 }
 
-/* --- TABLES --- */
+/* =========================================
+   INVENTORY TABLE
+   ========================================= */
 .inventory-table {
     width: 100%;
     border-collapse: collapse;
@@ -159,7 +185,7 @@ input[type="file"]:hover {
 }
 
 .inventory-table th {
-    background: #2c3e50;
+    background: var(--primary);
     color: white;
     padding: 15px;
     text-align: left;
@@ -176,7 +202,7 @@ input[type="file"]:hover {
     background-color: #f9f9f9;
 }
 
-/* --- BUTTONS --- */
+/* Floating Request Button */
 .btn-req {
     position: fixed;
     bottom: 40px;
@@ -191,6 +217,7 @@ input[type="file"]:hover {
     box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4);
     cursor: pointer;
     transition: transform 0.2s;
+    z-index: 100;
 }
 
 .btn-req:hover {
@@ -198,74 +225,143 @@ input[type="file"]:hover {
     background: #219150;
 }
 
-/* --- GLOBAL RESETS --- */
-:root { --primary: #2c3e50; --secondary: #34495e; --accent: #3498db; --bg: #f4f6f8; --white: #ffffff; }
-body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: #333; }
-.hidden { display: none !important; }
+/* =========================================
+   RIS FORM & MODAL STYLES
+   ========================================= */
 
-/* LOGIN SCREEN */
-#login-section { display: flex; justify-content: center; align-items: center; height: 100vh; background: #eee; }
-.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; width: 300px;}
-.login-box input { display: block; width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-.login-box button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
-
-/* --- USER VIEW (YOUR SIDEBAR STYLES) --- */
-.sidebar { width: 250px; background: var(--primary); color: var(--white); display: flex; flex-direction: column; padding: 20px; }
-.sidebar h2 { text-align: center; border-bottom: 1px solid #ffffff33; padding-bottom: 10px; }
-.nav-link { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-.nav-link:hover, .nav-link.active { background: var(--accent); }
-.main { flex: 1; padding: 30px; overflow-y: auto; }
-
-/* SECTIONS */
-.section { display: none; }
-.section.active { display: block; animation: fadeIn 0.4s; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* CARDS & TABLES */
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-.card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.card .number { font-size: 2.5rem; font-weight: bold; color: var(--primary); }
-table.inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-table.inventory-table th, table.inventory-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-table.inventory-table th { background: var(--secondary); color: white; }
-.btn-req { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; padding: 15px 30px; border-radius: 50px; border: none; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10; }
-
-/* --- MODAL & PRINT STYLES (FROM YOUR CODE) --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; z-index: 2000; padding: 20px 0; }
+/* The Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    overflow-y: auto; /* Scrollable if form is long */
+    padding: 20px 0;
+    z-index: 2000;
+}
 .modal-overlay.open { display: flex; }
-.modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
-.btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px;}
-.btn-close { background: #e74c3c; } .btn-print { background: #27ae60; } .btn-excel { background: #217346; } .btn-submit { background: #2980b9; }
 
-/* PAPER SLIP STYLING */
-.paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 5mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; position: relative; }
+/* The Action Buttons (Right Side) */
+.modal-actions {
+    position: fixed;
+    top: 20px; right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+}
+.modal-actions button {
+    width: 150px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    color: white;
+}
+.btn-close { background: #e74c3c; } 
+.btn-print { background: #3498db; } 
+.btn-excel { background: #27ae60; } 
+.btn-submit { background: #2c3e50; }
+
+/* The Paper Slip (A4) */
+.paper-slip {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    padding: 10mm;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    margin-top: 20px;
+    margin-bottom: 50px;
+    position: relative;
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    color: black;
+    font-size: 10px;
+    box-sizing: border-box;
+}
+
+/* RIS Form Internals */
 .ris-container { margin-bottom: 10px; }
 .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
 .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -10px; background: white; padding: 0 5px; font-size: 14px;}
+
 .ris-header-italic { text-align: right; font-style: italic; font-size: 9px; margin-bottom: 2px; font-weight: bold; }
-.ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; }
-.info-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+.ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; text-decoration: underline; }
+
+/* Form Tables */
+.info-table, .ris-table, .footer-table { width: 100%; border-collapse: collapse; }
 .info-table td { padding: 1px; vertical-align: bottom; }
 .label { font-weight: bold; white-space: nowrap; font-size: 10px; }
 .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px;}
-table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; }
-table.ris-table th, table.ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; font-size: 10px; }
-table.ris-table th { font-weight: bold; background: #eee; }
+
+.ris-table { margin-top: 5px; border: 2px solid black; table-layout: fixed; }
+.ris-table th, .ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; font-size: 10px; }
+.ris-table th { font-weight: bold; background: #eee; }
 .empty-row td { height: 14px; }
-table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px;}
-table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; font-size: 10px; }
-table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
+
+.footer-table { border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px;}
+.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; font-size: 10px; }
+.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
+
 .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 10px; font-size: 11px;}
 .sig-title { text-align: center; font-size: 9px; }
-.add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
 
-/* PRINT SETTINGS */
+/* Add Item Floating Bar */
+.add-item-controls {
+    background: #eee;
+    padding: 15px;
+    border-radius: 5px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2100;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.add-item-controls input { width: 60px; padding: 5px; }
+.add-item-controls button { background: #27ae60; padding: 5px 10px; border: none; color: white; border-radius: 3px; cursor: pointer; }
+
+/* =========================================
+   PRINT SETTINGS
+   ========================================= */
 @media print {
     @page { margin: 0; }
     body * { visibility: hidden; }
-    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: block !important; padding: 0; overflow: visible; z-index: 9999; }
+    
+    .modal-overlay { 
+        position: absolute; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        background: white; 
+        display: block !important; 
+        padding: 0; 
+        overflow: visible; 
+        z-index: 9999; 
+    }
+    
     .paper-slip, .paper-slip * { visibility: visible; }
-    .paper-slip { transform: scale(1); width: 100%; margin: 0; padding: 10mm; position: absolute; top: 0; left: 0; box-shadow: none; }
-    .modal-actions, .add-item-controls { display: none !important; }
+    
+    .paper-slip { 
+        transform: scale(1); 
+        width: 100%; 
+        margin: 0; 
+        padding: 10mm; 
+        position: absolute; 
+        top: 0; left: 0; 
+        box-shadow: none; 
+    }
+    
+    /* Hide UI Elements during print */
+    .modal-actions, .add-item-controls, .btn-req, .sidebar { 
+        display: none !important; 
+    }
 }
-
