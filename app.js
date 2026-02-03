@@ -266,3 +266,18 @@ async function resetInventory() {
     await batch.commit();
     alert("System Reset Complete.");
 }
+
+// ==========================================
+// FORCE GLOBAL EXPORT
+// ==========================================
+// This makes the functions available to your HTML buttons
+window.login = login;
+window.logout = logout;
+window.nav = nav;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.addItemToSlip = addItemToSlip;
+window.submitRequisition = submitRequisition;
+window.exportToExcel = exportToExcel;
+window.handleFileUpload = handleFileUpload;
+window.resetInventory = resetInventory;
