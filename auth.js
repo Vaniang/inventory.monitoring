@@ -27,9 +27,9 @@ function login() {
                 if(doc.exists) {
                     const role = doc.data().role;
                     if(role === 'admin') {
-                        window.location.href = "admin.html";
+                        window.location.href = "admin/admin.html";
                     } else {
-                        window.location.href = "user.html";
+                        window.location.href = "user/user.html";
                     }
                 } else {
                     errorMsg.innerText = "User profile not found.";
