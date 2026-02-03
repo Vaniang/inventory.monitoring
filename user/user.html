@@ -36,7 +36,6 @@
         .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
         .bell-icon:hover { color: var(--accent); }
         .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
-        
         .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
         .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
         .notif-header { background: var(--primary); color: white; padding: 10px 15px; font-weight: bold; font-size: 0.9rem; }
@@ -45,11 +44,11 @@
         .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
         .notif-time { font-size: 0.75rem; color: #888; margin-top: 5px; display: block; }
 
+        /* DASHBOARD */
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS & TABLES */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
         .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
@@ -64,57 +63,31 @@
         .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* --- FIXED MODAL & RIS STYLES --- */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); display: none; justify-content: center; 
-            overflow-y: auto; padding: 20px 0; z-index: 2000; 
-        }
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
         .modal-overlay.open { display: flex; }
-        
-        .modal-actions { 
-            position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; 
-            background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 3000;
-        }
+        .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 3000; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; }
+        .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
         
-        .add-item-controls { 
-            background: #eee; padding: 15px; border-radius: 5px; 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; 
-        }
-        
-        /* PAPER SLIP (A4 Layout) */
-        .paper-slip { 
-            width: 210mm; min-height: 297mm; background: white; 
-            padding: 5mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-            font-family: 'Arial Narrow', Arial, sans-serif; color: black; 
-            font-size: 10px; box-sizing: border-box; position: relative; 
-        }
+        /* PAPER SLIP (A4 Fixed) */
+        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 5mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; position: relative; }
         .ris-container { margin-bottom: 10px; }
         .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
         .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -10px; background: white; padding: 0 5px; font-size: 14px;}
-        .ris-header-italic { text-align: right; font-style: italic; font-size: 9px; margin-bottom: 2px; font-weight: bold; }
-        .ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; }
-        
+        .ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; text-decoration: underline; }
         .info-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
         .info-table td { padding: 1px; vertical-align: bottom; }
-        .label { font-weight: bold; white-space: nowrap; font-size: 10px; }
         .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
-        
         table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; }
-        table.ris-table th, table.ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; font-size: 10px; }
+        table.ris-table th, table.ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; }
         table.ris-table th { font-weight: bold; background: #eee; }
-        .empty-row td { height: 14px; }
-        
         table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px; }
         table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; font-size: 10px; }
         table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
-        
         .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 10px; font-size: 11px; }
         .sig-title { text-align: center; font-size: 9px; }
 
-        /* PRINT SETTINGS */
         @media print {
             @page { margin: 0; }
             body * { visibility: hidden; }
@@ -137,18 +110,13 @@
 
         <div class="main">
             <div class="header-flex">
-                <div class="header-title">
-                    <h1>Welcome, <span id="division-name">Loading...</span></h1>
-                </div>
+                <div class="header-title"><h1>Welcome, <span id="division-name">Loading...</span></h1></div>
                 <div class="notification-wrapper" onclick="toggleNotifications()">
-                    <i class="fas fa-bell bell-icon"></i>
-                    <span id="notif-badge" class="badge">0</span>
+                    <i class="fas fa-bell bell-icon"></i><span id="notif-badge" class="badge">0</span>
                 </div>
                 <div id="notif-dropdown" class="notif-dropdown">
                     <div class="notif-header">Notifications</div>
-                    <div id="notif-list" class="notif-list">
-                        <div style="padding:15px; color:#777; text-align:center;">No notifications</div>
-                    </div>
+                    <div id="notif-list" class="notif-list"><div style="padding:15px; color:#777;">No notifications</div></div>
                 </div>
             </div>
 
@@ -157,10 +125,9 @@
                     <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
                     <div class="card"><h3>My Requests</h3><div class="number" id="dash-total-reqs">0</div></div>
                 </div>
-                
                 <div class="content-box">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your division's inventory list using Excel. (Automatic Column Detection)</p>
+                    <p>Update your inventory using Excel. (Original format is preserved for Admin download)</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
@@ -201,10 +168,7 @@
                     <tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line" id="risNo_1"></td></tr>
                 </table>
                 <table class="ris-table">
-                    <thead>
-                        <tr><th colspan="4">Requisition</th><th colspan="2">Stock Available?</th><th colspan="2">Issue</th></tr>
-                        <tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Quantity</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Quantity</th><th width="20%">Remarks</th></tr>
-                    </thead>
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
                     <tbody id="risTableBody_1"></tbody>
                 </table>
                 <table class="footer-table">
@@ -215,9 +179,7 @@
                     <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                 </table>
             </div>
-            
             <div class="cut-line"></div>
-            
             <div class="ris-container">
                 <div class="ris-header-italic">Appendix 63</div>
                 <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
@@ -227,10 +189,7 @@
                     <tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line" id="risNo_2"></td></tr>
                 </table>
                 <table class="ris-table">
-                    <thead>
-                        <tr><th colspan="4">Requisition</th><th colspan="2">Stock Available?</th><th colspan="2">Issue</th></tr>
-                        <tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Quantity</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Quantity</th><th width="20%">Remarks</th></tr>
-                    </thead>
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
                     <tbody id="risTableBody_2"></tbody>
                 </table>
                 <table class="footer-table">
@@ -245,21 +204,11 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
-            authDomain: "supplies-monitoring.firebaseapp.com",
-            projectId: "supplies-monitoring",
-            storageBucket: "supplies-monitoring.firebasestorage.app",
-            messagingSenderId: "524755577094",
-            appId: "1:524755577094:web:cd3c45819698c3380a1687",
-            measurementId: "G-033SS1BHK1"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s", authDomain: "supplies-monitoring.firebaseapp.com", projectId: "supplies-monitoring", storageBucket: "supplies-monitoring.firebasestorage.app", messagingSenderId: "524755577094", appId: "1:524755577094:web:cd3c45819698c3380a1687", measurementId: "G-033SS1BHK1" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
-        let inventoryData = [], slipItems = [];
-        let currentUserDivision = "", currentUserId = "";
+        let inventoryData = [], slipItems = [], currentUserDivision = "", currentUserId = "";
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -270,191 +219,135 @@
                         document.getElementById('division-name').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-1').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-2').innerText = currentUserDivision;
-                        initUserDashboard(); 
-                        initNotifications();
+                        initUserDashboard(); initNotifications();
                     }
                 });
-            } else { window.location.href = "../index.html"; }
+            } else window.location.href = "../index.html";
         });
 
         function initNotifications() {
-            db.collection('notifications')
-              .where('userId', '==', currentUserId)
-              .onSnapshot(snap => {
-                  const list = document.getElementById('notif-list');
-                  const badge = document.getElementById('notif-badge');
-                  let unreadCount = 0;
-                  let notifs = [];
-                  snap.forEach(doc => notifs.push({id: doc.id, ...doc.data()}));
-                  notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-                  let html = '';
-                  if (notifs.length === 0) {
-                      html = '<div style="padding:15px; color:#777; text-align:center;">No notifications</div>';
-                  } else {
-                      notifs.forEach(n => {
-                          if(n.status === 'unread') unreadCount++;
-                          const date = n.timestamp ? new Date(n.timestamp.toDate()).toLocaleString() : '';
-                          html += `<div class="notif-item ${n.status === 'unread' ? 'unread' : ''}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}<br><span class="notif-time">${date}</span></div>`;
-                      });
-                  }
-                  list.innerHTML = html;
-                  badge.style.display = unreadCount > 0 ? 'block' : 'none';
-                  badge.innerText = unreadCount;
-              });
+            db.collection('notifications').where('userId', '==', currentUserId).onSnapshot(snap => {
+                const list = document.getElementById('notif-list'), badge = document.getElementById('notif-badge');
+                let unread = 0, notifs = [];
+                snap.forEach(d => notifs.push({id: d.id, ...d.data()}));
+                notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777;">No notifications</div>';
+                notifs.forEach(n => {
+                    if(n.status === 'unread') unread++;
+                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}<br><span class="notif-time">${n.timestamp?new Date(n.timestamp.toDate()).toLocaleString():''}</span></div>`;
+                });
+                badge.style.display = unread > 0 ? 'block' : 'none'; badge.innerText = unread;
+            });
         }
-
         function toggleNotifications() { document.getElementById('notif-dropdown').classList.toggle('show'); }
         function markRead(id) { db.collection('notifications').doc(id).update({ status: 'read' }); }
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
-        function nav(id, btn) {
-            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
-            btn.classList.add('active');
-        }
+        function nav(id, btn) { document.querySelectorAll('.section').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
 
         function initUserDashboard() {
             db.collection('inventory').where('division', '==', currentUserDivision).onSnapshot(snap => {
-                const tbody = document.getElementById('inventoryTable');
-                const select = document.getElementById('itemSelect');
-                if(tbody) tbody.innerHTML = ''; 
-                if(select) select.innerHTML = '<option value="">Select Item...</option>';
-                let totalStock = 0;
-                inventoryData = [];
-
-                snap.forEach(doc => {
-                    const d = doc.data(); d.id = doc.id;
-                    inventoryData.push(d);
-                    totalStock += d.currentQty;
-                });
+                const tbody = document.getElementById('inventoryTable'), select = document.getElementById('itemSelect');
+                tbody.innerHTML = ''; select.innerHTML = '<option value="">Select Item...</option>';
+                let total = 0; inventoryData = [];
+                snap.forEach(doc => { const d = doc.data(); d.id = doc.id; inventoryData.push(d); total += d.currentQty; });
                 inventoryData.sort((a, b) => a.itemName.localeCompare(b.itemName));
-
                 inventoryData.forEach(d => {
-                    if(tbody) {
-                        tbody.innerHTML += `<tr><td>${d.itemName}</td><td>${d.initialQty}</td><td>${d.unit || 'pc'}</td><td>${d.unitPrice}</td><td>${d.currentQty}</td><td><button class="btn-delete" onclick="deleteItem('${d.id}')">Delete</button></td></tr>`;
-                    }
-                    if(select) select.innerHTML += `<option value="${d.id}">${d.itemName} (Stock: ${d.currentQty})</option>`;
+                    tbody.innerHTML += `<tr><td>${d.itemName}</td><td>${d.initialQty}</td><td>${d.unit || 'pc'}</td><td>${d.unitPrice}</td><td>${d.currentQty}</td><td><button class="btn-delete" onclick="deleteItem('${d.id}')">Delete</button></td></tr>`;
+                    select.innerHTML += `<option value="${d.id}">${d.itemName} (Stock: ${d.currentQty})</option>`;
                 });
-                if(document.getElementById('dash-total-items')) document.getElementById('dash-total-items').innerText = totalStock;
+                document.getElementById('dash-total-items').innerText = total;
             });
-            db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => {
-                if(document.getElementById('dash-total-reqs')) document.getElementById('dash-total-reqs').innerText = s.size;
-            });
+            db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => document.getElementById('dash-total-reqs').innerText = s.size);
         }
 
-        function deleteItem(id) { if(!confirm("Delete this item?")) return; db.collection('inventory').doc(id).delete(); }
-        
-        async function clearMyInventory() {
-            if(!confirm("⚠ Clear ALL inventory and requests?")) return;
-            const batch = db.batch();
-            const invSnap = await db.collection('inventory').where('division', '==', currentUserDivision).get();
-            invSnap.forEach(doc => batch.delete(doc.ref));
-            const reqSnap = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
-            reqSnap.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
-            alert("Cleared!");
-        }
-
-        // --- SMART UPLOAD: DETECT HEADER & COLUMNS ---
         function handleFileUpload(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
+            const file = input.files[0];
+            if(!file) return;
+
+            // 1. Read as ArrayBuffer for Parsing Data
+            const dataReader = new FileReader();
+            dataReader.onload = (e) => {
                 const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
                 const ws = wb.Sheets[wb.SheetNames[0]];
-                
-                // 1. Convert to Array of Arrays to Find Header
                 const rawData = XLSX.utils.sheet_to_json(ws, {header: 1});
                 
                 let headerIndex = 0;
                 rawData.forEach((row, i) => {
-                    if(row.some(cell => cell && cell.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) {
-                        headerIndex = i;
-                    }
+                    if(row.some(c => c && c.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) headerIndex = i;
                 });
 
-                // 2. Parse again starting from Header Row
                 const json = XLSX.utils.sheet_to_json(ws, {range: headerIndex});
                 const batch = db.batch();
-                
-                // 3. Save File Record for Admin
-                const uploadRef = db.collection('ppmp_uploads').doc();
-                batch.set(uploadRef, {
-                    division: currentUserDivision,
-                    fileName: input.files[0].name,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    data: JSON.stringify(json),
-                    itemCount: json.length
-                });
-
-                // 4. Save Item Details (Mapping Columns)
                 let count = 0;
+
+                // Parse Items
                 json.forEach(row => {
-                    // Try to match column names from your specific Excel file
                     const name = row['GENERAL DESCRIPTION'] || row['Item Name'];
-                    const qty = row['QUANTITY/'] || row['Quantity']; // Handles the "QUANTITY/" column from your file
+                    const qty = row['QUANTITY/'] || row['Quantity'] || row['Qty'];
                     const unit = row['UNIT OF MEASURE'] || row['Unit'];
-                    const price = row['UNIT PRICE'] || row['Price'];
+                    const price = row['UNIT PRICE'] || row['Unit Price'] || row['Price'];
 
                     if(name && qty) {
                         count++;
                         batch.set(db.collection('inventory').doc(), {
-                            itemName: String(name).trim(), 
-                            initialQty: Number(qty), 
-                            currentQty: Number(qty), 
-                            unit: String(unit || 'pc'), 
-                            unitPrice: Number(price || 0), 
-                            division: currentUserDivision, 
-                            requestDates: []
+                            itemName: String(name).trim(), initialQty: Number(qty), currentQty: Number(qty),
+                            unit: String(unit || 'pc'), unitPrice: Number(price || 0), division: currentUserDivision, requestDates: []
                         });
                     }
                 });
-                batch.commit().then(()=>alert(`${count} Items Uploaded Successfully!`));
+
+                // 2. Read as DataURL (Base64) for Admin Download
+                const base64Reader = new FileReader();
+                base64Reader.onload = (b64e) => {
+                    const uploadRef = db.collection('ppmp_uploads').doc();
+                    batch.set(uploadRef, {
+                        division: currentUserDivision,
+                        fileName: file.name,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        fileBase64: b64e.target.result, // SAVE THE EXACT FILE
+                        itemCount: count
+                    });
+                    batch.commit().then(() => alert(`${count} Items Uploaded Successfully!`));
+                };
+                base64Reader.readAsDataURL(file);
             };
-            reader.readAsArrayBuffer(input.files[0]);
+            dataReader.readAsArrayBuffer(file);
         }
 
-        function openModal() { document.getElementById('reqModal').classList.add('open'); document.getElementById('risNo_1').innerText = ''; document.getElementById('risNo_2').innerText = ''; slipItems=[]; renderSlip(); }
-        function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
-
-        function addItemToSlip() {
-            const id = document.getElementById('itemSelect').value;
-            const qty = Number(document.getElementById('itemQty').value);
-            if(!id || qty<=0) return;
-            const item = inventoryData.find(i=>i.id===id);
-            if(qty > item.currentQty) return alert('Not enough stock!');
-            const existing = slipItems.find(i => i.id === id);
-            if(existing) { existing.reqQty += qty; } else { slipItems.push({ ...item, reqQty: qty }); }
-            renderSlip();
-        }
-
-        function renderSlip() {
-            ['risTableBody_1', 'risTableBody_2'].forEach(tableId => {
-                const tbody = document.getElementById(tableId);
-                if(!tbody) return;
-                tbody.innerHTML = '';
-                slipItems.forEach((item) => {
-                    let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
-                    tbody.innerHTML += `<tr><td></td><td>${item.unit || 'pc'}</td><td style="text-align:left">${cleanName}</td><td>${item.reqQty}</td><td></td><td></td><td></td><td></td></tr>`;
-                });
-                for(let i=0; i < (10 - slipItems.length); i++) {
-                    tbody.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-                }
-            });
-        }
-
-        async function submitRequisition() {
-            if(!slipItems.length) return alert("No items!");
+        function deleteItem(id) { if(confirm("Delete this item?")) db.collection('inventory').doc(id).delete(); }
+        async function clearMyInventory() {
+            if(!confirm("Clear ALL inventory?")) return;
             const batch = db.batch();
-            const today = new Date().toISOString();
-            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending' });
-            slipItems.forEach(item => {
-                const ref = db.collection('inventory').doc(item.id);
-                const current = inventoryData.find(i=>i.id===item.id).currentQty;
-                batch.update(ref, { currentQty: current - item.reqQty, requestDates: firebase.firestore.FieldValue.arrayUnion(today) });
+            const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
+            inv.forEach(d => batch.delete(d.ref));
+            await batch.commit(); alert("Cleared!");
+        }
+
+        function openModal() { document.getElementById('reqModal').classList.add('open'); slipItems = []; renderSlip(); }
+        function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
+        function addItemToSlip() {
+            const id = document.getElementById('itemSelect').value, qty = Number(document.getElementById('itemQty').value);
+            if(!id || qty <= 0) return;
+            const item = inventoryData.find(i => i.id === id);
+            if(qty > item.currentQty) return alert("Low Stock!");
+            slipItems.push({...item, reqQty: qty}); renderSlip();
+        }
+        function renderSlip() {
+            ['risTableBody_1', 'risTableBody_2'].forEach(tid => {
+                const b = document.getElementById(tid); b.innerHTML = '';
+                slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
+                for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
             });
-            await batch.commit();
-            alert("Submitted!"); closeModal();
+        }
+        async function submitRequisition() {
+            if(!slipItems.length) return alert("No items");
+            const batch = db.batch(), today = new Date().toISOString();
+            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending' });
+            slipItems.forEach(i => {
+                const ref = db.collection('inventory').doc(i.id);
+                batch.update(ref, { currentQty: i.currentQty - i.reqQty });
+            });
+            await batch.commit(); alert("Submitted!"); closeModal();
         }
         function exportToExcel() { 
             let data = [];
