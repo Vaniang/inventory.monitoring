@@ -21,7 +21,6 @@
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* SIDEBAR */
         .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
@@ -29,10 +28,7 @@
         .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
         .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
 
-        /* MAIN */
         .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-        
-        /* HEADER & NOTIFICATIONS */
         .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
         
@@ -54,36 +50,30 @@
         .notif-item:hover { background: #f9f9f9; }
         .notif-time { font-size: 0.75rem; color: #888; margin-top: 5px; display: block; }
 
-        /* SECTIONS (THE FIX: Ensuring these are hidden by default) */
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
         .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
         .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
 
-        /* TABLES */
         .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; margin-top: 20px; border-left: 5px solid #007bff; }
         .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
         .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
         .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
         
         .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
-        .btn-req:hover { transform: scale(1.05); }
         .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
         .modal-overlay.open { display: flex; }
         .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 3000; }
         .modal-actions button { width: 150px; padding: 10px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; }
         .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
         
-        /* PAPER SLIP */
         .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm; box-shadow: 0 0 30px rgba(0,0,0,0.5); margin-top: 20px; margin-bottom: 50px; position: relative; font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; }
         .ris-container { margin-bottom: 10px; }
         .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
@@ -143,6 +133,7 @@
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
             </div> 
+
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
                 <table class="inventory-table">
@@ -151,7 +142,8 @@
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
             </div>
-            </div>
+
+        </div>
     </div>
 
     <div class="modal-overlay" id="reqModal">
@@ -229,7 +221,7 @@
         // 1. AUTH & INIT
         auth.onAuthStateChanged(user => {
             if (user) {
-                currentUserId = user.uid; // STORE ID FOR NOTIFICATIONS
+                currentUserId = user.uid; 
                 db.collection('users').doc(user.uid).get().then(doc => {
                     if(doc.exists) {
                         currentUserDivision = doc.data().division || "Unknown";
@@ -237,32 +229,37 @@
                         document.getElementById('ris-div-name-1').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-2').innerText = currentUserDivision;
                         initUserDashboard(); 
-                        initNotifications(); // START LISTENING FOR NOTIFICATIONS
+                        initNotifications();
                     }
                 });
             } else { window.location.href = "../index.html"; }
         });
 
-        // 2. NOTIFICATIONS LOGIC
+        // 2. NOTIFICATIONS LOGIC (REMOVED .orderBy to fix Index Issue)
         function initNotifications() {
             db.collection('notifications')
               .where('userId', '==', currentUserId)
-              .orderBy('timestamp', 'desc')
               .onSnapshot(snap => {
                   const list = document.getElementById('notif-list');
                   const badge = document.getElementById('notif-badge');
                   let unreadCount = 0;
-                  let html = '';
+                  let notifs = [];
+                  
+                  // Collect Data First
+                  snap.forEach(doc => notifs.push({id: doc.id, ...doc.data()}));
+                  
+                  // Sort in JS (Avoids Firestore Index Error)
+                  notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
-                  if (snap.empty) {
+                  let html = '';
+                  if (notifs.length === 0) {
                       html = '<div style="padding:15px; color:#777; text-align:center;">No notifications</div>';
                   } else {
-                      snap.forEach(doc => {
-                          const n = doc.data();
+                      notifs.forEach(n => {
                           if(n.status === 'unread') unreadCount++;
                           const date = n.timestamp ? new Date(n.timestamp.toDate()).toLocaleString() : '';
                           html += `
-                            <div class="notif-item ${n.status === 'unread' ? 'unread' : ''}" onclick="markRead('${doc.id}')">
+                            <div class="notif-item ${n.status === 'unread' ? 'unread' : ''}" onclick="markRead('${n.id}')">
                                 <strong>${n.title}</strong><br>
                                 ${n.message}<br>
                                 <span class="notif-time">${date}</span>
@@ -414,7 +411,7 @@
             });
         }
 
-        // IMPORTANT: UPDATED SUBMIT FUNCTION
+        // SUBMIT
         async function submitRequisition() {
             if(!slipItems.length) return alert("No items!");
             const batch = db.batch();
@@ -425,7 +422,7 @@
                 date: today, 
                 items: slipItems, 
                 division: currentUserDivision, 
-                userId: currentUserId, // <--- THIS IS CRITICAL
+                userId: currentUserId, // CRITICAL
                 status: 'Pending' 
             });
 
