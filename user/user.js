@@ -24,13 +24,17 @@ auth.onAuthStateChanged(user => {
         db.collection('users').doc(user.uid).get().then(doc => {
             if(doc.exists) {
                 const data = doc.data();
-                currentUserDivision = data.division;
-                document.getElementById('division-name').innerText = currentUserDivision;
+                currentUserDivision = data.division || "Unknown Division";
+                // Update text on Dashboard
+                if(document.getElementById('division-name')) document.getElementById('division-name').innerText = currentUserDivision;
+                // Update text on RIS Forms (Copy 1 & 2)
+                if(document.getElementById('ris-div-name-1')) document.getElementById('ris-div-name-1').innerText = currentUserDivision;
+                if(document.getElementById('ris-div-name-2')) document.getElementById('ris-div-name-2').innerText = currentUserDivision;
+                
                 initUserDashboard(); // Load data
             }
         });
     } else {
-        // If not logged in, go back to main login
         window.location.href = "../index.html";
     }
 });
@@ -39,6 +43,7 @@ function logout() {
     auth.signOut().then(() => window.location.href = "../index.html");
 }
 
+// 3. NAVIGATION
 function nav(id, btn) {
     document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -46,35 +51,45 @@ function nav(id, btn) {
     btn.classList.add('active');
 }
 
-// 3. DATA LOGIC
+// 4. DATA LOGIC
 function initUserDashboard() {
     db.collection('inventory').onSnapshot(snap => {
         const tbody = document.getElementById('inventoryTable');
-        if(tbody) tbody.innerHTML = ''; 
-        let totalStock = 0;
+        const select = document.getElementById('itemSelect');
         
+        if(tbody) tbody.innerHTML = ''; 
+        if(select) select.innerHTML = '<option value="">Select Item...</option>';
+
+        let totalStock = 0;
         inventoryData = [];
+
         snap.forEach(doc => {
             const d = doc.data(); d.id = doc.id;
             inventoryData.push(d);
             totalStock += d.currentQty;
             
+            // Fill Inventory Table
             if(tbody) {
                 tbody.innerHTML += `<tr><td>${d.itemName}</td><td>${d.initialQty}</td><td>${d.unitPrice}</td><td>${d.currentQty}</td></tr>`;
             }
+            // Fill Dropdown
+            if(select) {
+                select.innerHTML += `<option value="${d.id}">${d.itemName} (Stock: ${d.currentQty})</option>`;
+            }
         });
+        
         if(document.getElementById('dash-total-items')) 
             document.getElementById('dash-total-items').innerText = totalStock;
     });
 
-    // Count Requests
+    // Count My Requests
     db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => {
         if(document.getElementById('dash-total-reqs'))
             document.getElementById('dash-total-reqs').innerText = s.size;
     });
 }
 
-// 4. UPLOAD EXCEL
+// 5. UPLOAD EXCEL
 function handleFileUpload(input) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -93,146 +108,76 @@ function handleFileUpload(input) {
     reader.readAsArrayBuffer(input.files[0]);
 }
 
-// Make functions accessible to HTML
-window.logout = logout;
-window.nav = nav;
-window.handleFileUpload = handleFileUpload;
-// Add window.openModal = openModal; etc. if you pasted the Modal code in HTML
-
-
-   function nav(id, btn) {
-            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function loadInventory() {
-            db.collection('inventory').onSnapshot(snap => {
-                inventoryData = [];
-                let totalStock = 0;
-                const tbody = document.getElementById('inventoryTable');
-                const select = document.getElementById('itemSelect');
-                tbody.innerHTML = ''; select.innerHTML = '<option value="">Select Item...</option>';
-
-                snap.forEach(doc => {
-                    const d = doc.data(); d.id = doc.id;
-                    inventoryData.push(d);
-                    totalStock += d.currentQty;
-                });
-                
-                inventoryData.sort((a,b) => a.itemName.localeCompare(b.itemName));
-
-                inventoryData.forEach(item => {
-                    let dates = item.requestDates ? item.requestDates.map(d=>new Date(d).toLocaleDateString()).join(', ') : '-';
-                    tbody.innerHTML += `<tr><td>${item.itemName}</td><td>${item.initialQty}</td><td>${item.unitPrice}</td><td>${dates}</td><td style="font-weight:bold;">${item.currentQty}</td></tr>`;
-                    select.innerHTML += `<option value="${item.id}">${item.itemName} (Stock: ${item.currentQty})</option>`;
-                });
-                document.getElementById('dash-total-items').innerText = totalStock;
-                updateChart();
-            });
-        }
-        
-        function loadStats() { db.collection('requisitions').onSnapshot(s => document.getElementById('dash-total-reqs').innerText = s.size); }
-
-        function updateChart() {
-            const ctx = document.getElementById('stockChart').getContext('2d');
-            const data = inventoryData.slice(0, 15);
-            if(window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: data.map(i=>i.itemName), datasets: [{ label:'Stock', data: data.map(i=>i.currentQty), backgroundColor:'#3498db' }] }
-            });
-        }
-
-        function handleFileUpload(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                const batch = db.batch();
-                let count = 0;
-                json.forEach(row => {
-                    if(row.Name && row.Qty) {
-                        count++;
-                        batch.set(db.collection('inventory').doc(), {
-                            itemName: String(row.Name), initialQty: Number(row.Qty), currentQty: Number(row.Qty), unitPrice: Number(row.Price||0), requestDates: []
-                        });
-                    }
-                });
-                batch.commit().then(()=>alert(count + ' Items Imported!'));
-            };
-            reader.readAsArrayBuffer(input.files[0]);
-        }
-
-        function openModal() { 
+// 6. MODAL & SLIP LOGIC
+function openModal() { 
     document.getElementById('reqModal').classList.add('open'); 
-    
-    // CHANGED: We now set these to empty strings instead of generating a random number
-    document.getElementById('risNo_1').innerText = '';
-    document.getElementById('risNo_2').innerText = '';
-    
+    document.getElementById('risNo_1').innerText = ''; 
+    document.getElementById('risNo_2').innerText = ''; 
     slipItems=[]; 
     renderSlip(); 
 }
-        function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
 
-        function addItemToSlip() {
-            const id = document.getElementById('itemSelect').value;
-            const qty = Number(document.getElementById('itemQty').value);
-            if(!id || qty<=0) return;
-            const item = inventoryData.find(i=>i.id===id);
-            if(qty > item.currentQty) return alert('Not enough stock!');
-            slipItems.push({ ...item, reqQty: qty });
-            renderSlip();
-        }
+function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
 
-       function renderSlip() {
+function addItemToSlip() {
+    const id = document.getElementById('itemSelect').value;
+    const qty = Number(document.getElementById('itemQty').value);
+    if(!id || qty<=0) return;
+    const item = inventoryData.find(i=>i.id===id);
+    if(qty > item.currentQty) return alert('Not enough stock!');
+    
+    // Check if item already exists in slip
+    const existing = slipItems.find(i => i.id === id);
+    if(existing) {
+        existing.reqQty += qty;
+    } else {
+        slipItems.push({ ...item, reqQty: qty });
+    }
+    renderSlip();
+}
+
+function renderSlip() {
+    // We render to BOTH tables (Copy 1 and Copy 2)
     ['risTableBody_1', 'risTableBody_2'].forEach(tableId => {
         const tbody = document.getElementById(tableId);
+        if(!tbody) return;
         tbody.innerHTML = '';
         
-        slipItems.forEach((item, i) => {
-            // CHANGED: Split by comma (,) AND semicolon (;) then take the first part
-            // "AIR FRESHENER, aerosol..." -> "AIR FRESHENER"
+        slipItems.forEach((item) => {
             let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
-
             tbody.innerHTML += `
                 <tr>
                     <td></td> 
-                    
                     <td>pc</td>
                     <td style="text-align:left">${cleanName}</td>
                     <td>${item.reqQty}</td>
-                    
                     <td></td><td></td>
                     <td></td><td></td>
                 </tr>`;
         });
         
-        // Fill empty rows
+        // Fill empty rows to maintain A4 height
         for(let i=0; i < (10 - slipItems.length); i++) {
             tbody.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
         }
     });
 }
 
-     function exportToExcel() {
+// 7. SUBMIT & EXPORT
+function exportToExcel() {
     let data = [];
+    // Loop twice to create 2 copies in Excel
     for(let k=0; k<2; k++) {
         data.push(["", "", "", "", "", "", "Appendix 63"]);
         data.push(["REQUISITION AND ISSUE SLIP"]);
         data.push(["Entity Name :", "", "DepED RO I", "", "", "", "Fund Cluster :", "01"]);
-        data.push(["Division :", "ORD-PAU", "", "", "", "Responsibility Center Code :", ""]);
+        data.push(["Division :", currentUserDivision, "", "", "", "Responsibility Center Code :", ""]);
         data.push(["Office :", "", "", "", "", "RIS No. :", ""]); 
         data.push(["Requisition", "", "", "", "Stock Available?", "", "Issue", ""]);
         data.push(["Stock No.", "Unit", "Description", "Quantity", "Yes", "No", "Quantity", "Remarks"]);
         
         slipItems.forEach((item) => {
-            // CHANGED: Clean name using comma split
             let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
-            
-            // CHANGED: First item in array is now "" (Empty Stock No)
             data.push(["", "pc", cleanName, item.reqQty, "", "", "", ""]);
         });
 
@@ -251,45 +196,41 @@ window.handleFileUpload = handleFileUpload;
     XLSX.utils.book_append_sheet(wb, ws, "RIS_Double");
     XLSX.writeFile(wb, "Requisition_Issue_Slip_Double.xlsx");
 }
-        async function submitRequisition() {
-            if(!slipItems.length) return alert("No items!");
-            const batch = db.batch();
-            const today = new Date().toISOString();
-            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems });
-            slipItems.forEach(item => {
-                const ref = db.collection('inventory').doc(item.id);
-                const current = inventoryData.find(i=>i.id===item.id).currentQty;
-                batch.update(ref, { currentQty: current - item.reqQty, requestDates: firebase.firestore.FieldValue.arrayUnion(today) });
-            });
-            await batch.commit();
-            alert("Inventory Updated!");
-            closeModal();
-        }
 
-       // --- NEW RESET FUNCTION (Resets Stock AND Deletes Req History) ---
-        async function resetInventory() {
-            if(!confirm("⚠ WARNING: This will reset ALL items back to their Initial Quantity AND DELETE all Requisition history (setting the count to 0).\n\nAre you sure you want to proceed?")) return;
-            
-            const batch = db.batch();
+async function submitRequisition() {
+    if(!slipItems.length) return alert("No items!");
+    const batch = db.batch();
+    const today = new Date().toISOString();
+    
+    // Save Requisition with Status 'Pending' and correct Division
+    batch.set(db.collection('requisitions').doc(), { 
+        date: today, 
+        items: slipItems, 
+        division: currentUserDivision, 
+        status: 'Pending' 
+    });
 
-            // 1. Reset Inventory Stock
-            inventoryData.forEach(item => {
-                const ref = db.collection('inventory').doc(item.id);
-                batch.update(ref, { currentQty: item.initialQty, requestDates: [] });
-            });
+    // Deduct Stock Immediately
+    slipItems.forEach(item => {
+        const ref = db.collection('inventory').doc(item.id);
+        const current = inventoryData.find(i=>i.id===item.id).currentQty;
+        batch.update(ref, { 
+            currentQty: current - item.reqQty, 
+            requestDates: firebase.firestore.FieldValue.arrayUnion(today) 
+        });
+    });
 
-            // 2. Delete All Requisitions (This makes the count go to 0)
-            const reqSnapshot = await db.collection('requisitions').get();
-            reqSnapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
+    await batch.commit();
+    alert("Requisition Submitted Successfully!");
+    closeModal();
+}
 
-            // 3. Commit Changes
-            try {
-                await batch.commit();
-                alert("Reset Succesfully!");
-            } catch (error) {
-                console.error("Error resetting:", error);
-                alert("Error resetting. See console.");
-            }
-        }
+// Make functions accessible to HTML
+window.logout = logout;
+window.nav = nav;
+window.handleFileUpload = handleFileUpload;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.addItemToSlip = addItemToSlip;
+window.submitRequisition = submitRequisition;
+window.exportToExcel = exportToExcel;
