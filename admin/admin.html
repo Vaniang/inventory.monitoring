@@ -86,7 +86,7 @@
             <div id="master-list" class="section">
                 <div class="header-title"><h1>Master Inventory (Uploaded Files)</h1></div>
                 <div class="content-box">
-                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">List of PPMP Excel files uploaded by each division.</p>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">List of PPMP Excel files uploaded by each division. <b>Download</b> to view the original Excel file with full formatting.</p>
                     <table class="data-table">
                         <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items Count</th><th>Action</th></tr></thead>
                         <tbody id="ppmpTable"></tbody>
@@ -207,7 +207,6 @@
                 });
 
                 let html = '';
-                // Convert to array and sort by Name
                 const sorted = Object.values(map).sort((a,b) => a.name.localeCompare(b.name));
                 
                 sorted.forEach(s => {
@@ -218,14 +217,33 @@
             });
         }
 
+        // --- UPDATED DOWNLOAD FUNCTION: GETS ORIGINAL FILE ---
         async function downloadPPMP(id) {
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
-            const data = JSON.parse(doc.data().data);
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "PPMP");
-            XLSX.writeFile(wb, doc.data().fileName || "PPMP.xlsx");
+            
+            const fileData = doc.data().fileBase64;
+            
+            // Fallback for old uploads (pre-Base64 update)
+            if(!fileData) {
+                alert("⚠ NOTICE: This file was uploaded before the 'Exact Format' update. Downloading restored version instead (formatting may differ).");
+                try {
+                    const data = JSON.parse(doc.data().data);
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "PPMP");
+                    XLSX.writeFile(wb, doc.data().fileName || "Restored_PPMP.xlsx");
+                } catch(e) { alert("Error restoring file: " + e.message); }
+                return;
+            }
+
+            // Download EXACT Original File
+            const link = document.createElement('a');
+            link.href = fileData;
+            link.download = doc.data().fileName || "Download.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function setStatus(docId, status, userId) {
