@@ -3,57 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Monitoring System</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>DepEd Inventory Monitoring System</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <div id="login-section">
         <div class="login-box">
             <h2>Inventory System</h2>
-            <input type="email" id="email" placeholder="Division/Unit Email">
+            <p>Department of Education - Region I</p>
+            <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Password">
             <button onclick="login()">Log In</button>
-            <p id="login-error" class="error"></p>
+            <p id="login-error" style="color:red"></p>
         </div>
     </div>
 
-    <div id="dashboard-section" class="hidden">
-        <header>
-            <h3 id="user-role-display">Role: Loading...</h3>
-            <button onclick="logout()">Logout</button>
-        </header>
-
-        <div id="user-view" class="role-view hidden">
-            <h1>My Requisitions</h1>
-            <p>Select items based on your PPMP.</p>
-            <button onclick="openRequestForm()">New Request +</button>
-            <div id="user-request-list">
-                </div>
+    <div id="user-view" class="view-container hidden" style="display:flex; height: 100vh;">
+        
+        <div class="sidebar">
+            <h2>IMS System</h2>
+            <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
+            <div class="nav-link" onclick="nav('inventory', this)">Inventory List</div>
+            <div class="nav-link" onclick="logout()" style="background:#c0392b; margin-top:20px;">Logout</div>
         </div>
 
-        <div id="admin-view" class="role-view hidden">
-            <h1>Asset Management Dashboard</h1>
-            <div class="stats">
-                <div class="card">Pending Requests: <span id="pending-count">0</span></div>
-                <div class="card">Low Stock Items: <span id="low-stock-count">0</span></div>
+        <div class="main">
+            <div id="dashboard" class="section active">
+                <h1>Dashboard <span id="user-division-name" style="font-size:0.6em; color:#777;"></span></h1>
+                <div class="cards-grid">
+                    <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
+                    <div class="card"><h3>My Requisitions</h3><div class="number" id="dash-total-reqs">0</div></div>
+                </div>
+                
+                <div style="background:white; padding:20px; border-radius:8px;"><canvas id="stockChart"></canvas></div>
             </div>
-            <h3>Incoming Requests</h3>
-            <div id="admin-request-queue">
-                </div>
-        </div>
 
-        <div id="super-admin-view" class="role-view hidden">
-            <h1>System Administration</h1>
-            <button>Create New Division Account</button>
-            <button>Reset Password</button>
-            <button>View Audit Logs</button>
+            <div id="inventory" class="section">
+                <h1>Inventory List</h1>
+                <table class="inventory-table">
+                    <thead><tr><th>Item Name</th><th>Init Qty</th><th>Unit Price</th><th>History</th><th>Left</th></tr></thead>
+                    <tbody id="inventoryTable"></tbody>
+                </table>
+                <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
+            </div>
         </div>
     </div>
 
-<script type="module" src="app.js"></script>
+    <div id="admin-view" class="view-container hidden">
+        <nav class="navbar">
+            <div class="nav-brand">Asset Management Admin</div>
+            <button onclick="logout()">Logout</button>
+        </nav>
+        <div style="padding:40px;">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, Asset Management. Here you can manage stock and approvals.</p>
+            
+            <div style="margin-top: 30px; border: 1px solid #ccc; padding: 20px; background:white;">
+                <h3>Database Controls</h3>
+                <p>Upload new stock list via Excel:</p>
+                <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
+                <br><br>
+                <button onclick="resetInventory()" style="background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    ⚠ Reset All Stock
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reqModal">
+        <div class="modal-actions">
+            <button class="btn btn-close" onclick="closeModal()">Close</button>
+            <button class="btn btn-print" onclick="window.print()">Print RIS</button>
+            <button class="btn btn-excel" onclick="exportToExcel()">Download Excel</button>
+            <button class="btn btn-submit" onclick="submitRequisition()">Submit & Save</button>
+        </div>
+
+        <div class="add-item-controls">
+            <b>Add Item:</b>
+            <select id="itemSelect" style="padding:5px;"><option value="">Select Item...</option></select>
+            <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:5px;">
+            <button class="btn" style="background:#27ae60; padding:5px 10px; width:auto;" onclick="addItemToSlip()">Add</button>
+        </div>
+
+        <div class="paper-slip" id="printableArea">
+            <div class="ris-container">
+                <div class="ris-header-italic">Appendix 63</div>
+                <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
+                <table class="info-table">
+                    <tr><td width="10%" class="label">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%" class="label">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr>
+                    <tr><td class="label">Division:</td><td class="input-line" id="ris-div-name-1">ORD-PAU</td><td></td><td class="label" colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
+                    <tr><td class="label">Office:</td><td class="input-line"></td><td></td><td class="label">RIS No.:</td><td class="input-line" id="risNo_1"></td></tr>
+                </table>
+                <table class="ris-table">
+                    <thead>
+                        <tr><th colspan="4">Requisition</th><th colspan="2">Stock Available?</th><th colspan="2">Issue</th></tr>
+                        <tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Quantity</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Quantity</th><th width="20%">Remarks</th></tr>
+                    </thead>
+                    <tbody id="risTableBody_1"></tbody>
+                </table>
+                <table class="footer-table">
+                    <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
+                    <tr><td>Signature:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                    <tr><td>Printed Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I</div><div class="sig-title">ORD-PAU</div></td><td><div class="sig-title">Admin Officer V</div><div class="sig-title">ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Date:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                </table>
+            </div>
+            
+            <div class="cut-line"></div>
+            
+            <div class="ris-container">
+                <center>(Duplicate Copy Output Here)</center>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
