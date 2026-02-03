@@ -4,147 +4,242 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - IMS</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; --orange: #f39c12; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         .view-container { display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; }
-        .sidebar h2 { text-align: center; margin-bottom: 40px; border-bottom: 1px solid #555; padding-bottom: 20px;}
-        .nav-link { padding: 15px; margin-bottom: 5px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
-        .nav-link:hover, .nav-link.active { background: #34495e; border-left: 4px solid #3498db; }
+        .hidden { display: none !important; }
+        .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; letter-spacing: 1px;}
+        .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; } .section.active { display: block; }
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #2c3e50; }
-        .card .number { font-size: 2.5rem; font-weight: bold; margin-top: 5px; }
-        .content-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .data-table th { background: #eee; padding: 12px; text-align: left; }
-        .data-table td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
-        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display:inline-block;}
-        .badge-Pending { background: #fff3cd; color: #856404; } .badge-Approved { background: #d4edda; color: #155724; }
-        .action-btn { border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; }
-        .btn-approve { background: #2ecc71; } .btn-reject { background: #e74c3c; }
-        .btn-download { background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0 0 30px 0; }
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+        .card .number { font-size: 2.5rem; font-weight: 800; color: #333; margin-top: 10px; }
+        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
+        .data-table tr:hover { background-color: #f9f9f9; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .action-btn { border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; transition: transform 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em; }
+        .action-btn:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-approve { background: var(--green); }
+        .btn-reject { background: var(--red); }
+        .btn-print { float: right; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
+        .btn-print:hover { background: #1a252f; }
+        .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        @media print { body * { visibility: hidden; } .section.active, .section.active * { visibility: visible; } .section.active { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; } .sidebar, .btn-print, .action-btn { display: none !important; } .card { border: 1px solid #ccc; box-shadow: none; } }
     </style>
 </head>
 <body>
+
     <div class="view-container">
         <div class="sidebar">
             <h2>Admin Panel</h2>
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
-            <div class="nav-link" onclick="nav('master-inventory', this)">Master Inventory</div>
-            <div class="nav-link" onclick="nav('consolidated', this)">Consolidated Supplies</div>
+            <div class="nav-link" onclick="nav('master-list', this)">Master Inventory (Files)</div>
+            <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
+
         <div class="main">
+            
             <div id="dashboard" class="section active">
-                <h1>Admin Dashboard</h1>
+                <div class="header-title"><h1>Admin Dashboard</h1></div>
                 <div class="cards-grid">
-                    <div class="card" style="border-color:#3498db;"><h3>PPMPs Uploaded</h3><div class="number" id="adm-ppmp">0</div></div>
-                    <div class="card"><h3>Requests</h3><div class="number" id="adm-total">0</div></div>
-                    <div class="card" style="border-color:#f39c12;"><h3>Pending</h3><div class="number" id="adm-pending">0</div></div>
+                    <div class="card" style="border-color: #3498db;"><h3>PPMPs Uploaded</h3><div class="number" id="adm-ppmp-count">0</div></div>
+                    <div class="card" style="border-color: #2c3e50;"><h3>Total Requests</h3><div class="number" id="adm-total">0</div></div>
+                    <div class="card" style="border-color: #f39c12;"><h3>Pending</h3><div class="number" id="adm-pending" style="color:#f39c12">0</div></div>
+                    <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
                 </div>
                 <div class="content-box">
                     <h3>🔔 Incoming Requests</h3>
-                    <table class="data-table"><thead><tr><th>Date</th><th>Division</th><th>Items</th><th>Status</th><th>Actions</th></tr></thead><tbody id="requestTable"></tbody></table>
+                    <table class="data-table">
+                        <thead><tr><th>Date</th><th>Division</th><th>Items</th><th>Status</th><th class="no-print">Actions</th></tr></thead>
+                        <tbody id="requestTable"></tbody>
+                    </table>
                 </div>
             </div>
-            
-            <div id="master-inventory" class="section">
-                <h1>Master Inventory (Uploaded PPMPs)</h1>
+
+            <div id="master-list" class="section">
+                <div class="header-title"><h1>Master Inventory (Uploaded Files)</h1></div>
                 <div class="content-box">
-                    <p>List of Excel files submitted by divisions.</p>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">List of PPMP Excel files uploaded by each division.</p>
                     <table class="data-table">
-                        <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items Count</th><th>Action</th></tr></thead>
                         <tbody id="ppmpTable"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="consolidated" class="section">
-                <h1>Consolidated Supplies</h1>
+            <div id="consolidated-supplies" class="section">
+                <div class="header-title"><h1>Consolidated Supplies</h1></div>
                 <div class="content-box">
-                    <p>Total aggregated stock across all divisions.</p>
-                    <table class="data-table"><thead><tr><th>Item Name</th><th>Total Stock</th><th>Avg Price</th></tr></thead><tbody id="consolTable"></tbody></table>
+                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print Summary</button>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Aggregated total of all supplies including Units and Average Price.</p>
+                    <table class="data-table">
+                        <thead><tr><th>Item Name</th><th>Total Qty</th><th>Unit</th><th>Avg Price</th></tr></thead>
+                        <tbody id="consolidatedTable"></tbody>
+                    </table>
                 </div>
             </div>
+
         </div>
     </div>
+
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s", authDomain: "supplies-monitoring.firebaseapp.com", projectId: "supplies-monitoring", storageBucket: "supplies-monitoring.firebasestorage.app", messagingSenderId: "524755577094", appId: "1:524755577094:web:cd3c45819698c3380a1687", measurementId: "G-033SS1BHK1" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
+            authDomain: "supplies-monitoring.firebaseapp.com",
+            projectId: "supplies-monitoring",
+            storageBucket: "supplies-monitoring.firebasestorage.app",
+            messagingSenderId: "524755577094",
+            appId: "1:524755577094:web:cd3c45819698c3380a1687",
+            measurementId: "G-033SS1BHK1"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        auth.onAuthStateChanged(u => { if(!u) window.location.href="../index.html"; else initAdmin(); });
-        function logout() { auth.signOut().then(()=>window.location.href="../index.html"); }
-        function nav(id,btn) { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-link').forEach(e=>e.classList.remove('active')); btn.classList.add('active'); }
-
-        function initAdmin() {
-            // 1. REQUESTS & STATS
-            db.collection('requisitions').orderBy('date','desc').onSnapshot(snap => {
-                let total=0, pending=0, html='';
-                snap.forEach(doc => {
-                    const r=doc.data(); total++; if(r.status==='Pending') pending++;
-                    html+=`<tr><td>${new Date(r.date).toLocaleDateString()}</td><td>${r.division}</td><td>${r.items.length} Items</td><td><span class="badge badge-${r.status}">${r.status}</span></td><td>${r.status==='Pending'?`<button class="action-btn btn-approve" onclick="setStatus('${doc.id}','Approved','${r.userId}')">✓</button><button class="action-btn btn-reject" onclick="setStatus('${doc.id}','Rejected','${r.userId}')">✗</button>`:'-'}</td></tr>`;
+        auth.onAuthStateChanged(user => {
+            if (!user) window.location.href = "../index.html";
+            else {
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().role === 'admin') {
+                        initAdminDashboard();
+                        initMasterInventory();
+                        initConsolidatedSupplies();
+                    } else window.location.href = "../user/user.html";
                 });
-                document.getElementById('adm-total').innerText=total; document.getElementById('adm-pending').innerText=pending; document.getElementById('requestTable').innerHTML=html;
-            });
+            }
+        });
 
-            // 2. MASTER INVENTORY (PPMP UPLOADS)
-            db.collection('ppmp_uploads').orderBy('timestamp','desc').onSnapshot(snap => {
-                let html='', count=0;
-                snap.forEach(doc => {
-                    count++; const d=doc.data();
-                    // We store the ID in the button so we can retrieve the data to download
-                    html+=`<tr><td>${d.division}</td><td>${d.fileName}</td><td>${d.timestamp?new Date(d.timestamp.toDate()).toLocaleDateString():''}</td><td>${d.itemCount}</td><td><button class="btn-download" onclick="downloadPPMP('${doc.id}')">Download</button></td></tr>`;
-                });
-                document.getElementById('ppmpTable').innerHTML=html;
-                document.getElementById('adm-ppmp').innerText=count;
-            });
+        function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
+        function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
-            // 3. CONSOLIDATED SUPPLIES
-            db.collection('inventory').onSnapshot(snap => {
-                const map={};
+        function initAdminDashboard() {
+            db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
+
+            db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
+                let total = 0, pending = 0, approved = 0, html = '';
                 snap.forEach(doc => {
-                    const d=doc.data(); const key=d.itemName.trim();
-                    if(!map[key]) map[key]={qty:0, prices:[]};
-                    map[key].qty += d.currentQty; map[key].prices.push(d.unitPrice);
+                    const r = doc.data();
+                    total++;
+                    if(r.status === 'Approved') approved++;
+                    if(r.status === 'Pending' || !r.status) pending++;
+
+                    const itemsStr = r.items.map(i => `${i.itemName} (${i.reqQty})`).join(', ');
+                    const dateStr = new Date(r.date).toLocaleDateString();
+                    const status = r.status || 'Pending';
+                    const userId = r.userId || '';
+
+                    let actions = '<span style="color:#aaa;">—</span>';
+                    if(status === 'Pending') {
+                        actions = `
+                            <button class="action-btn btn-approve" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
+                            <button class="action-btn btn-reject" onclick="setStatus('${doc.id}', 'Rejected', '${userId}')">✗</button>`;
+                    }
+
+                    html += `<tr><td>${dateStr}</td><td><strong>${r.division}</strong></td><td style="font-size:0.9em;">${itemsStr}</td><td><span class="badge badge-${status}">${status}</span></td><td class="no-print">${actions}</td></tr>`;
                 });
-                let html='';
-                for(const [name, val] of Object.entries(map)) {
-                    const avg = (val.prices.reduce((a,b)=>a+b,0)/val.prices.length).toFixed(2);
-                    html+=`<tr><td>${name}</td><td>${val.qty}</td><td>${avg}</td></tr>`;
-                }
-                document.getElementById('consolTable').innerHTML=html;
+                document.getElementById('adm-total').innerText = total;
+                document.getElementById('adm-pending').innerText = pending;
+                document.getElementById('adm-approved').innerText = approved;
+                document.getElementById('requestTable').innerHTML = html;
             });
         }
 
-        // DOWNLOAD FUNCTION (Regenerates Excel)
+        function initMasterInventory() {
+            db.collection('ppmp_uploads').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                let html = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    html += `<tr>
+                        <td><strong>${d.division}</strong></td>
+                        <td>${d.fileName}</td>
+                        <td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td>
+                        <td>${d.itemCount}</td>
+                        <td><button class="btn-download" onclick="downloadPPMP('${doc.id}')">Download</button></td>
+                    </tr>`;
+                });
+                document.getElementById('ppmpTable').innerHTML = html;
+            });
+        }
+
+        function initConsolidatedSupplies() {
+            db.collection('inventory').onSnapshot(snap => {
+                const map = {};
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const key = d.itemName.trim().toLowerCase();
+                    if(!map[key]) {
+                        map[key] = { name: d.itemName, qty: 0, prices: [], unit: d.unit || 'pc' };
+                    }
+                    map[key].qty += d.currentQty;
+                    map[key].prices.push(d.unitPrice);
+                });
+
+                let html = '';
+                // Convert to array and sort by Name
+                const sorted = Object.values(map).sort((a,b) => a.name.localeCompare(b.name));
+                
+                sorted.forEach(s => {
+                    const avgPrice = s.prices.length ? (s.prices.reduce((a,b)=>a+b, 0) / s.prices.length).toFixed(2) : 0;
+                    html += `<tr><td>${s.name}</td><td style="font-size:1.1em; font-weight:bold;">${s.qty}</td><td>${s.unit}</td><td>${avgPrice}</td></tr>`;
+                });
+                document.getElementById('consolidatedTable').innerHTML = html;
+            });
+        }
+
         async function downloadPPMP(id) {
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
-            const data = JSON.parse(doc.data().data); // Get the saved JSON
+            const data = JSON.parse(doc.data().data);
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "PPMP");
             XLSX.writeFile(wb, doc.data().fileName || "PPMP.xlsx");
         }
 
-        function setStatus(id, stat, uid) {
-            if(!confirm(stat+"?")) return;
-            const batch=db.batch();
-            batch.update(db.collection('requisitions').doc(id), {status:stat});
-            if(uid) batch.set(db.collection('notifications').doc(), {userId:uid, title:`Request ${stat}`, message:`Your request is ${stat}.`, status:'unread', timestamp:firebase.firestore.FieldValue.serverTimestamp()});
-            batch.commit();
+        function setStatus(docId, status, userId) {
+            if(!confirm(`Mark as ${status}?`)) return;
+            const batch = db.batch();
+            batch.update(db.collection('requisitions').doc(docId), { status: status });
+            if(userId) {
+                batch.set(db.collection('notifications').doc(), {
+                    userId: userId, title: `Request ${status}`,
+                    message: status === 'Approved' ? "Your request is approved." : "Your request was rejected.",
+                    status: 'unread', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            batch.commit().then(() => alert(`Updated!`));
         }
     </script>
 </body>
