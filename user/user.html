@@ -13,15 +13,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <style>
-        /* --- GLOBAL FONTS & RESET --- */
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
-        
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* --- SIDEBAR --- */
+        /* SIDEBAR */
         .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
@@ -29,7 +27,7 @@
         .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
         .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
 
-        /* --- MAIN CONTENT --- */
+        /* MAIN */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
@@ -38,13 +36,13 @@
         header h1 { color: #2c3e50; font-size: 2rem; margin-bottom: 30px; }
         #division-name { color: #3498db; font-weight: bold; }
 
-        /* --- CARDS --- */
+        /* CARDS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
-        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
         .card .number { font-size: 3rem; font-weight: 800; color: #2c3e50; margin-top: 10px; }
+        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
 
-        /* --- UPLOAD & TABLES --- */
+        /* TABLES & INPUTS */
         .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         input[type="file"] { background: #f8f9fa; padding: 15px; border: 2px dashed #cbd5e0; border-radius: 8px; width: 100%; cursor: pointer; box-sizing: border-box;}
         
@@ -55,44 +53,35 @@
         .btn-req { position: fixed; bottom: 40px; right: 40px; background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
         .btn-req:hover { transform: scale(1.05); }
 
-        /* --- RIS FORM & MODAL --- */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
         .modal-overlay.open { display: flex; }
-
         .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 3000; }
         .modal-actions button { width: 150px; padding: 10px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; }
         .btn-close { background: #e74c3c; } .btn-print { background: #3498db; } .btn-excel { background: #27ae60; } .btn-submit { background: #2c3e50; }
 
-        /* PAPER SLIP (A4 Layout) */
+        /* PAPER SLIP */
         .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm; box-shadow: 0 0 30px rgba(0,0,0,0.5); margin-top: 20px; margin-bottom: 50px; position: relative; font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; }
-
         .ris-container { margin-bottom: 10px; }
         .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
         .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -10px; background: white; padding: 0 5px; font-size: 14px; }
-
         .ris-header-italic { text-align: right; font-style: italic; font-size: 9px; margin-bottom: 2px; font-weight: bold; }
         .ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; text-decoration: underline; }
-        
         .info-table, .ris-table, .footer-table { width: 100%; border-collapse: collapse; }
         .info-table td { padding: 1px; vertical-align: bottom; }
         .label { font-weight: bold; white-space: nowrap; font-size: 10px; }
         .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
-
         .ris-table { margin-top: 5px; border: 2px solid black; table-layout: fixed; }
         .ris-table th, .ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; font-size: 10px; }
         .ris-table th { background: #eee; font-weight: bold; }
         .empty-row td { height: 14px; }
-
         .footer-table { border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px; }
         .footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; font-size: 10px; }
         .footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
-
         .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 10px; font-size: 11px; }
         .sig-title { text-align: center; font-size: 9px; }
-
         .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
 
-        /* PRINT SETTINGS */
         @media print {
             body * { visibility: hidden; }
             .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: block !important; padding: 0; overflow: visible; z-index: 9999; }
@@ -113,41 +102,26 @@
         </div>
 
         <div class="main">
-            
             <div id="dashboard" class="section active">
                 <header class="header-flex">
                     <h1>Welcome, <span id="division-name">Loading...</span></h1>
                 </header>
-
                 <div class="cards-grid">
-                    <div class="card">
-                        <h3>Total Stock</h3>
-                        <div class="number" id="dash-total-items">0</div>
-                    </div>
-                    <div class="card">
-                        <h3>My Requests</h3>
-                        <div class="number" id="dash-total-reqs">0</div>
-                    </div>
+                    <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
+                    <div class="card"><h3>My Requests</h3><div class="number" id="dash-total-reqs">0</div></div>
                 </div>
-
                 <div class="content-box" style="margin-top: 20px; border-left: 5px solid #007bff;">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your division's inventory list using Excel.</p>
+                    <p>Update your division's inventory list using Excel. (This will be your stock source).</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                 </div>
             </div>
 
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
+                <p style="color:#666; margin-bottom:10px;">Showing stock uploaded by: <strong id="inv-div-label">...</strong></p>
                 <table class="inventory-table">
-                    <thead>
-                        <tr>
-                            <th>Item Name</th>
-                            <th>Initial Qty</th>
-                            <th>Unit Price</th>
-                            <th>Current Stock</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit Price</th><th>Current Stock</th></tr></thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
@@ -162,67 +136,52 @@
             <button class="btn btn-excel" onclick="exportToExcel()">Download Excel</button>
             <button class="btn btn-submit" onclick="submitRequisition()">Submit & Save</button>
         </div>
-
         <div class="add-item-controls">
-            <b>Add Item:</b>
+            <b>Add:</b>
             <select id="itemSelect" style="padding:5px;"><option value="">Select Item...</option></select>
             <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:5px;">
-            <button class="btn" style="background:#27ae60; padding:5px 10px; width:auto;" onclick="addItemToSlip()">Add</button>
+            <button onclick="addItemToSlip()" style="background:#27ae60; color:white; border:none; padding:5px 10px; cursor:pointer;">Add</button>
         </div>
-
         <div class="paper-slip" id="printableArea">
             <div class="ris-container">
                 <div class="ris-header-italic">Appendix 63</div>
                 <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
                 <table class="info-table">
                     <tr><td width="10%" class="label">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%" class="label">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr>
-                    <tr><td class="label">Division:</td><td class="input-line" id="ris-div-name-1">ORD-PAU</td><td></td><td class="label" colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
+                    <tr><td class="label">Division:</td><td class="input-line" id="ris-div-name-1">...</td><td></td><td class="label" colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
                     <tr><td class="label">Office:</td><td class="input-line"></td><td></td><td class="label">RIS No.:</td><td class="input-line" id="risNo_1"></td></tr>
                 </table>
                 <table class="ris-table">
-                    <thead>
-                        <tr><th colspan="4">Requisition</th><th colspan="2">Stock Available?</th><th colspan="2">Issue</th></tr>
-                        <tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Quantity</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Quantity</th><th width="20%">Remarks</th></tr>
-                    </thead>
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
                     <tbody id="risTableBody_1"></tbody>
                 </table>
                 <table class="footer-table">
                     <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
-                    <tr><td>Signature:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
-                    <tr><td>Printed Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
-                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I</div><div class="sig-title">Admin Officer V</div></td><td></td><td></td><td style="border-right:none;"></td></tr>
-                    <tr><td>Date:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                    <tr><td>Signature:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
                 </table>
             </div>
-
             <div class="cut-line"></div>
-
             <div class="ris-container">
                 <div class="ris-header-italic">Appendix 63</div>
                 <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
                 <table class="info-table">
                     <tr><td width="10%" class="label">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%" class="label">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr>
-                    <tr><td class="label">Division:</td><td class="input-line" id="ris-div-name-2">ORD-PAU</td><td></td><td class="label" colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
+                    <tr><td class="label">Division:</td><td class="input-line" id="ris-div-name-2">...</td><td></td><td class="label" colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
                     <tr><td class="label">Office:</td><td class="input-line"></td><td></td><td class="label">RIS No.:</td><td class="input-line" id="risNo_2"></td></tr>
                 </table>
                 <table class="ris-table">
-                    <thead>
-                        <tr><th colspan="4">Requisition</th><th colspan="2">Stock Available?</th><th colspan="2">Issue</th></tr>
-                        <tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Quantity</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Quantity</th><th width="20%">Remarks</th></tr>
-                    </thead>
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
                     <tbody id="risTableBody_2"></tbody>
                 </table>
                 <table class="footer-table">
                     <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
-                    <tr><td>Signature:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
-                    <tr><td>Printed Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
-                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I</div><div class="sig-title">Admin Officer V</div></td><td></td><td></td><td style="border-right:none;"></td></tr>
-                    <tr><td>Date:</td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                    <tr><td>Signature:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
                 </table>
             </div>
         </div>
     </div>
-
     <script src="user.js"></script>
 </body>
 </html>
