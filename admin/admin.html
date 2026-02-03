@@ -6,48 +6,74 @@
     <title>Admin Dashboard - IMS</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; --orange: #f39c12; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         .view-container { display: flex; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
 
-        /* SIDEBAR */
+        /* SIDEBAR (Darker for Admin) */
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
-        .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; letter-spacing: 1px;}
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
-        .nav-link.active { background: var(--accent); border-left: 4px solid white; }
+        .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
 
         /* MAIN */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0 0 30px 0; }
 
+        /* SECTIONS */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         /* CARDS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
         .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
         .card .number { font-size: 2.5rem; font-weight: 800; color: #333; margin-top: 10px; }
 
         /* TABLES */
         .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; }
-        .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-        
-        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
+        .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
+        .data-table tr:hover { background-color: #f9f9f9; }
+
+        /* BADGES */
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .action-btn { border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; transition: transform 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-        .action-btn:hover { transform: scale(1.1); }
+        /* ACTION BUTTONS */
+        .action-btn { border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; transition: transform 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em; }
+        .action-btn:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .btn-approve { background: var(--green); }
         .btn-reject { background: var(--red); }
+        .btn-print { float: right; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
+        .btn-print:hover { background: #1a252f; }
+
+        /* PRINT SETTINGS */
+        @media print {
+            body * { visibility: hidden; }
+            .section.active, .section.active * { visibility: visible; }
+            .section.active { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; }
+            .sidebar, .btn-print, .action-btn { display: none !important; }
+            .card { border: 1px solid #ccc; box-shadow: none; }
+        }
     </style>
 </head>
 <body>
@@ -55,28 +81,76 @@
     <div class="view-container">
         <div class="sidebar">
             <h2>Admin Panel</h2>
-            <div class="nav-link active">Dashboard</div>
+            <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
+            <div class="nav-link" onclick="nav('master-list', this)">Master Inventory</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
         <div class="main">
-            <div class="header-title"><h1>Admin Dashboard</h1></div>
-            <div class="cards-grid">
-                <div class="card" style="border-color: #2c3e50;"><h3>Total Requests</h3><div class="number" id="adm-total">0</div></div>
-                <div class="card" style="border-color: #f39c12;"><h3>Pending</h3><div class="number" id="adm-pending" style="color:#f39c12">0</div></div>
-                <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
+            
+            <div id="dashboard" class="section active">
+                <div class="header-title"><h1>Admin Dashboard</h1></div>
+
+                <div class="cards-grid">
+                    <div class="card" style="border-color: #2c3e50;">
+                        <h3>Total Requests</h3>
+                        <div class="number" id="adm-total">0</div>
+                    </div>
+                    <div class="card" style="border-color: #f39c12;">
+                        <h3>Pending</h3>
+                        <div class="number" id="adm-pending" style="color:#f39c12">0</div>
+                    </div>
+                    <div class="card" style="border-color: #27ae60;">
+                        <h3>Approved</h3>
+                        <div class="number" id="adm-approved" style="color:#27ae60">0</div>
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print Report</button>
+                    <h3>🔔 Incoming Requests</h3>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Review and manage supply requests from all divisions.</p>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Division</th>
+                                <th>Items Requested</th>
+                                <th>Status</th>
+                                <th class="no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestTable"></tbody>
+                    </table>
+                </div>
             </div>
-            <div class="content-box">
-                <h3>🔔 Incoming Requests</h3>
-                <table class="data-table">
-                    <thead><tr><th>Date</th><th>Division</th><th>Items Requested</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="requestTable"></tbody>
-                </table>
+
+            <div id="master-list" class="section">
+                <div class="header-title"><h1>Master Inventory List</h1></div>
+                <div class="content-box">
+                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print List</button>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">A complete view of all stock uploaded by every division.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Division</th>
+                                <th>Item Name</th>
+                                <th>Initial Qty</th>
+                                <th>Current Stock</th>
+                                <th>Unit Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterInventoryTable"></tbody>
+                    </table>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script>
+        // 1. CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
             authDomain: "supplies-monitoring.firebaseapp.com",
@@ -90,21 +164,36 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // 2. AUTH CHECK
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
             else {
                 db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().role === 'admin') initAdminDashboard();
-                    else window.location.href = "../user/user.html";
+                    if (doc.exists && doc.data().role === 'admin') {
+                        initAdminDashboard();
+                        initMasterInventory();
+                    } else {
+                        window.location.href = "../user/user.html";
+                    }
                 });
             }
         });
 
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
 
+        // 3. NAVIGATION
+        function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 4. REQUESTS DASHBOARD
         function initAdminDashboard() {
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
-                let total = 0, pending = 0, approved = 0, html = '';
+                let total = 0, pending = 0, approved = 0;
+                let html = '';
                 
                 snap.forEach(doc => {
                     const r = doc.data();
@@ -115,8 +204,9 @@
                     const itemsStr = r.items.map(i => `${i.itemName} (${i.reqQty})`).join(', ');
                     const dateStr = new Date(r.date).toLocaleDateString();
                     const status = r.status || 'Pending';
-                    const userId = r.userId || ''; // Handle missing ID safely
+                    const userId = r.userId || ''; 
 
+                    // Buttons
                     let actions = '<span style="color:#aaa;">—</span>';
                     if(status === 'Pending') {
                         actions = `
@@ -125,7 +215,15 @@
                         `;
                     }
 
-                    html += `<tr><td>${dateStr}</td><td><strong>${r.division}</strong></td><td style="font-size:0.9em; color:#555;">${itemsStr}</td><td><span class="badge badge-${status}">${status}</span></td><td>${actions}</td></tr>`;
+                    html += `
+                        <tr>
+                            <td>${dateStr}</td>
+                            <td><strong style="color:#2c3e50;">${r.division}</strong></td>
+                            <td style="font-size:0.9em; color:#555;">${itemsStr}</td>
+                            <td><span class="badge badge-${status}">${status}</span></td>
+                            <td class="no-print">${actions}</td>
+                        </tr>
+                    `;
                 });
 
                 document.getElementById('adm-total').innerText = total;
@@ -135,16 +233,41 @@
             });
         }
 
-        // --- THE FIX: ROBUST NOTIFICATION LOGIC ---
+        // 5. MASTER INVENTORY (All Divisions)
+        function initMasterInventory() {
+            db.collection('inventory').onSnapshot(snap => {
+                let html = '';
+                let items = [];
+                snap.forEach(doc => items.push(doc.data()));
+                
+                // Sort by Division then Item Name
+                items.sort((a,b) => (a.division || '').localeCompare(b.division || '') || a.itemName.localeCompare(b.itemName));
+
+                items.forEach(i => {
+                    html += `
+                        <tr>
+                            <td><strong>${i.division || 'Unknown'}</strong></td>
+                            <td>${i.itemName}</td>
+                            <td>${i.initialQty}</td>
+                            <td style="font-weight:bold; color:${i.currentQty < 5 ? 'red' : 'green'}">${i.currentQty}</td>
+                            <td>${i.unitPrice}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('masterInventoryTable').innerHTML = html;
+            });
+        }
+
+        // 6. APPROVE/REJECT & NOTIFY
         function setStatus(docId, status, userId) {
-            if(!confirm(`Mark this request as ${status}?`)) return;
+            if(!confirm(`Mark as ${status}?`)) return;
             
             const batch = db.batch();
             const reqRef = db.collection('requisitions').doc(docId);
             batch.update(reqRef, { status: status });
 
-            // Only try to send notification if we have a valid User ID
-            if(userId && userId !== 'undefined' && userId !== '') {
+            // Send Notification
+            if(userId && userId !== 'undefined') {
                 const notifRef = db.collection('notifications').doc();
                 batch.set(notifRef, {
                     userId: userId,
@@ -155,12 +278,10 @@
                     status: 'unread',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-            } else {
-                alert("⚠ Note: This request is old and has no User ID attached. Status updated, but no notification sent.");
             }
 
             batch.commit()
-                .then(() => alert(`Status Updated!`))
+                .then(() => alert(`Updated & Notified!`))
                 .catch(err => alert("Error: " + err.message));
         }
     </script>
