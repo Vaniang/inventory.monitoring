@@ -1,0 +1,16 @@
+body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; }
+.hidden { display: none !important; }
+
+/* Login Box */
+#login-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
+.login-box { background: white; padding: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
+input { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+button { background-color: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+button:hover { background-color: #0056b3; }
+.error { color: red; }
+
+/* Dashboard */
+header { background: #333; color: white; padding: 15px; display: flex; justify-content: space-between; }
+.role-view { padding: 20px; }
+.stats { display: flex; gap: 20px; }
+.card { background: white; padding: 20px; border-radius: 8px; flex: 1; }

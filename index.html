@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Monitoring System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+    <div id="login-section">
+        <div class="login-box">
+            <h2>Inventory System</h2>
+            <input type="email" id="email" placeholder="Division/Unit Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Log In</button>
+            <p id="login-error" class="error"></p>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+        <header>
+            <h3 id="user-role-display">Role: Loading...</h3>
+            <button onclick="logout()">Logout</button>
+        </header>
+
+        <div id="user-view" class="role-view hidden">
+            <h1>My Requisitions</h1>
+            <p>Select items based on your PPMP.</p>
+            <button onclick="openRequestForm()">New Request +</button>
+            <div id="user-request-list">
+                </div>
+        </div>
+
+        <div id="admin-view" class="role-view hidden">
+            <h1>Asset Management Dashboard</h1>
+            <div class="stats">
+                <div class="card">Pending Requests: <span id="pending-count">0</span></div>
+                <div class="card">Low Stock Items: <span id="low-stock-count">0</span></div>
+            </div>
+            <h3>Incoming Requests</h3>
+            <div id="admin-request-queue">
+                </div>
+        </div>
+
+        <div id="super-admin-view" class="role-view hidden">
+            <h1>System Administration</h1>
+            <button>Create New Division Account</button>
+            <button>Reset Password</button>
+            <button>View Audit Logs</button>
+        </div>
+    </div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
