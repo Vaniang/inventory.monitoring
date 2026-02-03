@@ -43,7 +43,7 @@
         .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
 
         /* TABLES & INPUTS */
-        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; }
         input[type="file"] { background: #f8f9fa; padding: 15px; border: 2px dashed #cbd5e0; border-radius: 8px; width: 100%; cursor: pointer; box-sizing: border-box;}
         
         .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -52,6 +52,12 @@
         
         .btn-req { position: fixed; bottom: 40px; right: 40px; background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
         .btn-req:hover { transform: scale(1.05); }
+
+        .btn-reset { position: absolute; top: 30px; right: 30px; background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-reset:hover { background: #c0392b; }
+
+        .btn-delete { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+        .btn-delete:hover { background: #c0392b; }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
@@ -112,8 +118,9 @@
                 </div>
                 <div class="content-box" style="margin-top: 20px; border-left: 5px solid #007bff;">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your division's inventory list using Excel. (This will be your stock source).</p>
+                    <p>Update your division's inventory list using Excel.</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
+                    <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All Inventory</button>
                 </div>
             </div>
 
@@ -121,7 +128,14 @@
                 <h1>Inventory List</h1>
                 <p style="color:#666; margin-bottom:10px;">Showing stock uploaded by: <strong id="inv-div-label">...</strong></p>
                 <table class="inventory-table">
-                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit Price</th><th>Current Stock</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Initial Qty</th>
+                            <th>Unit Price</th>
+                            <th>Current Stock</th>
+                            <th width="80px">Action</th> </tr>
+                    </thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
@@ -182,6 +196,7 @@
             </div>
         </div>
     </div>
+    
     <script src="user.js"></script>
 </body>
 </html>
