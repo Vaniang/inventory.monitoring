@@ -15,7 +15,6 @@
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; --orange: #f39c12; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         .view-container { display: flex; height: 100vh; overflow: hidden; }
-        .hidden { display: none !important; }
 
         /* SIDEBAR */
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
@@ -23,7 +22,6 @@
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); border-left: 4px solid white; }
-        .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
 
         /* MAIN */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
@@ -41,7 +39,6 @@
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
         
-        /* BADGES & BUTTONS */
         .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -63,48 +60,23 @@
         </div>
 
         <div class="main">
-            <div class="header-title">
-                <h1>Admin Dashboard</h1>
-            </div>
-
+            <div class="header-title"><h1>Admin Dashboard</h1></div>
             <div class="cards-grid">
-                <div class="card" style="border-color: #2c3e50;">
-                    <h3>Total Requests</h3>
-                    <div class="number" id="adm-total">0</div>
-                </div>
-                <div class="card" style="border-color: #f39c12;">
-                    <h3>Pending</h3>
-                    <div class="number" id="adm-pending" style="color:#f39c12">0</div>
-                </div>
-                <div class="card" style="border-color: #27ae60;">
-                    <h3>Approved</h3>
-                    <div class="number" id="adm-approved" style="color:#27ae60">0</div>
-                </div>
+                <div class="card" style="border-color: #2c3e50;"><h3>Total Requests</h3><div class="number" id="adm-total">0</div></div>
+                <div class="card" style="border-color: #f39c12;"><h3>Pending</h3><div class="number" id="adm-pending" style="color:#f39c12">0</div></div>
+                <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
             </div>
-
             <div class="content-box">
                 <h3>🔔 Incoming Requests</h3>
-                <p style="color:#777; font-size:0.9rem;">Approve or reject requests below. Users will be notified instantly.</p>
-                
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Division</th>
-                            <th>Items Requested</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requestTable">
-                        </tbody>
+                    <thead><tr><th>Date</th><th>Division</th><th>Items Requested</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="requestTable"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
             authDomain: "supplies-monitoring.firebaseapp.com",
@@ -118,33 +90,21 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // 2. AUTH CHECK
         auth.onAuthStateChanged(user => {
-            if (!user) {
-                window.location.href = "../index.html";
-            } else {
-                // Optional: Check if role is really admin
+            if (!user) window.location.href = "../index.html";
+            else {
                 db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().role === 'admin') {
-                        initAdminDashboard();
-                    } else {
-                        // Redirect non-admins back to user page
-                        window.location.href = "../user/user.html";
-                    }
+                    if (doc.exists && doc.data().role === 'admin') initAdminDashboard();
+                    else window.location.href = "../user/user.html";
                 });
             }
         });
 
-        function logout() {
-            auth.signOut().then(() => window.location.href = "../index.html");
-        }
+        function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
 
-        // 3. DASHBOARD LOGIC
         function initAdminDashboard() {
-            // Listen to all requisitions
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
-                let total = 0, pending = 0, approved = 0;
-                let html = '';
+                let total = 0, pending = 0, approved = 0, html = '';
                 
                 snap.forEach(doc => {
                     const r = doc.data();
@@ -152,71 +112,55 @@
                     if(r.status === 'Approved') approved++;
                     if(r.status === 'Pending' || !r.status) pending++;
 
-                    // Only show Pending items in the table for action (Optional: remove if if you want to see history)
-                    // Let's show everything but sort by date so pending is top
-                    
                     const itemsStr = r.items.map(i => `${i.itemName} (${i.reqQty})`).join(', ');
                     const dateStr = new Date(r.date).toLocaleDateString();
                     const status = r.status || 'Pending';
-                    
-                    // Buttons only appear if status is Pending
-                    let actions = '';
+                    const userId = r.userId || ''; // Handle missing ID safely
+
+                    let actions = '<span style="color:#aaa;">—</span>';
                     if(status === 'Pending') {
                         actions = `
-                            <button class="action-btn btn-approve" title="Approve" onclick="setStatus('${doc.id}', 'Approved', '${r.userId}')">✓</button>
-                            <button class="action-btn btn-reject" title="Reject" onclick="setStatus('${doc.id}', 'Rejected', '${r.userId}')">✗</button>
+                            <button class="action-btn btn-approve" title="Approve" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
+                            <button class="action-btn btn-reject" title="Reject" onclick="setStatus('${doc.id}', 'Rejected', '${userId}')">✗</button>
                         `;
-                    } else {
-                        actions = '<span style="color:#aaa;">—</span>';
                     }
 
-                    html += `
-                        <tr>
-                            <td>${dateStr}</td>
-                            <td><strong style="color:#2c3e50;">${r.division}</strong></td>
-                            <td style="font-size:0.9em; color:#555;">${itemsStr}</td>
-                            <td><span class="badge badge-${status}">${status}</span></td>
-                            <td>${actions}</td>
-                        </tr>
-                    `;
+                    html += `<tr><td>${dateStr}</td><td><strong>${r.division}</strong></td><td style="font-size:0.9em; color:#555;">${itemsStr}</td><td><span class="badge badge-${status}">${status}</span></td><td>${actions}</td></tr>`;
                 });
 
-                // Update Stats
                 document.getElementById('adm-total').innerText = total;
                 document.getElementById('adm-pending').innerText = pending;
                 document.getElementById('adm-approved').innerText = approved;
-                
-                // Update Table
                 document.getElementById('requestTable').innerHTML = html;
             });
         }
 
-        // 4. APPROVE/REJECT & NOTIFY
+        // --- THE FIX: ROBUST NOTIFICATION LOGIC ---
         function setStatus(docId, status, userId) {
-            if(!confirm(`Are you sure you want to mark this request as ${status}?`)) return;
+            if(!confirm(`Mark this request as ${status}?`)) return;
             
             const batch = db.batch();
-            
-            // A. Update the Requisition Status
             const reqRef = db.collection('requisitions').doc(docId);
             batch.update(reqRef, { status: status });
 
-            // B. Send Notification to the specific User
-            if(userId) {
+            // Only try to send notification if we have a valid User ID
+            if(userId && userId !== 'undefined' && userId !== '') {
                 const notifRef = db.collection('notifications').doc();
                 batch.set(notifRef, {
-                    userId: userId, // Target the specific user
+                    userId: userId,
                     title: `Request ${status}`,
                     message: status === 'Approved' 
-                        ? "Good news! Your supplies request has been approved. You may collect them at the supply office." 
-                        : "Your supplies request has been rejected. Please contact the supply officer for details.",
+                        ? "Good news! Your supplies request has been approved." 
+                        : "Your supplies request has been rejected.",
                     status: 'unread',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+            } else {
+                alert("⚠ Note: This request is old and has no User ID attached. Status updated, but no notification sent.");
             }
 
             batch.commit()
-                .then(() => alert(`Request ${status} and User Notified!`))
+                .then(() => alert(`Status Updated!`))
                 .catch(err => alert("Error: " + err.message));
         }
     </script>
