@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="view-container">
+        <div class="sidebar admin-sidebar">
+            <h2>Admin Panel</h2>
+            <div class="nav-link active" onclick="nav('dashboard', this)">Overview</div>
+            <div class="nav-link" onclick="nav('requests', this)">Requests</div>
+            <div class="nav-link logout-btn" onclick="logout()">Logout</div>
+        </div>
+
+        <div class="main">
+            <div id="dashboard" class="section active">
+                <h1>Admin Overview</h1>
+                <div class="cards-grid">
+                    <div class="card"><h3>Pending Requests</h3><div class="number" id="adm-pending">0</div></div>
+                    <div class="card"><h3>Total Stock</h3><div class="number" id="adm-stock">0</div></div>
+                </div>
+                <div class="chart-box"><canvas id="adminChart"></canvas></div>
+            </div>
+
+            <div id="requests" class="section">
+                <h1>Incoming Requests</h1>
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Division</th><th>Items</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="requestTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="admin.js"></script>
+</body>
+</html>
