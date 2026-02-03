@@ -29,7 +29,7 @@ function login() {
                     if(role === 'admin') {
                         window.location.href = "admin.html";
                     } else {
-                        window.location.href = "user/user.html";
+                        window.location.href = "user.html";
                     }
                 } else {
                     errorMsg.innerText = "User profile not found.";
