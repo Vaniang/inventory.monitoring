@@ -664,33 +664,45 @@
             });
         }
         
-        async function submitRequisition() {
-            if(!slipItems.length) return alert("No items");
-            
-            // Capture the current signatories
-            const reqBy = document.getElementById('sig-req-name-1').value;
-            const reqDesig = document.getElementById('sig-req-pos-1').value;
-            const appBy = document.getElementById('sig-app-name-1').value;
-            const appDesig = document.getElementById('sig-app-pos-1').value;
+      async function submitRequisition() {
+    if(!slipItems.length) return alert("No items");
+    
+    // 1. Get Text Values
+    const reqBy = document.getElementById('sig-req-name-1').value;
+    const reqDesig = document.getElementById('sig-req-pos-1').value;
+    const appBy = document.getElementById('sig-app-name-1').value;
+    const appDesig = document.getElementById('sig-app-pos-1').value;
 
-            const batch = db.batch(), today = new Date().toISOString();
-            slipItems.forEach(i => { const ref = db.collection('inventory').doc(i.id); batch.update(ref, { currentQty: i.currentQty - i.reqQty }); });
-            
-            // Save requisition with signatory data
-            batch.set(db.collection('requisitions').doc(), { 
-                date: today, 
-                items: slipItems, 
-                division: currentUserDivision, 
-                userId: currentUserId, 
-                status: 'Pending',
-                requestedBy: reqBy,
-                requestedDesig: reqDesig,
-                approvedBy: appBy,
-                approvedDesig: appDesig
-            });
-            
-            await batch.commit(); alert("Request Submitted!"); closeModal();
-        }
+    // 2. NEW: Get Signature Images from Local Storage
+    const reqSig = localStorage.getItem('ris_sig_req') || "";
+    const appSig = localStorage.getItem('ris_sig_app') || "";
+
+    const batch = db.batch(), today = new Date().toISOString();
+    
+    // Update Inventory Counts
+    slipItems.forEach(i => { 
+        const ref = db.collection('inventory').doc(i.id); 
+        batch.update(ref, { currentQty: i.currentQty - i.reqQty }); 
+    });
+    
+    // 3. Save Request WITH SIGNATURES to Database
+    batch.set(db.collection('requisitions').doc(), { 
+        date: today, 
+        items: slipItems, 
+        division: currentUserDivision, 
+        userId: currentUserId, 
+        status: 'Pending',
+        requestedBy: reqBy,
+        requestedDesig: reqDesig,
+        approvedBy: appBy,
+        approvedDesig: appDesig,
+        // These two lines save the images so Admin can see them:
+        reqSig: reqSig, 
+        appSig: appSig
+    });
+    
+    await batch.commit(); alert("Request Submitted!"); closeModal();
+}
 
         function exportToExcel() { 
             // Get current signatory values from inputs
@@ -795,6 +807,7 @@ openModal = function() {
     </script>
 </body>
 </html>
+
 
 
 
