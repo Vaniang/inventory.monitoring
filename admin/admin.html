@@ -503,11 +503,11 @@
             }
         }
 
-       function generateSingleRISHtml(data) {
+     function generateSingleRISHtml(data) {
     let itemRows = '';
     const items = data.items || [];
     
-    // Generate rows for items
+    // Generate Items
     items.forEach(item => {
         itemRows += `<tr>
             <td>${item.stockNo || ''}</td>
@@ -520,26 +520,24 @@
             <td>${item.remarks || ''}</td>
         </tr>`;
     });
+    for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
+    
+    // Get Names
+    const rName = data.requestedBy || "JOVANIE M. MAZON"; 
+    const rPos  = data.requestedDesig || "Admin Assistant I<br>ORD-PAU";
+    const aName = data.approvedBy || "CESAR S. BUCSIT";
+    const aPos  = data.approvedDesig || "Admin Officer V<br>ORD-PAU Caretaker";
 
-    // Fill empty rows to maintain height
-    for(let i=0; i < (10 - items.length); i++) { 
-        itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; 
-    }
-    
-    // --- THIS IS THE FIX ---
-    // We check if the data has 'requestedBy'. If yes, use it. If not, use the old default.
-    const reqName = data.requestedBy || "JOVANIE M. MAZON"; 
-    const reqPos  = data.requestedDesig || "Admin Assistant I<br>ORD-PAU";
-    
-    const appName = data.approvedBy || "CESAR S. BUCSIT";
-    const appPos  = data.approvedDesig || "Admin Officer V<br>ORD-PAU Caretaker";
-    // -----------------------
+    // --- NEW: RETRIEVE SAVED SIGNATURES FROM DATABASE ---
+    // We check 'data.reqSig' (database) instead of localStorage
+    const reqImgTag = data.reqSig ? `<img src="${data.reqSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
+    const appImgTag = data.appSig ? `<img src="${data.appSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
+    // ----------------------------------------------------
 
     const singleCopy = `
         <div class="ris-copy">
             <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
             <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
-            
             <table style="width:100%; font-size:11px; margin-bottom:5px;">
                 <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
                 <tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
@@ -553,21 +551,27 @@
 
             <table class="footer-table">
                 <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
-                <tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr>
                 
                 <tr>
+                    <td>Signature:</td>
+                    <td style="border-bottom:1px solid black; height:35px; vertical-align:bottom;" align="center">${reqImgTag}</td>
+                    <td style="border-bottom:1px solid black; vertical-align:bottom;" align="center">${appImgTag}</td>
+                    <td style="border-bottom:1px solid black;"></td>
+                    <td style="border-bottom:1px solid black; border-right:none;"></td>
+                </tr>
+
+                <tr>
                     <td>Name:</td>
-                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${reqName}</div></td>
-                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${appName}</div></td>
+                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${rName}</div></td>
+                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${aName}</div></td>
                     <td></td><td style="border-right:none;"></td>
                 </tr>
                 <tr>
                     <td>Designation:</td>
-                    <td align="center"><div style="font-size:9px;">${reqPos}</div></td>
-                    <td align="center"><div style="font-size:9px;">${appPos}</div></td>
+                    <td align="center"><div style="font-size:9px;">${rPos}</div></td>
+                    <td align="center"><div style="font-size:9px;">${aPos}</div></td>
                     <td></td><td style="border-right:none;"></td>
                 </tr>
-                
                 <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
             </table>
         </div>`;
