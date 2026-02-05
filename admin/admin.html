@@ -43,6 +43,12 @@
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
         
+        /* INVENTORY TABLE FOR UNIT MONITOR */
+        .inventory-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .inventory-table th { background: #34495e; color: white; padding: 15px; text-align: left; }
+        .inventory-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+
         /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
@@ -56,6 +62,7 @@
         .btn-delete { background: var(--red); }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
@@ -140,43 +147,6 @@
                     </div>
                 </div>
 
-                <div id="unit-inventory" class="section">
-    <div class="header-title"><h1>Unit Stock Monitor</h1></div>
-    
-    <div class="content-box">
-        <p>Select a specific Division/Unit to view their remaining stock levels.</p>
-        
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
-                <option value="">-- Select Division --</option>
-                <option value="ORD-PAU">ORD-PAU</option>
-                <option value="ORD-LEGAL">ORD-LEGAL</option>
-                <option value="ORD-ICT">ORD-ICT</option>
-                <option value="HR">HR</option>
-                <option value="FINANCE">FINANCE</option>
-            </select>
-            
-            <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
-                <i class="fas fa-sync"></i> Refresh
-            </button>
-        </div>
-
-        <table class="inventory-table">
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Unit</th>
-                    <th>Remaining Stock</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="adminUnitTable">
-                <tr><td colspan="4" style="text-align:center;">Select a unit to view stocks...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
                 <div class="content-box">
                     <h3>🔔 Incoming Requests</h3>
                     <table class="data-table">
@@ -185,7 +155,40 @@
                     </table>
                 </div>
             </div>
+            <div id="unit-inventory" class="section">
+                <div class="header-title"><h1>Unit Stock Monitor</h1></div>
+                <div class="content-box">
+                    <p>Select a specific Division/Unit to view their remaining stock levels.</p>
+                    
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
+                            <option value="">-- Select Division --</option>
+                            <option value="ORD-PAU">ORD-PAU</option>
+                            <option value="ORD-LEGAL">ORD-LEGAL</option>
+                            <option value="ORD-ICT">ORD-ICT</option>
+                            <option value="HR">HR</option>
+                            <option value="FINANCE">FINANCE</option>
+                        </select>
+                        <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
 
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Unit</th>
+                                <th>Remaining Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUnitTable">
+                            <tr><td colspan="4" style="text-align:center;">Select a unit to view stocks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div id="master-list" class="section">
                 <div class="header-title"><h1>Master Inventory</h1></div>
                 <div class="content-box">
@@ -259,7 +262,7 @@
                         initMasterInventory();
                         initConsolidatedSupplies();
                         initConsolidatedRIS();
-                        initAnnouncementManager(); // NEW: Listen for active announcements
+                        initAnnouncementManager(); 
                     } else window.location.href = "../user/user.html";
                 });
             }
@@ -298,20 +301,16 @@
             document.getElementById('ann-message').value = "";
         }
 
-        // Listen for the active announcement to allow deletion
         function initAnnouncementManager() {
             db.collection('announcements').orderBy('timestamp', 'desc').limit(1).onSnapshot(snap => {
                 const box = document.getElementById('live-announcement-box');
-                
                 if (snap.empty) {
-                    box.style.display = 'none'; // Hide if no announcement
+                    box.style.display = 'none'; 
                     return;
                 }
-
                 const doc = snap.docs[0];
                 const data = doc.data();
-                
-                box.style.display = 'block'; // Show box
+                box.style.display = 'block'; 
                 document.getElementById('live-title').innerText = data.title;
                 document.getElementById('live-message').innerText = data.message;
                 document.getElementById('live-ann-id').value = doc.id;
@@ -566,8 +565,7 @@
     const aName = data.approvedBy || "CESAR S. BUCSIT";
     const aPos  = data.approvedDesig || "Admin Officer V<br>ORD-PAU Caretaker";
 
-    // --- NEW: RETRIEVE SAVED SIGNATURES FROM DATABASE ---
-    // We check 'data.reqSig' (database) instead of localStorage
+    // --- RETRIEVE SAVED SIGNATURES FROM DATABASE ---
     const reqImgTag = data.reqSig ? `<img src="${data.reqSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
     const appImgTag = data.appSig ? `<img src="${data.appSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
     // ----------------------------------------------------
@@ -616,7 +614,8 @@
 
     return singleCopy + '<div class="cut-line"></div>' + singleCopy;
 }
-        let adminUnitListener = null; // Variable to store the listener so we can turn it off when switching units
+
+let adminUnitListener = null;
 
 function loadUnitInventory() {
     const unit = document.getElementById('adminUnitSelect').value;
@@ -629,10 +628,8 @@ function loadUnitInventory() {
 
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading data...</td></tr>';
 
-    // Detach previous listener if exists (prevents memory leaks/glitches)
     if(adminUnitListener) adminUnitListener();
 
-    // Query the inventory for the selected Unit only
     adminUnitListener = db.collection('inventory')
         .where('division', '==', unit)
         .orderBy('itemName')
@@ -646,14 +643,12 @@ function loadUnitInventory() {
             snap.forEach(doc => {
                 const item = doc.data();
                 const qty = item.currentQty;
-                
-                // Logic for Status Colors
                 let statusBadge = '';
                 let rowColor = '';
 
                 if(qty <= 0) {
                     statusBadge = '<span class="status-badge" style="background:#e74c3c; color:white;">OUT OF STOCK</span>';
-                    rowColor = 'style="background-color: #fadbd8;"'; // Light red background
+                    rowColor = 'style="background-color: #fadbd8;"'; 
                 } else if(qty < 5) {
                     statusBadge = '<span class="status-badge" style="background:#f1c40f; color:black;">CRITICAL</span>';
                 } else {
@@ -669,6 +664,11 @@ function loadUnitInventory() {
             });
 
             tbody.innerHTML = html;
+        }, error => {
+            console.error("Error:", error);
+            if(error.message.includes("index")) {
+                alert("Database Error: Missing Index. Check Console (F12) for the link.");
+            }
         });
 }
     </script>
