@@ -376,20 +376,43 @@
             db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => document.getElementById('dash-total-reqs').innerText = s.size);
         }
 
-        function initUserConsolidatedRIS() {
-            db.collection('requisitions').where('division', '==', currentUserDivision).where('status', '==', 'Approved').orderBy('date', 'desc').onSnapshot(snap => {
-                const tbody = document.getElementById('userRisTable');
-                let html = '';
-                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No approved requests found.</td></tr>'; return; }
-                snap.forEach(doc => {
-                    const r = doc.data();
-                    const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
-                    const itemsDesc = r.items ? r.items.length + ' Items' : '0 Items';
-                    html += `<tr><td>${dateStr}</td><td>${itemsDesc}</td><td><span class="status-badge status-Approved">Approved</span></td><td><button class="btn-print-official" onclick="printOfficialRIS('${doc.id}')"><i class="fas fa-print"></i> Official Copy</button></td></tr>`;
-                });
-                tbody.innerHTML = html;
+       function initUserConsolidatedRIS() {
+    db.collection('requisitions')
+        .where('division', '==', currentUserDivision)
+        .where('status', '==', 'Approved')
+        .orderBy('date', 'desc')
+        .onSnapshot(snap => {
+            const tbody = document.getElementById('userRisTable');
+            let html = '';
+            if(snap.empty) { 
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No approved requests found.</td></tr>'; 
+                return; 
+            }
+            snap.forEach(doc => {
+                const r = doc.data();
+                const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
+                const itemsDesc = r.items ? r.items.length + ' Items' : '0 Items';
+                
+                // Added the Delete Button below inside the Action column
+                html += `<tr>
+                    <td>${dateStr}</td>
+                    <td>${itemsDesc}</td>
+                    <td><span class="status-badge status-Approved">Approved</span></td>
+                    <td>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <button class="btn-print-official" onclick="printOfficialRIS('${doc.id}')">
+                                <i class="fas fa-print"></i> Official Copy
+                            </button>
+                            <button class="btn-delete" style="padding:8px 12px;" onclick="deleteRIS('${doc.id}')" title="Delete Record">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
             });
-        }
+            tbody.innerHTML = html;
+        });
+}
 
         async function printOfficialRIS(id) {
             const doc = await db.collection('requisitions').doc(id).get();
@@ -631,7 +654,23 @@
             XLSX.utils.book_append_sheet(wb, ws, "RIS_Double");
             XLSX.writeFile(wb, "Requisition_Issue_Slip_Double.xlsx");
         }
+
+        function deleteRIS(id) {
+    if(confirm("Are you sure you want to DELETE this approved record? \n\nWarning: This action cannot be undone.")) {
+        db.collection('requisitions').doc(id).delete()
+        .then(() => {
+            // The onSnapshot listener will automatically refresh the table
+            // so we don't need to manually reload the page.
+            alert("Record deleted successfully.");
+        })
+        .catch(error => {
+            console.error("Error removing document: ", error);
+            alert("Error deleting record: " + error.message);
+        });
+    }
+}
     </script>
 </body>
 </html>
+
 
