@@ -400,14 +400,30 @@
         }
 
         function deleteItem(id) { if(confirm("Delete this item?")) db.collection('inventory').doc(id).delete(); }
-        async function clearMyInventory() {
-            if(!confirm("Clear ALL inventory?")) return;
-            const batch = db.batch();
-            const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
-            inv.forEach(d => batch.delete(d.ref));
-            await batch.commit(); alert("Cleared!");
-        }
+       async function clearMyInventory() {
+    if(!confirm("⚠ WARNING: This will delete ALL Inventory items AND your Request History.\n\nAre you sure you want to reset everything to 0?")) return;
 
+    const batch = db.batch();
+
+    // 1. Delete all Inventory items for this division
+    const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
+    inv.forEach(d => batch.delete(d.ref));
+
+    // 2. Delete all Requisitions (Requests) for this division
+    const reqs = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
+    reqs.forEach(d => batch.delete(d.ref));
+
+    // 3. Commit the changes
+    await batch.commit()
+        .then(() => {
+            alert("All data (Stocks & Requests) has been reset!");
+            // The dashboard counters will auto-update to 0 because of the real-time listeners
+        })
+        .catch(error => {
+            console.error("Error clearing data: ", error);
+            alert("Error clearing data. See console for details.");
+        });
+}
         function openModal() { document.getElementById('reqModal').classList.add('open'); slipItems = []; renderSlip(); }
         function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
         function addItemToSlip() {
@@ -465,6 +481,7 @@
     </script>
 </body>
 </html>
+
 
 
 
