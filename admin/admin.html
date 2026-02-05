@@ -17,7 +17,6 @@
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         
-        /* LAYOUT */
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
@@ -26,15 +25,11 @@
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
-        
-        /* CONTENT */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0 0 30px 0; }
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* CARDS & TABLES */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); transition: transform 0.2s; }
         .card .number { font-size: 2.5rem; font-weight: 800; color: #333; margin-top: 10px; }
@@ -42,13 +37,10 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
-        
-        /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
         .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
         .btn-print-tbl { background: var(--primary); }
@@ -56,57 +48,23 @@
         .btn-delete { background: var(--red); }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
-
-        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
         .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-
-        /* --- PRINT AREA (FIXED) --- */
         #print-area-forms { display: none; }
 
         @media print {
             @page { size: A4 portrait; margin: 0; }
-            
-            /* Hide the Dashboard UI completely */
-            .view-container, .modal-overlay, .sidebar, .main { 
-                display: none !important; 
-                height: 0; 
-                overflow: hidden; 
-            }
-
-            /* Show Only Print Area */
-            #print-area-forms {
-                display: block !important;
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
-                background: white;
-                z-index: 9999;
-            }
-
-            /* RIS Layout (A4) */
-            .ris-page { 
-                width: 210mm; 
-                height: 296mm; 
-                padding: 10mm; 
-                box-sizing: border-box; 
-                display: flex; 
-                flex-direction: column; 
-                justify-content: space-between; 
-            }
-            
+            .view-container, .modal-overlay, .sidebar, .main { display: none !important; height: 0; overflow: hidden; }
+            #print-area-forms { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
+            .ris-page { width: 210mm; height: 296mm; padding: 10mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
             .ris-copy { height: 48%; }
-            
             .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
             .ris-table th, .ris-table td { border: 1px solid black; padding: 3px; text-align: center; vertical-align: middle; }
             .ris-table th { background-color: #eee; font-weight: bold; text-transform: uppercase; }
-            
             .footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; font-size: 10px; table-layout: fixed; margin-top: -2px; }
             .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
-            
             .cut-line { border-top: 1px dashed #333; margin: 0; text-align: center; font-size: 10px; position: relative; height: 10px; display: flex; align-items: center; justify-content: center; }
             .cut-line::after { content: "✂ CUT HERE"; background: white; padding: 0 5px; }
         }
@@ -125,7 +83,6 @@
         </div>
 
         <div class="main">
-            
             <div id="dashboard" class="section active">
                 <div class="header-title"><h1>Admin Dashboard</h1></div>
                 <div class="cards-grid">
@@ -169,14 +126,7 @@
                 <div class="content-box">
                     <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Manage, Edit, Print, and Download individual Requisition and Issue Slips (RIS).</p>
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Division</th>
-                                <th>Status</th>
-                                <th style="text-align:center;">Actions</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Date</th><th>Division</th><th>Status</th><th style="text-align:center;">Actions</th></tr></thead>
                         <tbody id="risTableBody"></tbody>
                     </table>
                 </div>
@@ -188,7 +138,6 @@
                     <h2>Edit RIS Details</h2>
                     <p style="color:#666; font-size:0.9em;">Add Stock No., Remarks, or adjust Quantities before printing.</p>
                     <input type="hidden" id="edit-doc-id">
-                    
                     <div style="margin-bottom:15px;">
                         <label><b>Status:</b></label>
                         <select id="edit-status" style="padding:5px;">
@@ -197,39 +146,20 @@
                             <option value="Rejected">Rejected</option>
                         </select>
                     </div>
-
                     <table class="data-table" style="font-size:0.9em;">
-                        <thead>
-                            <tr>
-                                <th width="10%">Stock No.</th>
-                                <th width="30%">Description</th>
-                                <th width="10%">Req Qty</th>
-                                <th width="10%">Unit</th>
-                                <th width="10%">Yes/No</th>
-                                <th width="30%">Remarks</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th width="10%">Stock No.</th><th width="30%">Description</th><th width="10%">Req Qty</th><th width="10%">Unit</th><th width="10%">Yes/No</th><th width="30%">Remarks</th></tr></thead>
                         <tbody id="editModalItems"></tbody>
                     </table>
                     <button class="btn-save" onclick="saveRISChanges()">Save Changes</button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <div id="print-area-forms"></div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s",
-            authDomain: "supplies-monitoring.firebaseapp.com",
-            projectId: "supplies-monitoring",
-            storageBucket: "supplies-monitoring.firebasestorage.app",
-            messagingSenderId: "524755577094",
-            appId: "1:524755577094:web:cd3c45819698c3380a1687",
-            measurementId: "G-033SS1BHK1"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s", authDomain: "supplies-monitoring.firebaseapp.com", projectId: "supplies-monitoring", storageBucket: "supplies-monitoring.firebasestorage.app", messagingSenderId: "524755577094", appId: "1:524755577094:web:cd3c45819698c3380a1687", measurementId: "G-033SS1BHK1" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -256,13 +186,16 @@
             btn.classList.add('active');
         }
 
-        // --- DASHBOARD FUNCTIONS ---
+        // --- DASHBOARD FUNCTIONS (SOFT DELETE FILTER) ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
                 let total=0, pending=0, approved=0, html='';
                 snap.forEach(doc => {
-                    const r = doc.data(); total++;
+                    const r = doc.data(); 
+                    if (r.adminHidden) return; // Skip Hidden Items
+
+                    total++;
                     if(r.status === 'Approved') approved++;
                     if(r.status === 'Pending' || !r.status) pending++;
 
@@ -271,7 +204,6 @@
                     const status = r.status || 'Pending';
                     const userId = r.userId || '';
 
-                    // Quick Actions
                     let actions = '<span style="color:#aaa;">—</span>';
                     if(status === 'Pending') {
                         actions = `<button class="action-btn btn-print-tbl" style="background:var(--green);" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
@@ -286,19 +218,15 @@
             });
         }
 
-        // --- NEW: UPDATED setStatus WITH STOCK RETURN LOGIC ---
         async function setStatus(docId, newStatus, userId) {
             if(!confirm(`Mark as ${newStatus}?`)) return;
-
             const docRef = db.collection('requisitions').doc(docId);
             const doc = await docRef.get();
             if(!doc.exists) return;
-
             const data = doc.data();
             const oldStatus = data.status || 'Pending';
             const batch = db.batch();
 
-            // LOGIC: Return stock if Rejected; Deduct if un-Rejected
             if (newStatus === 'Rejected' && oldStatus !== 'Rejected') {
                 data.items.forEach(item => {
                     const invRef = db.collection('inventory').doc(item.id);
@@ -310,9 +238,7 @@
                     batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) });
                 });
             }
-
             batch.update(docRef, { status: newStatus });
-
             if(userId) {
                 batch.set(db.collection('notifications').doc(), {
                     userId: userId, title: `Request ${newStatus}`,
@@ -324,7 +250,6 @@
             alert(`Updated to ${newStatus}!`);
         }
 
-        // --- MASTER INVENTORY ---
         function initMasterInventory() {
             db.collection('ppmp_uploads').orderBy('timestamp', 'desc').onSnapshot(snap => {
                 let html = '';
@@ -335,7 +260,6 @@
                 document.getElementById('ppmpTable').innerHTML = html;
             });
         }
-        
         async function downloadPPMP(id) {
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
@@ -348,7 +272,6 @@
             link.click();
             document.body.removeChild(link);
         }
-
         function deletePPMP(id) { if(confirm("Delete this file?")) db.collection('ppmp_uploads').doc(id).delete(); }
 
         function initConsolidatedSupplies() {
@@ -369,15 +292,16 @@
             });
         }
 
-        // --- CONSOLIDATED RIS LOGIC ---
+        // --- CONSOLIDATED RIS (SOFT DELETE) ---
         let currentRisItems = [];
-
         function initConsolidatedRIS() {
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
                 const tbody = document.getElementById('risTableBody');
                 let html = '';
                 snap.forEach(doc => {
                     const d = doc.data();
+                    if (d.adminHidden) return; // Skip Hidden Items
+
                     const dateStr = d.date ? d.date.split('T')[0] : '';
                     html += `
                     <tr>
@@ -388,7 +312,7 @@
                             <button class="action-btn btn-edit" title="Edit/View" onclick="openEditModal('${doc.id}')"><i class="fas fa-edit"></i></button>
                             <button class="action-btn btn-print-tbl" title="Print RIS" onclick="printSingleRIS('${doc.id}')"><i class="fas fa-print"></i></button>
                             <button class="action-btn btn-excel" title="Download Excel" onclick="downloadRISExcel('${doc.id}')"><i class="fas fa-file-excel"></i></button>
-                            <button class="action-btn btn-delete" title="Delete" onclick="deleteRIS('${doc.id}')"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn btn-delete" title="Remove from View" onclick="deleteRIS('${doc.id}')"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
                 });
@@ -400,11 +324,9 @@
             const doc = await db.collection('requisitions').doc(id).get();
             if(!doc.exists) return;
             const data = doc.data();
-            
             document.getElementById('edit-doc-id').value = id;
             document.getElementById('edit-status').value = data.status || 'Pending';
             document.getElementById('editModal').style.display = 'flex';
-
             currentRisItems = data.items || [];
             renderEditItems();
         }
@@ -419,56 +341,31 @@
                     <td>${item.itemName}</td>
                     <td>${item.reqQty}</td>
                     <td>${item.unit || 'pc'}</td>
-                    <td>
-                        <select class="edit-input" onchange="updateItem(${index}, 'availability', this.value)">
-                            <option value="">-</option>
-                            <option value="Yes" ${item.availability === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="No" ${item.availability === 'No' ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
+                    <td><select class="edit-input" onchange="updateItem(${index}, 'availability', this.value)"><option value="">-</option><option value="Yes" ${item.availability === 'Yes' ? 'selected' : ''}>Yes</option><option value="No" ${item.availability === 'No' ? 'selected' : ''}>No</option></select></td>
                     <td><input type="text" class="edit-input" value="${item.remarks || ''}" onchange="updateItem(${index}, 'remarks', this.value)"></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
-
-        function updateItem(index, field, value) {
-            currentRisItems[index][field] = value;
-        }
-
+        function updateItem(index, field, value) { currentRisItems[index][field] = value; }
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
-        // --- NEW: UPDATED saveRISChanges WITH STOCK RETURN LOGIC ---
         async function saveRISChanges() {
             const id = document.getElementById('edit-doc-id').value;
             const newStatus = document.getElementById('edit-status').value;
-
             const docRef = db.collection('requisitions').doc(id);
             const doc = await docRef.get();
             if(!doc.exists) return;
-
             const oldData = doc.data();
             const oldStatus = oldData.status || 'Pending';
             const batch = db.batch();
 
-            // LOGIC: Same as setStatus
             if (newStatus === 'Rejected' && oldStatus !== 'Rejected') {
-                oldData.items.forEach(item => {
-                    const invRef = db.collection('inventory').doc(item.id);
-                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(item.reqQty) });
-                });
+                oldData.items.forEach(item => { const invRef = db.collection('inventory').doc(item.id); batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(item.reqQty) }); });
             } else if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
-                oldData.items.forEach(item => {
-                    const invRef = db.collection('inventory').doc(item.id);
-                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) });
-                });
+                oldData.items.forEach(item => { const invRef = db.collection('inventory').doc(item.id); batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) }); });
             }
-
-            batch.update(docRef, {
-                status: newStatus,
-                items: currentRisItems
-            });
-
+            batch.update(docRef, { status: newStatus, items: currentRisItems });
             await batch.commit();
             alert("Updated Successfully!");
             closeEditModal();
@@ -478,16 +375,13 @@
             const doc = await db.collection('requisitions').doc(id).get();
             if(!doc.exists) return;
             const data = doc.data();
-
             const container = document.getElementById('print-area-forms');
             container.innerHTML = ''; 
-
             const risHTML = generateSingleRISHtml(data);
             const pageDiv = document.createElement('div');
             pageDiv.className = 'ris-page';
             pageDiv.innerHTML = risHTML;
             container.appendChild(pageDiv);
-
             setTimeout(() => window.print(), 500);
         }
 
@@ -495,75 +389,39 @@
             const doc = await db.collection('requisitions').doc(id).get();
             const data = doc.data();
             let wsData = [
-                ["REQUISITION AND ISSUE SLIP"],
-                ["Division:", data.division, "Date:", data.date.split('T')[0]],
-                [],
-                ["Stock No.", "Unit", "Description", "Req Qty", "Yes", "No", "Remarks"]
+                ["REQUISITION AND ISSUE SLIP"], ["Division:", data.division, "Date:", data.date.split('T')[0]], [], ["Stock No.", "Unit", "Description", "Req Qty", "Yes", "No", "Remarks"]
             ];
-            data.items.forEach(i => {
-                wsData.push([
-                    i.stockNo || '', i.unit || 'pc', i.itemName, i.reqQty, 
-                    i.availability === 'Yes'?'✓':'', i.availability === 'No'?'✓':'', i.remarks || ''
-                ]);
-            });
+            data.items.forEach(i => { wsData.push([i.stockNo || '', i.unit || 'pc', i.itemName, i.reqQty, i.availability === 'Yes'?'✓':'', i.availability === 'No'?'✓':'', i.remarks || '']); });
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "RIS");
             XLSX.writeFile(wb, `RIS_${data.division}.xlsx`);
         }
 
+        // --- NEW SOFT DELETE LOGIC (UPDATES INSTEAD OF DELETES) ---
         function deleteRIS(id) {
-            if(confirm("Delete this Request?")) db.collection('requisitions').doc(id).delete();
+            if(confirm("Remove this Request from your view? (It will NOT be deleted for the User)")) {
+                db.collection('requisitions').doc(id).update({ adminHidden: true })
+                .then(() => alert("Request hidden."))
+                .catch(err => alert("Error: " + err.message));
+            }
         }
 
         function generateSingleRISHtml(data) {
             let itemRows = '';
             const items = data.items || [];
-            
             items.forEach(item => {
-                itemRows += `
-                <tr>
-                    <td>${item.stockNo || ''}</td>
-                    <td>${item.unit || 'pc'}</td>
-                    <td style="text-align:left;">${item.itemName}</td>
-                    <td>${item.reqQty}</td>
-                    <td>${item.availability === 'Yes' ? '✓' : ''}</td>
-                    <td>${item.availability === 'No' ? '✓' : ''}</td>
-                    <td>${item.availability === 'Yes' ? item.reqQty : ''}</td>
-                    <td>${item.remarks || ''}</td>
-                </tr>`;
+                itemRows += `<tr><td>${item.stockNo || ''}</td><td>${item.unit || 'pc'}</td><td style="text-align:left;">${item.itemName}</td><td>${item.reqQty}</td><td>${item.availability === 'Yes' ? '✓' : ''}</td><td>${item.availability === 'No' ? '✓' : ''}</td><td>${item.availability === 'Yes' ? item.reqQty : ''}</td><td>${item.remarks || ''}</td></tr>`;
             });
-
-            for(let i=0; i < (10 - items.length); i++) {
-                itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-            }
-
+            for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
             const singleCopy = `
                 <div class="ris-copy">
                     <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
                     <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
-                    
-                    <table style="width:100%; font-size:11px; margin-bottom:5px;">
-                        <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
-                        <tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
-                        <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
-                    </table>
-
-                    <table class="ris-table">
-                        <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead>
-                        <tbody>${itemRows}</tbody>
-                    </table>
-
-                    <table class="footer-table">
-                        <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
-                        <tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr>
-                        <tr><td>Name:</td><td align="center"><b>JOVANIE M. MAZON</b></td><td align="center"><b>CESAR S. BUCSIT</b></td><td></td><td style="border-right:none;"></td></tr>
-                        <tr><td>Designation:</td><td align="center">Admin Assistant I<br>ORD-PAU</td><td align="center">Admin Officer V<br>ORD-PAU Caretaker</td><td></td><td style="border-right:none;"></td></tr>
-                        <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
-                    </table>
-                </div>
-            `;
-
+                    <table style="width:100%; font-size:11px; margin-bottom:5px;"><tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr><tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr><tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr></table>
+                    <table class="ris-table"><thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead><tbody>${itemRows}</tbody></table>
+                    <table class="footer-table"><tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr><tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr><tr><td>Name:</td><td align="center"><b>JOVANIE M. MAZON</b></td><td align="center"><b>CESAR S. BUCSIT</b></td><td></td><td style="border-right:none;"></td></tr><tr><td>Designation:</td><td align="center">Admin Assistant I<br>ORD-PAU</td><td align="center">Admin Officer V<br>ORD-PAU Caretaker</td><td></td><td style="border-right:none;"></td></tr><tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr></table>
+                </div>`;
             return singleCopy + '<div class="cut-line"></div>' + singleCopy;
         }
     </script>
