@@ -13,175 +13,166 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
-    :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --red: #e74c3c; --green: #27ae60; }
-    
-    /* GLOBAL LAYOUT */
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
-    .view-container { display: flex; height: 100vh; overflow: hidden; }
-    .hidden { display: none !important; }
-
-    /* SIDEBAR */
-    .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
-    .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-    .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
-    .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
-    .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
-    .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
-
-    /* MAIN CONTENT */
-    .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
-
-    /* NOTIFICATIONS */
-    .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
-    .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
-    .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
-    .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
-    .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
-    .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; background: #fff; cursor: pointer; }
-    .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
-
-    /* DASHBOARD */
-    .section { display: none; animation: fadeIn 0.4s ease-out; }
-    .section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
-    .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
-    .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
-    .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
-
-    .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; border-left: 5px solid #007bff; }
-    .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
-    .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
-    .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
-
-    .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; z-index: 100; }
-    .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-    .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-    /* MODAL (SCROLLABLE FIX) */
-    .modal-overlay { 
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(0,0,0,0.8); 
-        display: none; 
-        justify-content: center; 
-        align-items: flex-start; /* FIX: Starts at top so you can scroll down */
-        overflow-y: auto; /* FIX: Enables scrolling */
-        padding: 40px 0; 
-        z-index: 2000; 
-    }
-    .modal-overlay.open { display: flex; }
-    
-    .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; }
-    .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    
-    /* Floating Add Item Bar */
-    .add-item-controls { 
-        background: white; padding: 10px 20px; border-radius: 30px; 
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 2100; 
-        display: flex; gap: 10px; align-items: center; border: 1px solid #ddd;
-    }
-
-    /* --- RIS PAPER SLIP (A4 Layout) --- */
-    .paper-slip { 
-        width: 210mm; 
-        min-height: 297mm; /* Visual A4 Height */
-        background: white; 
-        padding: 10mm 10mm; /* Standard margins */
-        box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-        font-family: 'Arial Narrow', 'Arial', sans-serif; 
-        color: black; 
-        box-sizing: border-box; 
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between; /* Push contents to fill page */
-    }
-
-    .ris-container { height: 48%; display: flex; flex-direction: column; } /* Each copy takes ~half page */
-    
-    .ris-header-italic { font-style: italic; font-size: 10px; font-weight: bold; text-align: right; }
-    .ris-title { text-align: center; font-weight: bold; font-size: 14px; text-decoration: underline; margin: 5px 0; }
-
-    /* Tables - Compacted for Fit */
-    .info-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 5px; }
-    .info-table td { padding: 2px; vertical-align: bottom; }
-    .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
-    
-    table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; font-size: 11px; margin-bottom: auto; }
-    table.ris-table th, table.ris-table td { border: 1px solid black; padding: 3px 2px; text-align: center; vertical-align: middle; height: 16px; overflow: hidden; }
-    table.ris-table th { font-weight: bold; background: #eee; }
-    
-    /* Footer Signature Area */
-    table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; font-size: 10px; margin-top: -2px; }
-    table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; }
-    table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
-    
-    .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 15px; font-size: 11px; }
-    .sig-title { text-align: center; font-size: 9px; margin-bottom: 5px;}
-
-    /* Cut Line */
-    .cut-line { border-top: 2px dashed #555; height: 10px; width: 100%; margin: 10px 0; position: relative; }
-    .cut-line::after { content: "✂ CUT HERE"; position: absolute; left: 50%; top: -10px; transform: translateX(-50%); background: white; padding: 0 5px; font-size: 10px; color: #555; }
-
-    /* --- PRINT MODE (Strict A4) --- */
-    @media print {
-        @page { size: A4 portrait; margin: 0; }
-        body * { visibility: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --red: #e74c3c; --green: #27ae60; }
         
+        /* GLOBAL LAYOUT */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
+        .view-container { display: flex; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
+        .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
+
+        /* MAIN CONTENT */
+        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
+        
+        /* NOTIFICATIONS */
+        .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
+        .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
+        .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
+        .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
+        .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; background: #fff; cursor: pointer; }
+        .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
+
+        /* DASHBOARD */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
+        .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
+        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+
+        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; border-left: 5px solid #007bff; position: relative; }
+        .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
+        .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
+        .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
+
+        .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; z-index: 100; }
+        .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .btn-print-official { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-print-official:hover { background: #1a252f; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        .status-Pending { background: #fff3cd; color: #856404; }
+        .status-Approved { background: #d4edda; color: #155724; }
+        .status-Rejected { background: #f8d7da; color: #721c24; }
+
+        /* MODAL (SCROLLABLE FIX) */
         .modal-overlay { 
-            position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: white; display: block !important; 
-            overflow: visible; padding: 0; margin: 0;
-            z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); 
+            display: none; 
+            justify-content: center; 
+            align-items: flex-start; /* FIX: Starts at top so you can scroll down */
+            overflow-y: auto; /* FIX: Enables scrolling */
+            padding: 40px 0; 
+            z-index: 2000; 
+        }
+        .modal-overlay.open { display: flex; }
+        
+        .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        /* Floating Add Item Bar */
+        .add-item-controls { 
+            background: white; padding: 10px 20px; border-radius: 30px; 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 2100; 
+            display: flex; gap: 10px; align-items: center; border: 1px solid #ddd;
         }
 
-        /* Show only the paper */
-        .paper-slip, .paper-slip * { visibility: visible; }
-        
+        /* --- RIS PAPER SLIP (A4 Layout) --- */
         .paper-slip { 
-            width: 100%; height: 100vh; /* Fill page */
-            margin: 0; padding: 5mm; /* Print margins */
-            box-shadow: none; 
-            position: absolute; top: 0; left: 0;
+            width: 210mm; 
+            min-height: 297mm; /* Visual A4 Height */
+            background: white; 
+            padding: 10mm 10mm; /* Standard margins */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            font-family: 'Arial Narrow', 'Arial', sans-serif; 
+            color: black; 
+            box-sizing: border-box; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Push contents to fill page */
         }
+
+        .ris-container { height: 48%; display: flex; flex-direction: column; } /* Each copy takes ~half page */
         
-        /* Strict Height Distribution */
-        .ris-container { height: 48%; }
-        .cut-line { height: 4%; display: flex; align-items: center; }
+        .ris-header-italic { font-style: italic; font-size: 10px; font-weight: bold; text-align: right; }
+        .ris-title { text-align: center; font-weight: bold; font-size: 14px; text-decoration: underline; margin: 5px 0; }
 
-        /* Hide UI */
-        .modal-actions, .add-item-controls, .sidebar, .header-flex { display: none !important; }
-    }
-        /* Update this class to keep the button inside the box */
-.content-box { 
-    background: white; 
-    padding: 30px; 
-    border-radius: 12px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
-    margin-top: 20px; 
-    border-left: 5px solid #007bff; 
-    position: relative; /* <--- THIS WAS MISSING */
-}
+        /* Tables - Compacted for Fit */
+        .info-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 5px; }
+        .info-table td { padding: 2px; vertical-align: bottom; }
+        .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
+        
+        table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; font-size: 11px; margin-bottom: auto; }
+        table.ris-table th, table.ris-table td { border: 1px solid black; padding: 3px 2px; text-align: center; vertical-align: middle; height: 16px; overflow: hidden; }
+        table.ris-table th { font-weight: bold; background: #eee; }
+        
+        /* Footer Signature Area */
+        table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; font-size: 10px; margin-top: -2px; }
+        table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; }
+        table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
+        
+        .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 15px; font-size: 11px; }
+        .sig-title { text-align: center; font-size: 9px; margin-bottom: 5px;}
 
-/* Optional: Adjust the button slightly if needed */
-.btn-reset { 
-    position: absolute; 
-    top: 30px; 
-    right: 30px; 
-    background: var(--red); 
-    color: white; 
-    border: none; 
-    padding: 8px 15px; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    font-weight: bold; 
-}
-</style>
+        /* Cut Line */
+        .cut-line { border-top: 2px dashed #555; height: 10px; width: 100%; margin: 10px 0; position: relative; }
+        .cut-line::after { content: "✂ CUT HERE"; position: absolute; left: 50%; top: -10px; transform: translateX(-50%); background: white; padding: 0 5px; font-size: 10px; color: #555; }
+
+        /* --- PRINT AREA (OFFICIAL RIS FROM ADMIN) --- */
+        #print-area-forms { display: none; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body * { visibility: hidden; }
+            .sidebar, .section, .view-container, .modal-overlay, .header-flex { display: none !important; }
+            
+            /* Show Only Print Area */
+            #print-area-forms, #print-area-forms * { visibility: visible; }
+            #print-area-forms {
+                display: block !important;
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                z-index: 9999;
+            }
+
+            /* RIS Layout (Matches Admin) */
+            .ris-page { 
+                width: 210mm; height: 296mm; padding: 10mm; 
+                box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; 
+            }
+            .ris-copy { height: 48%; }
+            .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
+            .ris-table th, .ris-table td { border: 1px solid black; padding: 3px; text-align: center; vertical-align: middle; }
+            .ris-table th { background-color: #eee; font-weight: bold; }
+            .footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; font-size: 10px; table-layout: fixed; margin-top: -2px; }
+            .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
+            .cut-line { border-top: 1px dashed #333; margin: 0; text-align: center; font-size: 10px; position: relative; height: 10px; display: flex; align-items: center; justify-content: center; }
+            .cut-line::after { content: "✂ CUT HERE"; background: white; padding: 0 5px; }
+            
+            /* Hide the default paper-slip preview in dashboard */
+            .paper-slip:not(#print-area-forms .paper-slip) { display: none !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -210,13 +201,31 @@
                     <div class="card"><h3>Total Stock</h3><div class="number" id="dash-total-items">0</div></div>
                     <div class="card"><h3>My Requests</h3><div class="number" id="dash-total-reqs">0</div></div>
                 </div>
+                
                 <div class="content-box">
                     <h3>📂 Upload Stock / PPMP</h3>
                     <p>Update your inventory using Excel. (Original format is preserved for Admin download)</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
-            </div> 
+
+                <div class="content-box">
+                    <h3>📜 Request History</h3>
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Official Copy</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestHistoryTable">
+                            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>  
 
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
@@ -232,7 +241,7 @@
     <div class="modal-overlay" id="reqModal">
         <div class="modal-actions">
             <button class="btn" style="background:#e74c3c;" onclick="closeModal()">Close</button>
-            <button class="btn" style="background:#3498db;" onclick="window.print()">Print RIS</button>
+            <button class="btn" style="background:#3498db;" onclick="window.print()">Preview Print</button>
             <button class="btn" style="background:#27ae60;" onclick="exportToExcel()">Download Excel</button>
             <button class="btn" style="background:#2c3e50;" onclick="submitRequisition()">Submit & Save</button>
         </div>
@@ -288,6 +297,8 @@
         </div>
     </div>
 
+    <div id="print-area-forms"></div>
+
     <script>
         const firebaseConfig = { apiKey: "AIzaSyDxPnmXxfno19bkj9VHP1Do97PDg0lp04s", authDomain: "supplies-monitoring.firebaseapp.com", projectId: "supplies-monitoring", storageBucket: "supplies-monitoring.firebasestorage.app", messagingSenderId: "524755577094", appId: "1:524755577094:web:cd3c45819698c3380a1687", measurementId: "G-033SS1BHK1" };
         firebase.initializeApp(firebaseConfig);
@@ -319,7 +330,7 @@
                 list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777;">No notifications</div>';
                 notifs.forEach(n => {
                     if(n.status === 'unread') unread++;
-                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}<br><span class="notif-time">${n.timestamp?new Date(n.timestamp.toDate()).toLocaleString():''}</span></div>`;
+                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}</div>`;
                 });
                 badge.style.display = unread > 0 ? 'block' : 'none'; badge.innerText = unread;
             });
@@ -330,6 +341,7 @@
         function nav(id, btn) { document.querySelectorAll('.section').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
 
         function initUserDashboard() {
+            // Inventory Listener
             db.collection('inventory').where('division', '==', currentUserDivision).onSnapshot(snap => {
                 const tbody = document.getElementById('inventoryTable'), select = document.getElementById('itemSelect');
                 tbody.innerHTML = ''; select.innerHTML = '<option value="">Select Item...</option>';
@@ -342,14 +354,113 @@
                 });
                 document.getElementById('dash-total-items').innerText = total;
             });
-            db.collection('requisitions').where('division', '==', currentUserDivision).onSnapshot(s => document.getElementById('dash-total-reqs').innerText = s.size);
+
+            // Requests Listener (History)
+            db.collection('requisitions').where('division', '==', currentUserDivision).orderBy('date', 'desc').onSnapshot(snap => {
+                const historyBody = document.getElementById('requestHistoryTable');
+                let html = '';
+                let count = 0;
+                snap.forEach(doc => {
+                    count++;
+                    const r = doc.data();
+                    const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
+                    const itemsDesc = r.items ? r.items.length + ' Items' : '0 Items';
+                    const status = r.status || 'Pending';
+                    
+                    // Show PRINT button ONLY if Approved
+                    let printBtn = '';
+                    if (status === 'Approved') {
+                        printBtn = `<button class="btn-print-official" onclick="printOfficialRIS('${doc.id}')"><i class="fas fa-print"></i> Official Copy</button>`;
+                    } else {
+                        printBtn = `<span style="color:#aaa; font-size:0.9em;">Wait for Approval</span>`;
+                    }
+
+                    html += `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td>${itemsDesc}</td>
+                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td>${printBtn}</td>
+                    </tr>`;
+                });
+                document.getElementById('dash-total-reqs').innerText = count;
+                historyBody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; padding:20px;">No requests found.</td></tr>';
+            });
         }
 
+        // --- OFFICIAL PRINT LOGIC (Matches Admin) ---
+        async function printOfficialRIS(id) {
+            const doc = await db.collection('requisitions').doc(id).get();
+            if(!doc.exists) return;
+            const data = doc.data();
+
+            const container = document.getElementById('print-area-forms');
+            container.innerHTML = ''; 
+
+            const risHTML = generateSingleRISHtml(data);
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'ris-page';
+            pageDiv.innerHTML = risHTML;
+            container.appendChild(pageDiv);
+
+            setTimeout(() => window.print(), 500);
+        }
+
+        function generateSingleRISHtml(data) {
+            let itemRows = '';
+            const items = data.items || [];
+            
+            items.forEach(item => {
+                itemRows += `
+                <tr>
+                    <td>${item.stockNo || ''}</td>
+                    <td>${item.unit || 'pc'}</td>
+                    <td style="text-align:left;">${item.itemName}</td>
+                    <td>${item.reqQty}</td>
+                    <td>${item.availability === 'Yes' ? '✓' : ''}</td>
+                    <td>${item.availability === 'No' ? '✓' : ''}</td>
+                    <td>${item.availability === 'Yes' ? item.reqQty : ''}</td>
+                    <td>${item.remarks || ''}</td>
+                </tr>`;
+            });
+
+            for(let i=0; i < (10 - items.length); i++) {
+                itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            }
+
+            const singleCopy = `
+                <div class="ris-copy">
+                    <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
+                    <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
+                    
+                    <table style="width:100%; font-size:11px; margin-bottom:5px;">
+                        <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
+                        <tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
+                        <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
+                    </table>
+
+                    <table class="ris-table">
+                        <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead>
+                        <tbody>${itemRows}</tbody>
+                    </table>
+
+                    <table class="footer-table">
+                        <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
+                        <tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr>
+                        <tr><td>Name:</td><td align="center"><b>JOVANIE M. MAZON</b></td><td align="center"><b>CESAR S. BUCSIT</b></td><td></td><td style="border-right:none;"></td></tr>
+                        <tr><td>Designation:</td><td align="center">Admin Assistant I<br>ORD-PAU</td><td align="center">Admin Officer V<br>ORD-PAU Caretaker</td><td></td><td style="border-right:none;"></td></tr>
+                        <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
+                    </table>
+                </div>
+            `;
+
+            return singleCopy + '<div class="cut-line"></div>' + singleCopy;
+        }
+
+        // --- FILE UPLOAD & OTHER LOGIC ---
         function handleFileUpload(input) {
             const file = input.files[0];
             if(!file) return;
-
-            // 1. Read as ArrayBuffer for Parsing Data
             const dataReader = new FileReader();
             dataReader.onload = (e) => {
                 const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
@@ -357,40 +468,32 @@
                 const rawData = XLSX.utils.sheet_to_json(ws, {header: 1});
                 
                 let headerIndex = 0;
-                rawData.forEach((row, i) => {
-                    if(row.some(c => c && c.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) headerIndex = i;
-                });
-
+                rawData.forEach((row, i) => { if(row.some(c => c && c.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) headerIndex = i; });
                 const json = XLSX.utils.sheet_to_json(ws, {range: headerIndex});
+                
                 const batch = db.batch();
                 let count = 0;
-
-                // Parse Items
                 json.forEach(row => {
                     const name = row['GENERAL DESCRIPTION'] || row['Item Name'];
                     const qty = row['QUANTITY/'] || row['Quantity'] || row['Qty'];
                     const unit = row['UNIT OF MEASURE'] || row['Unit'];
-                    const price = row['UNIT PRICE'] || row['Unit Price'] || row['Price'];
-
+                    const price = row['UNIT PRICE'] || row['Unit Price'];
                     if(name && qty) {
                         count++;
                         batch.set(db.collection('inventory').doc(), {
                             itemName: String(name).trim(), initialQty: Number(qty), currentQty: Number(qty),
-                            unit: String(unit || 'pc'), unitPrice: Number(price || 0), division: currentUserDivision, requestDates: []
+                            unit: String(unit || 'pc'), unitPrice: Number(price || 0), division: currentUserDivision
                         });
                     }
                 });
 
-                // 2. Read as DataURL (Base64) for Admin Download
                 const base64Reader = new FileReader();
                 base64Reader.onload = (b64e) => {
                     const uploadRef = db.collection('ppmp_uploads').doc();
                     batch.set(uploadRef, {
-                        division: currentUserDivision,
-                        fileName: file.name,
+                        division: currentUserDivision, fileName: file.name,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        fileBase64: b64e.target.result, // SAVE THE EXACT FILE
-                        itemCount: count
+                        fileBase64: b64e.target.result, itemCount: count
                     });
                     batch.commit().then(() => alert(`${count} Items Uploaded Successfully!`));
                 };
@@ -399,33 +502,20 @@
             dataReader.readAsArrayBuffer(file);
         }
 
-        function deleteItem(id) { if(confirm("Delete this item?")) db.collection('inventory').doc(id).delete(); }
-       async function clearMyInventory() {
-    if(!confirm("⚠ WARNING: This will delete ALL Inventory items AND your Request History.\n\nAre you sure you want to reset everything to 0?")) return;
+        function deleteItem(id) { if(confirm("Delete item?")) db.collection('inventory').doc(id).delete(); }
+        async function clearMyInventory() {
+            if(!confirm("⚠ Reset ALL Stocks & Requests?")) return;
+            const batch = db.batch();
+            const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
+            inv.forEach(d => batch.delete(d.ref));
+            const reqs = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
+            reqs.forEach(d => batch.delete(d.ref));
+            await batch.commit(); alert("Reset Complete!");
+        }
 
-    const batch = db.batch();
-
-    // 1. Delete all Inventory items for this division
-    const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
-    inv.forEach(d => batch.delete(d.ref));
-
-    // 2. Delete all Requisitions (Requests) for this division
-    const reqs = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
-    reqs.forEach(d => batch.delete(d.ref));
-
-    // 3. Commit the changes
-    await batch.commit()
-        .then(() => {
-            alert("All data (Stocks & Requests) has been reset!");
-            // The dashboard counters will auto-update to 0 because of the real-time listeners
-        })
-        .catch(error => {
-            console.error("Error clearing data: ", error);
-            alert("Error clearing data. See console for details.");
-        });
-}
         function openModal() { document.getElementById('reqModal').classList.add('open'); slipItems = []; renderSlip(); }
         function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
+        
         function addItemToSlip() {
             const id = document.getElementById('itemSelect').value, qty = Number(document.getElementById('itemQty').value);
             if(!id || qty <= 0) return;
@@ -433,6 +523,7 @@
             if(qty > item.currentQty) return alert("Low Stock!");
             slipItems.push({...item, reqQty: qty}); renderSlip();
         }
+
         function renderSlip() {
             ['risTableBody_1', 'risTableBody_2'].forEach(tid => {
                 const b = document.getElementById(tid); b.innerHTML = '';
@@ -440,16 +531,25 @@
                 for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
             });
         }
+
         async function submitRequisition() {
             if(!slipItems.length) return alert("No items");
             const batch = db.batch(), today = new Date().toISOString();
-            batch.set(db.collection('requisitions').doc(), { date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending' });
+            
+            // Deduct stock immediately
             slipItems.forEach(i => {
                 const ref = db.collection('inventory').doc(i.id);
                 batch.update(ref, { currentQty: i.currentQty - i.reqQty });
             });
-            await batch.commit(); alert("Submitted!"); closeModal();
+            
+            // Save request
+            batch.set(db.collection('requisitions').doc(), { 
+                date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending' 
+            });
+
+            await batch.commit(); alert("Request Submitted!"); closeModal();
         }
+
         function exportToExcel() { 
             let data = [];
             for(let k=0; k<2; k++) {
@@ -481,7 +581,3 @@
     </script>
 </body>
 </html>
-
-
-
-
