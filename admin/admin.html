@@ -161,14 +161,37 @@
                     <p>Select a specific Division/Unit to view their remaining stock levels.</p>
                     
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
-                            <option value="">-- Select Division --</option>
-                            <option value="ORD-PAU">ORD-PAU</option>
-                            <option value="ORD-LEGAL">ORD-LEGAL</option>
-                            <option value="ORD-ICT">ORD-ICT</option>
-                            <option value="HR">HR</option>
-                            <option value="FINANCE">FINANCE</option>
-                        </select>
+                       <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
+    <option value="">-- Select Division/Unit --</option>
+    
+    <option value="AD-Personnel Section">AD-Personnel Section</option>
+    <option value="AD-AMS">AD-AMS</option>
+    <option value="AD-Records">AD-Records</option>
+    <option value="AD-GSU">AD-GSU</option>
+    <option value="AD-Cash Unit">AD-Cash Unit</option>
+    <option value="AD-Procurement Unit">AD-Procurement Unit</option>
+    <option value="AD-Payroll">AD-Payroll</option>
+    <option value="Admin Proper">Admin Proper</option>
+
+    <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
+    <option value="ORD-ICT Unit">ORD-ICT Unit</option>
+    <option value="ORD-Legal Unit">ORD-Legal Unit</option>
+    <option value="ORD Proper">ORD Proper</option>
+    <option value="OARD">OARD</option>
+
+    <option value="Finance Proper">Finance Proper</option>
+    <option value="FD-Accounting">FD-Accounting</option>
+    <option value="FD-Budget">FD-Budget</option>
+
+    <option value="ESSD">ESSD</option>
+    <option value="FTAD">FTAD</option>
+    <option value="HRDD">HRDD</option>
+    <option value="CLMD">CLMD</option>
+    <option value="CLMD-LR">CLMD-LR</option>
+    <option value="QAD">QAD</option>
+
+    <option value="COA">COA</option>
+</select>
                         <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
                             <i class="fas fa-sync"></i> Refresh
                         </button>
