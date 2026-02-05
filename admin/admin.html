@@ -14,7 +14,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; --orange: #f39c12; }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         
         /* LAYOUT */
@@ -42,7 +42,6 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
-        .data-table tr:hover { background-color: #f9f9f9; }
         
         /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
@@ -50,32 +49,34 @@
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         
-        .action-btn { border: none; width: 30px; height: 30px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
+        .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
         .btn-print-tbl { background: var(--primary); }
         .btn-excel { background: var(--green); }
         .btn-delete { background: var(--red); }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
 
-        /* MODAL STYLES */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .close-modal:hover { color: #333; }
-        
         .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
 
-        /* --- PRINT AREA (STRICT A4) --- */
+        /* --- PRINT AREA (FIXED) --- */
         #print-area-forms { display: none; }
 
         @media print {
             @page { size: A4 portrait; margin: 0; }
-            body * { visibility: hidden; }
-            .sidebar, .section, .view-container, .modal-overlay { display: none !important; }
+            
+            /* Hide the Dashboard UI completely */
+            .view-container, .modal-overlay, .sidebar, .main { 
+                display: none !important; 
+                height: 0; 
+                overflow: hidden; 
+            }
 
             /* Show Only Print Area */
-            #print-area-forms, #print-area-forms * { visibility: visible; }
             #print-area-forms {
                 display: block !important;
                 position: absolute;
@@ -83,9 +84,10 @@
                 width: 100%;
                 height: 100%;
                 background: white;
+                z-index: 9999;
             }
 
-            /* Exact A4 Layout */
+            /* RIS Layout (A4) */
             .ris-page { 
                 width: 210mm; 
                 height: 296mm; 
@@ -96,11 +98,11 @@
                 justify-content: space-between; 
             }
             
-            .ris-copy { height: 48%; border: none; }
+            .ris-copy { height: 48%; }
             
-            .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; }
+            .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
             .ris-table th, .ris-table td { border: 1px solid black; padding: 3px; text-align: center; vertical-align: middle; }
-            .ris-table th { background-color: #eee; font-weight: bold; }
+            .ris-table th { background-color: #eee; font-weight: bold; text-transform: uppercase; }
             
             .footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; font-size: 10px; table-layout: fixed; margin-top: -2px; }
             .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
@@ -116,9 +118,9 @@
         <div class="sidebar">
             <h2>Admin Panel</h2>
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
-            <div class="nav-link" onclick="nav('master-list', this)">Master Inventory (Files)</div>
+            <div class="nav-link" onclick="nav('master-list', this)">Master Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
-            <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS (Manage)</div>
+            <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
@@ -135,7 +137,7 @@
             </div>
 
             <div id="master-list" class="section">
-                <div class="header-title"><h1>Master Inventory (Uploaded Files)</h1></div>
+                <div class="header-title"><h1>Master Inventory</h1></div>
                 <div class="content-box">
                     <table class="data-table">
                         <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items Count</th><th>Action</th></tr></thead>
@@ -158,9 +160,7 @@
             <div id="consolidated-ris" class="section">
                 <div class="header-title"><h1>Consolidated RIS Management</h1></div>
                 <div class="content-box">
-                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">
-                        Manage, Edit, Print, and Download individual Requisition and Issue Slips (RIS).
-                    </p>
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Manage, Edit, Print, and Download individual Requisition and Issue Slips (RIS).</p>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -208,10 +208,10 @@
                 </div>
             </div>
 
-            <div id="print-area-forms"></div>
-
         </div>
     </div>
+
+    <div id="print-area-forms"></div>
 
     <script>
         const firebaseConfig = {
@@ -235,7 +235,7 @@
                         initAdminDashboard();
                         initMasterInventory();
                         initConsolidatedSupplies();
-                        initConsolidatedRIS(); // New Function
+                        initConsolidatedRIS();
                     } else window.location.href = "../user/user.html";
                 });
             }
@@ -249,7 +249,7 @@
             btn.classList.add('active');
         }
 
-        // --- DASHBOARD & INVENTORY ---
+        // --- DASHBOARD FUNCTIONS ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
             db.collection('requisitions').onSnapshot(snap => {
@@ -295,8 +295,8 @@
             });
         }
 
-        // --- NEW: CONSOLIDATED RIS MANAGEMENT ---
-        let currentRisItems = []; // Store temporary items for editing
+        // --- CONSOLIDATED RIS LOGIC ---
+        let currentRisItems = [];
 
         function initConsolidatedRIS() {
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
@@ -322,7 +322,6 @@
             });
         }
 
-        // 1. OPEN EDIT MODAL
         async function openEditModal(id) {
             const doc = await db.collection('requisitions').doc(id).get();
             if(!doc.exists) return;
@@ -365,7 +364,6 @@
 
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
-        // 2. SAVE CHANGES
         async function saveRISChanges() {
             const id = document.getElementById('edit-doc-id').value;
             const status = document.getElementById('edit-status').value;
@@ -378,28 +376,24 @@
             closeEditModal();
         }
 
-        // 3. PRINT SINGLE RIS (Two Copies)
         async function printSingleRIS(id) {
             const doc = await db.collection('requisitions').doc(id).get();
             if(!doc.exists) return;
             const data = doc.data();
 
             const container = document.getElementById('print-area-forms');
-            container.innerHTML = ''; // Clear previous
+            container.innerHTML = ''; 
 
-            // Generate HTML for THIS specific RIS
             const risHTML = generateSingleRISHtml(data);
-            
             const pageDiv = document.createElement('div');
             pageDiv.className = 'ris-page';
             pageDiv.innerHTML = risHTML;
             container.appendChild(pageDiv);
 
-            // Small delay to ensure rendering before print
+            // Wait a moment for DOM update, then print
             setTimeout(() => window.print(), 500);
         }
 
-        // 4. DOWNLOAD EXCEL
         async function downloadRISExcel(id) {
             const doc = await db.collection('requisitions').doc(id).get();
             const data = doc.data();
@@ -428,7 +422,6 @@
             if(confirm("Delete this Request?")) db.collection('requisitions').doc(id).delete();
         }
 
-        // --- HTML GENERATOR FOR RIS (Reused Logic) ---
         function generateSingleRISHtml(data) {
             let itemRows = '';
             const items = data.items || [];
@@ -447,7 +440,6 @@
                 </tr>`;
             });
 
-            // Fill empty rows
             for(let i=0; i < (10 - items.length); i++) {
                 itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
             }
