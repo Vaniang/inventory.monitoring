@@ -79,22 +79,29 @@
         }
         .announcement-banner h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
 
-        /* --- RIS PAPER SLIP (A4 Layout) --- */
+        /* --- RIS PAPER SLIP (Strict A4 Layout) --- */
         .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', 'Arial', sans-serif; color: black; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+        
         .ris-container { height: 48%; display: flex; flex-direction: column; }
+        
         .ris-header-italic { font-style: italic; font-size: 10px; font-weight: bold; text-align: right; }
         .ris-title { text-align: center; font-weight: bold; font-size: 14px; text-decoration: underline; margin: 5px 0; }
+        
         .info-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 5px; }
         .info-table td { padding: 2px; vertical-align: bottom; }
         .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
+        
         table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; font-size: 11px; margin-bottom: auto; }
         table.ris-table th, table.ris-table td { border: 1px solid black; padding: 3px 2px; text-align: center; vertical-align: middle; height: 16px; overflow: hidden; }
         table.ris-table th { font-weight: bold; background: #eee; }
+        
         table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; font-size: 10px; margin-top: -2px; }
         table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; }
         table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
+        
         .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 15px; font-size: 11px; }
         .sig-title { text-align: center; font-size: 9px; margin-bottom: 5px;}
+        
         .cut-line { border-top: 2px dashed #555; height: 10px; width: 100%; margin: 10px 0; position: relative; }
         .cut-line::after { content: "✂ CUT HERE"; position: absolute; left: 50%; top: -10px; transform: translateX(-50%); background: white; padding: 0 5px; font-size: 10px; color: #555; }
 
@@ -202,9 +209,33 @@
             <div class="ris-container">
                 <div class="ris-header-italic">Appendix 63</div>
                 <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
-                <table class="info-table"><tr><td width="10%">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr><tr><td>Division:</td><td class="input-line" id="ris-div-name-1">...</td><td></td><td colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr><tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line"></td></tr></table>
-                <table class="ris-table"><thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead><tbody id="risTableBody_1"></tbody></table>
-                <table class="footer-table"><tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr><tr><td>Signature:</td><td style="border-bottom:1px solid black; height:20px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr><tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr><tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I<br>ORD-PAU</div></td><td><div class="sig-title">Admin Officer V<br>ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr><tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr></table>
+                <table class="info-table">
+                    <tr><td width="10%">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr>
+                    <tr><td>Division:</td><td class="input-line" id="ris-div-name-1">...</td><td></td><td colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
+                    <tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line"></td></tr>
+                </table>
+                <table class="ris-table">
+                    <thead>
+                        <tr>
+                            <th width="8%">STOCK NO.</th>
+                            <th width="8%">UNIT</th>
+                            <th width="34%">DESCRIPTION</th>
+                            <th width="10%">QTY</th>
+                            <th width="5%">YES</th>
+                            <th width="5%">NO</th>
+                            <th width="10%">QTY</th>
+                            <th width="20%">REMARKS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="risTableBody_1"></tbody>
+                </table>
+                <table class="footer-table">
+                    <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
+                    <tr><td>Signature:</td><td style="border-bottom:1px solid black; height:20px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                    <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I<br>ORD-PAU</div></td><td><div class="sig-title">Admin Officer V<br>ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                </table>
             </div>
             <div class="cut-line"></div>
             <div style="text-align:center; padding:20px; color:#aaa; font-style:italic;">(Bottom copy will appear on print)</div>
@@ -322,7 +353,7 @@
                     <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
                     <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
                     <table style="width:100%; font-size:11px; margin-bottom:5px;"><tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr><tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr><tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr></table>
-                    <table class="ris-table"><thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead><tbody>${itemRows}</tbody></table>
+                    <table class="ris-table"><thead><tr><th width="8%">STOCK NO.</th><th width="8%">UNIT</th><th width="34%">DESCRIPTION</th><th width="10%">QTY</th><th width="5%">YES</th><th width="5%">NO</th><th width="10%">QTY</th><th width="20%">REMARKS</th></tr></thead><tbody>${itemRows}</tbody></table>
                     <table class="footer-table"><tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr><tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr><tr><td>Name:</td><td align="center"><b>JOVANIE M. MAZON</b></td><td align="center"><b>CESAR S. BUCSIT</b></td><td></td><td style="border-right:none;"></td></tr><tr><td>Designation:</td><td align="center">Admin Assistant I<br>ORD-PAU</td><td align="center">Admin Officer V<br>ORD-PAU Caretaker</td><td></td><td style="border-right:none;"></td></tr><tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr></table>
                 </div>`;
             return singleCopy + '<div class="cut-line"></div>' + singleCopy;
@@ -383,11 +414,9 @@
             slipItems.push({...item, reqQty: qty}); renderSlip();
         }
         function renderSlip() {
-            ['risTableBody_1'].forEach(tid => {
-                const b = document.getElementById(tid); b.innerHTML = '';
-                slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
-                for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-            });
+            const b = document.getElementById('risTableBody_1'); b.innerHTML = '';
+            slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
+            for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
         }
         async function submitRequisition() {
             if(!slipItems.length) return alert("No items");
