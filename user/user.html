@@ -197,7 +197,7 @@
                 
                 <div class="content-box">
                     <h3>📂 Upload Stock / PPMP</h3>
-                    <p>Update your inventory using Excel. (Original format is preserved for Admin download)</p>
+                    <p>Please upload your approved PPMP. (Your Uploaded PPMP in here, serves as your submitted final PPMP in our Montoring)</p>
                     <input type="file" onchange="handleFileUpload(this)" accept=".xlsx, .csv" />
                     <button class="btn-reset" onclick="clearMyInventory()">⚠ Clear All</button>
                 </div>
@@ -215,7 +215,7 @@
             <div id="consolidated-ris" class="section">
                 <div class="header-title"><h1>Consolidated RIS (Approved)</h1></div>
                 <div class="content-box">
-                    <p style="color:#555; margin-bottom:15px;">This list shows only your <b>Approved</b> requests. Click <b>"Official Copy"</b> to print the RIS with Admin's approval and edits.</p>
+                    <p style="color:#555; margin-bottom:15px;">This list shows only your <b>Approved</b> requests. This serve as your <b>"Official File Copy"</b>.</p>
                     <table class="inventory-table">
                         <thead><tr><th>Date</th><th>Items</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody id="userRisTable"><tr><td colspan="4" style="text-align:center;">Loading...</td></tr></tbody>
@@ -228,8 +228,6 @@
     <div class="modal-overlay" id="reqModal">
         <div class="modal-actions">
             <button class="btn" style="background:#e74c3c;" onclick="closeModal()">Close</button>
-            <button class="btn" style="background:#3498db;" onclick="window.print()">Preview Print</button>
-            <button class="btn" style="background:#27ae60;" onclick="exportToExcel()">Download Excel</button>
             <button class="btn" style="background:#2c3e50;" onclick="submitRequisition()">Submit & Save</button>
         </div>
         <div class="add-item-controls">
@@ -672,5 +670,6 @@
     </script>
 </body>
 </html>
+
 
 
