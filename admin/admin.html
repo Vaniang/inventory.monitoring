@@ -50,9 +50,42 @@
         .btn-print { float: right; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
         .btn-print:hover { background: #1a252f; }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        @media print { body * { visibility: hidden; } .section.active, .section.active * { visibility: visible; } .section.active { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; } .sidebar, .btn-print, .action-btn { display: none !important; } .card { border: 1px solid #ccc; box-shadow: none; } }
         .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-.btn-delete:hover { background: #c0392b; }
+        .btn-delete:hover { background: #c0392b; }
+
+        /* --- PRINT STYLES FOR CONSOLIDATED RIS --- */
+        .hidden-print-area { display: none; }
+
+        @media print { 
+            body * { visibility: hidden; } 
+            
+            /* Hide Sidebar and Dashboard Elements */
+            .sidebar, .section, .header-title, .view-container { display: none !important; }
+
+            /* Specific Rule for Consolidated Supplies Summary */
+            #consolidated-supplies.active, #consolidated-supplies.active * { visibility: visible; }
+            #consolidated-supplies.active { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; }
+
+            /* Specific Rule for Consolidated RIS Report */
+            #print-area-ris, #print-area-ris * { visibility: visible; }
+            #print-area-ris {
+                display: block !important;
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%;
+                padding: 20px 40px;
+                background: white;
+            }
+
+            .card { border: 1px solid #ccc; box-shadow: none; }
+            .btn-print, .action-btn { display: none !important; }
+
+            /* Print Table Styling */
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: 'Arial', sans-serif; font-size: 12px; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 5px; text-align: left; }
+            .print-table th { background-color: #eee; text-align: center; font-weight: bold; }
+            .print-table td { vertical-align: middle; }
+        }
     </style>
 </head>
 <body>
@@ -63,6 +96,7 @@
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
             <div class="nav-link" onclick="nav('master-list', this)">Master Inventory (Files)</div>
             <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
+            <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS (Requests)</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
@@ -105,6 +139,72 @@
                         <thead><tr><th>Item Name</th><th>Total Qty</th><th>Unit</th><th>Avg Price</th></tr></thead>
                         <tbody id="consolidatedTable"></tbody>
                     </table>
+                </div>
+            </div>
+
+            <div id="consolidated-ris" class="section">
+                <div class="header-title"><h1>Consolidated RIS (Requests)</h1></div>
+                <div class="content-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <label><b>Filter by Date:</b></label>
+                            <input type="date" id="ris-filter-date" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+                            <button class="btn-download" onclick="loadConsolidatedRIS()" style="background: var(--primary);">Load Data</button>
+                        </div>
+                        <button class="btn-print" onclick="printConsolidatedRIS()" style="margin:0;"><i class="fas fa-print"></i> Print Report</button>
+                    </div>
+                    
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">
+                        Displays total quantities of <b>Approved</b> requests. Filter by date to generate a daily summary.
+                    </p>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="40%">Item Description</th>
+                                <th width="10%">Unit</th>
+                                <th width="15%">Total Qty</th>
+                                <th width="35%">Requesting Divisions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consolidatedRISTable">
+                            <tr><td colspan="4" style="text-align:center; padding:20px; color:#999;">Select a date and click Load Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="print-area-ris" class="hidden-print-area">
+                <div class="print-header">
+                    <h3 style="text-align:center; margin:0; text-decoration:underline;">CONSOLIDATED REQUISITION AND ISSUE SLIP</h3>
+                    <p style="text-align:center; margin:5px 0;">DepEd Regional Office I</p>
+                    <p style="text-align:center; margin:10px 0; font-size:14px;"><b>For Date:</b> <span id="print-ris-date">All Time</span></p>
+                </div>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th width="5%">No.</th>
+                            <th width="10%">Unit</th>
+                            <th width="45%">Item Description</th>
+                            <th width="10%">Total Qty</th>
+                            <th width="30%">Remarks (Divisions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="printRISTableBody"></tbody>
+                </table>
+                <div class="print-footer" style="margin-top:50px; display:flex; justify-content:space-between; font-size:12px;">
+                    <div style="width:40%; text-align:center;">
+                        <p>Prepared by:</p>
+                        <br><br>
+                        <div style="border-bottom:1px solid black; width:80%; margin:0 auto; font-weight:bold;">JOVANIE M. MAZON</div>
+                        <span>Admin Assistant I</span>
+                    </div>
+                    <div style="width:40%; text-align:center;">
+                        <p>Certified Correct:</p>
+                        <br><br>
+                        <div style="border-bottom:1px solid black; width:80%; margin:0 auto; font-weight:bold;">CESAR S. BUCSIT</div>
+                        <span>Admin Officer V</span>
+                    </div>
                 </div>
             </div>
 
@@ -183,12 +283,22 @@
                 let html = '';
                 snap.forEach(doc => {
                     const d = doc.data();
+                    // Escape filename to prevent quote issues in the onclick
+                    const safeFileName = d.fileName ? d.fileName.replace(/'/g, "\\'") : 'File';
+                    
                     html += `<tr>
                         <td><strong>${d.division}</strong></td>
                         <td>${d.fileName}</td>
                         <td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td>
                         <td>${d.itemCount}</td>
-                        <td><button class="btn-download" onclick="downloadPPMP('${doc.id}')">Download</button></td>
+                        <td>
+                            <button class="btn-download" onclick="downloadPPMP('${doc.id}')" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deletePPMP('${doc.id}', '${safeFileName}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>`;
                 });
                 document.getElementById('ppmpTable').innerHTML = html;
@@ -219,16 +329,14 @@
             });
         }
 
-        // --- UPDATED DOWNLOAD FUNCTION: GETS ORIGINAL FILE ---
         async function downloadPPMP(id) {
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
             
             const fileData = doc.data().fileBase64;
             
-            // Fallback for old uploads (pre-Base64 update)
             if(!fileData) {
-                alert("⚠ NOTICE: This file was uploaded before the 'Exact Format' update. Downloading restored version instead (formatting may differ).");
+                alert("⚠ NOTICE: This file was uploaded before the 'Exact Format' update. Downloading restored version instead.");
                 try {
                     const data = JSON.parse(doc.data().data);
                     const ws = XLSX.utils.json_to_sheet(data);
@@ -239,13 +347,23 @@
                 return;
             }
 
-            // Download EXACT Original File
             const link = document.createElement('a');
             link.href = fileData;
             link.download = doc.data().fileName || "Download.xlsx";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        function deletePPMP(id, fileName) {
+            if(!confirm(`Are you sure you want to PERMANENTLY DELETE "${fileName}"?`)) return;
+            
+            db.collection('ppmp_uploads').doc(id).delete()
+            .then(() => alert('File deleted successfully.'))
+            .catch((error) => {
+                console.error("Error removing document: ", error);
+                alert('Error deleting file: ' + error.message);
+            });
         }
 
         function setStatus(docId, status, userId) {
@@ -261,47 +379,109 @@
             }
             batch.commit().then(() => alert(`Updated!`));
         }
-        function initMasterInventory() {
-    db.collection('ppmp_uploads').orderBy('timestamp', 'desc').onSnapshot(snap => {
-        let html = '';
-        snap.forEach(doc => {
-            const d = doc.data();
-            // Escape filename to prevent quote issues in the onclick
-            const safeFileName = d.fileName ? d.fileName.replace(/'/g, "\\'") : 'File';
+
+        // --- CONSOLIDATED RIS LOGIC ---
+        let consolidatedRISData = [];
+
+        function loadConsolidatedRIS() {
+            const dateFilter = document.getElementById('ris-filter-date').value;
+            const tbody = document.getElementById('consolidatedRISTable');
             
-            html += `<tr>
-                <td><strong>${d.division}</strong></td>
-                <td>${d.fileName}</td>
-                <td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td>
-                <td>${d.itemCount}</td>
-                <td>
-                    <button class="btn-download" onclick="downloadPPMP('${doc.id}')" title="Download">
-                        <i class="fas fa-download"></i>
-                    </button>
-                    <button class="btn-delete" onclick="deletePPMP('${doc.id}', '${safeFileName}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>`;
-        });
-        document.getElementById('ppmpTable').innerHTML = html;
-    });
-}
-        function deletePPMP(id, fileName) {
-    if(!confirm(`Are you sure you want to PERMANENTLY DELETE "${fileName}"?\n\nThis will remove the file and cannot be undone.`)) return;
-    
-    // Optional: Show loading state or changing text if desired
-    
-    db.collection('ppmp_uploads').doc(id).delete()
-    .then(() => {
-        // The table will auto-update because of the .onSnapshot listener in initMasterInventory
-        alert('File deleted successfully.');
-    })
-    .catch((error) => {
-        console.error("Error removing document: ", error);
-        alert('Error deleting file: ' + error.message);
-    });
-}
+            // Only fetch Approved requests
+            let query = db.collection('requisitions').where('status', '==', 'Approved');
+
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+
+            query.get().then(snap => {
+                const itemMap = {};
+                let hasData = false;
+                
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    
+                    // Filter by Date (Exact Match YYYY-MM-DD)
+                    const reqDate = data.date.split('T')[0]; 
+                    if(dateFilter && reqDate !== dateFilter) return;
+
+                    hasData = true;
+                    const divName = data.division;
+
+                    if(data.items && Array.isArray(data.items)) {
+                        data.items.forEach(item => {
+                            // Unique key based on Name + Unit
+                            const key = (item.itemName + '-' + (item.unit || 'pc')).trim().toLowerCase();
+                            
+                            if(!itemMap[key]) {
+                                itemMap[key] = {
+                                    name: item.itemName,
+                                    unit: item.unit || 'pc',
+                                    totalQty: 0,
+                                    divisions: new Set() 
+                                };
+                            }
+                            
+                            itemMap[key].totalQty += Number(item.reqQty);
+                            itemMap[key].divisions.add(divName);
+                        });
+                    }
+                });
+
+                consolidatedRISData = Object.values(itemMap).sort((a,b) => a.name.localeCompare(b.name));
+                renderConsolidatedRISView();
+            });
+        }
+
+        function renderConsolidatedRISView() {
+            const tbody = document.getElementById('consolidatedRISTable');
+            tbody.innerHTML = '';
+
+            if(consolidatedRISData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No approved requests found for this date.</td></tr>';
+                return;
+            }
+
+            consolidatedRISData.forEach(item => {
+                const divList = Array.from(item.divisions).join(', ');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td style="font-weight:bold; font-size:1.1em; color:var(--primary);">${item.totalQty}</td>
+                        <td style="font-size:0.9em; color:#555;">${divList}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function printConsolidatedRIS() {
+            if(consolidatedRISData.length === 0) {
+                alert("No data to print. Please load data first.");
+                return;
+            }
+
+            const printBody = document.getElementById('printRISTableBody');
+            const dateLabel = document.getElementById('print-ris-date');
+            const filterVal = document.getElementById('ris-filter-date').value;
+
+            dateLabel.innerText = filterVal ? new Date(filterVal).toLocaleDateString() : "All Time (Summary)";
+            printBody.innerHTML = '';
+
+            consolidatedRISData.forEach((item, index) => {
+                const divList = Array.from(item.divisions).join(', ');
+                printBody.innerHTML += `
+                    <tr>
+                        <td style="text-align:center;">${index + 1}</td>
+                        <td style="text-align:center;">${item.unit}</td>
+                        <td>${item.name}</td>
+                        <td style="text-align:center; font-weight:bold;">${item.totalQty}</td>
+                        <td>${divList}</td>
+                    </tr>
+                `;
+            });
+
+            window.print();
+        }
     </script>
 </body>
 </html>
