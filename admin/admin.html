@@ -134,6 +134,13 @@
                     <div class="card" style="border-color: #f39c12;"><h3>Pending</h3><div class="number" id="adm-pending" style="color:#f39c12">0</div></div>
                     <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
                 </div>
+                <div class="content-box">
+                    <h3>🔔 Incoming Requests</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Date</th><th>Division</th><th>Items</th><th>Status</th><th class="no-print">Actions</th></tr></thead>
+                        <tbody id="requestTable"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="master-list" class="section">
@@ -252,35 +259,78 @@
         // --- DASHBOARD FUNCTIONS ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
-            db.collection('requisitions').onSnapshot(snap => {
-                let total=0, pending=0, approved=0;
+            db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
+                let total=0, pending=0, approved=0, html='';
                 snap.forEach(doc => {
                     const r = doc.data(); total++;
                     if(r.status === 'Approved') approved++;
                     if(r.status === 'Pending' || !r.status) pending++;
+
+                    const itemsStr = r.items ? r.items.map(i => `${i.itemName} (${i.reqQty})`).join(', ') : '';
+                    const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
+                    const status = r.status || 'Pending';
+                    const userId = r.userId || '';
+
+                    // Quick Actions
+                    let actions = '<span style="color:#aaa;">—</span>';
+                    if(status === 'Pending') {
+                        actions = `<button class="action-btn btn-print-tbl" style="background:var(--green);" onclick="setStatus('${doc.id}', 'Approved', '${userId}')">✓</button>
+                                   <button class="action-btn btn-delete" onclick="setStatus('${doc.id}', 'Rejected', '${userId}')">✗</button>`;
+                    }
+                    html += `<tr><td>${dateStr}</td><td><strong>${r.division}</strong></td><td style="font-size:0.9em;">${itemsStr}</td><td><span class="badge badge-${status}">${status}</span></td><td class="no-print">${actions}</td></tr>`;
                 });
                 document.getElementById('adm-total').innerText = total;
                 document.getElementById('adm-pending').innerText = pending;
                 document.getElementById('adm-approved').innerText = approved;
+                document.getElementById('requestTable').innerHTML = html;
             });
         }
 
-        // --- MASTER INVENTORY (FIXED) ---
+        // --- NEW: UPDATED setStatus WITH STOCK RETURN LOGIC ---
+        async function setStatus(docId, newStatus, userId) {
+            if(!confirm(`Mark as ${newStatus}?`)) return;
+
+            const docRef = db.collection('requisitions').doc(docId);
+            const doc = await docRef.get();
+            if(!doc.exists) return;
+
+            const data = doc.data();
+            const oldStatus = data.status || 'Pending';
+            const batch = db.batch();
+
+            // LOGIC: Return stock if Rejected; Deduct if un-Rejected
+            if (newStatus === 'Rejected' && oldStatus !== 'Rejected') {
+                data.items.forEach(item => {
+                    const invRef = db.collection('inventory').doc(item.id);
+                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(item.reqQty) });
+                });
+            } else if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
+                data.items.forEach(item => {
+                    const invRef = db.collection('inventory').doc(item.id);
+                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) });
+                });
+            }
+
+            batch.update(docRef, { status: newStatus });
+
+            if(userId) {
+                batch.set(db.collection('notifications').doc(), {
+                    userId: userId, title: `Request ${newStatus}`,
+                    message: newStatus === 'Approved' ? "Your request is approved." : "Your request was rejected.",
+                    status: 'unread', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            await batch.commit();
+            alert(`Updated to ${newStatus}!`);
+        }
+
+        // --- MASTER INVENTORY ---
         function initMasterInventory() {
             db.collection('ppmp_uploads').orderBy('timestamp', 'desc').onSnapshot(snap => {
                 let html = '';
                 snap.forEach(doc => {
                     const d = doc.data();
-                    html += `<tr>
-                        <td>${d.division}</td>
-                        <td>${d.fileName}</td>
-                        <td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td>
-                        <td>${d.itemCount}</td>
-                        <td>
-                            <button class="action-btn btn-excel" onclick="downloadPPMP('${doc.id}')" title="Download"><i class="fas fa-download"></i></button>
-                            <button class="action-btn btn-delete" onclick="deletePPMP('${doc.id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+                    html += `<tr><td>${d.division}</td><td>${d.fileName}</td><td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td><td>${d.itemCount}</td><td><button class="action-btn btn-excel" onclick="downloadPPMP('${doc.id}')"><i class="fas fa-download"></i></button><button class="action-btn btn-delete" onclick="deletePPMP('${doc.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
                 });
                 document.getElementById('ppmpTable').innerHTML = html;
             });
@@ -290,17 +340,7 @@
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
             const fileData = doc.data().fileBase64;
-            if(!fileData) {
-                alert("⚠ NOTICE: Old file format. Downloading restored version.");
-                try {
-                    const data = JSON.parse(doc.data().data);
-                    const ws = XLSX.utils.json_to_sheet(data);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, "PPMP");
-                    XLSX.writeFile(wb, doc.data().fileName || "Restored_PPMP.xlsx");
-                } catch(e) { alert("Error restoring: " + e.message); }
-                return;
-            }
+            if(!fileData) return alert("Old file format.");
             const link = document.createElement('a');
             link.href = fileData;
             link.download = doc.data().fileName || "Download.xlsx";
@@ -398,14 +438,38 @@
 
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
+        // --- NEW: UPDATED saveRISChanges WITH STOCK RETURN LOGIC ---
         async function saveRISChanges() {
             const id = document.getElementById('edit-doc-id').value;
-            const status = document.getElementById('edit-status').value;
+            const newStatus = document.getElementById('edit-status').value;
 
-            await db.collection('requisitions').doc(id).update({
-                status: status,
+            const docRef = db.collection('requisitions').doc(id);
+            const doc = await docRef.get();
+            if(!doc.exists) return;
+
+            const oldData = doc.data();
+            const oldStatus = oldData.status || 'Pending';
+            const batch = db.batch();
+
+            // LOGIC: Same as setStatus
+            if (newStatus === 'Rejected' && oldStatus !== 'Rejected') {
+                oldData.items.forEach(item => {
+                    const invRef = db.collection('inventory').doc(item.id);
+                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(item.reqQty) });
+                });
+            } else if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
+                oldData.items.forEach(item => {
+                    const invRef = db.collection('inventory').doc(item.id);
+                    batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) });
+                });
+            }
+
+            batch.update(docRef, {
+                status: newStatus,
                 items: currentRisItems
             });
+
+            await batch.commit();
             alert("Updated Successfully!");
             closeEditModal();
         }
@@ -424,28 +488,24 @@
             pageDiv.innerHTML = risHTML;
             container.appendChild(pageDiv);
 
-            // Wait a moment for DOM update, then print
             setTimeout(() => window.print(), 500);
         }
 
         async function downloadRISExcel(id) {
             const doc = await db.collection('requisitions').doc(id).get();
             const data = doc.data();
-            
             let wsData = [
                 ["REQUISITION AND ISSUE SLIP"],
                 ["Division:", data.division, "Date:", data.date.split('T')[0]],
                 [],
                 ["Stock No.", "Unit", "Description", "Req Qty", "Yes", "No", "Remarks"]
             ];
-
             data.items.forEach(i => {
                 wsData.push([
                     i.stockNo || '', i.unit || 'pc', i.itemName, i.reqQty, 
                     i.availability === 'Yes'?'✓':'', i.availability === 'No'?'✓':'', i.remarks || ''
                 ]);
             });
-
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "RIS");
