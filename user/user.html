@@ -79,8 +79,20 @@
         }
         .announcement-banner h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
 
-        /* --- RIS PAPER SLIP (Strict A4 Layout) --- */
-        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', 'Arial', sans-serif; color: black; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+        /* --- RIS PAPER SLIP (Strict A4 Layout - Two Copies) --- */
+        .paper-slip { 
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            padding: 10mm 10mm; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            font-family: 'Arial Narrow', 'Arial', sans-serif; 
+            color: black; 
+            box-sizing: border-box; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+        }
         
         .ris-container { height: 48%; display: flex; flex-direction: column; }
         
@@ -110,8 +122,15 @@
             @page { size: A4 portrait; margin: 0; }
             body * { visibility: hidden; }
             .sidebar, .section, .view-container, .modal-overlay, .header-flex { display: none !important; }
+            
+            /* Logic: If #print-area-forms has content, show it. If empty (printing from modal preview), show the modal's paper-slip */
             #print-area-forms, #print-area-forms * { visibility: visible; }
             #print-area-forms { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
+            
+            /* If printing directly from modal ("Preview Print") */
+            .modal-overlay.open .paper-slip { visibility: visible; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; box-shadow: none; margin: 0; }
+            .modal-overlay.open .paper-slip * { visibility: visible; }
+            
             .ris-page { width: 210mm; height: 296mm; padding: 10mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
             .ris-copy { height: 48%; }
             .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
@@ -121,7 +140,6 @@
             .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
             .cut-line { border-top: 1px dashed #333; margin: 0; text-align: center; font-size: 10px; position: relative; height: 10px; display: flex; align-items: center; justify-content: center; }
             .cut-line::after { content: "✂ CUT HERE"; background: white; padding: 0 5px; }
-            .paper-slip:not(#print-area-forms .paper-slip) { display: none !important; }
         }
     </style>
 </head>
@@ -149,7 +167,6 @@
             </div>
 
             <div id="dashboard" class="section active">
-                
                 <div id="announcement-area" class="announcement-banner">
                     <h3 id="ann-title-display">📢 System Announcement</h3>
                     <p id="ann-msg-display">...</p>
@@ -215,18 +232,7 @@
                     <tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line"></td></tr>
                 </table>
                 <table class="ris-table">
-                    <thead>
-                        <tr>
-                            <th width="8%">STOCK NO.</th>
-                            <th width="8%">UNIT</th>
-                            <th width="34%">DESCRIPTION</th>
-                            <th width="10%">QTY</th>
-                            <th width="5%">YES</th>
-                            <th width="5%">NO</th>
-                            <th width="10%">QTY</th>
-                            <th width="20%">REMARKS</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
                     <tbody id="risTableBody_1"></tbody>
                 </table>
                 <table class="footer-table">
@@ -237,8 +243,29 @@
                     <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
                 </table>
             </div>
+            
             <div class="cut-line"></div>
-            <div style="text-align:center; padding:20px; color:#aaa; font-style:italic;">(Bottom copy will appear on print)</div>
+            
+            <div class="ris-container">
+                <div class="ris-header-italic">Appendix 63</div>
+                <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
+                <table class="info-table">
+                    <tr><td width="10%">Entity Name:</td><td width="40%" class="input-line">DepED RO I</td><td width="20%"></td><td width="10%">Fund Cluster:</td><td width="20%" class="input-line">01</td></tr>
+                    <tr><td>Division:</td><td class="input-line" id="ris-div-name-2">...</td><td></td><td colspan="2" style="font-size:9px;">Responsibility Center Code:</td></tr>
+                    <tr><td>Office:</td><td class="input-line"></td><td></td><td>RIS No.:</td><td class="input-line"></td></tr>
+                </table>
+                <table class="ris-table">
+                    <thead><tr><th width="8%">Stock No.</th><th width="8%">Unit</th><th width="34%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Qty</th><th width="20%">Remarks</th></tr></thead>
+                    <tbody id="risTableBody_2"></tbody>
+                </table>
+                <table class="footer-table">
+                    <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
+                    <tr><td>Signature:</td><td style="border-bottom:1px solid black; height:20px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                    <tr><td>Name:</td><td><div class="sig-name">JOVANIE M. MAZON</div></td><td><div class="sig-name">CESAR S. BUCSIT</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Designation:</td><td><div class="sig-title">Admin Assistant I<br>ORD-PAU</div></td><td><div class="sig-title">Admin Officer V<br>ORD-PAU Caretaker</div></td><td></td><td style="border-right:none;"></td></tr>
+                    <tr><td>Date:</td><td style="border-bottom:1px solid black; height:15px;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black;"></td><td style="border-bottom:1px solid black; border-right:none;"></td></tr>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -259,7 +286,8 @@
                         currentUserDivision = doc.data().division || "Unknown";
                         document.getElementById('division-name').innerText = currentUserDivision;
                         document.getElementById('ris-div-name-1').innerText = currentUserDivision;
-                        initUserDashboard(); initNotifications(); initUserConsolidatedRIS(); initAnnouncements(); // New Init
+                        document.getElementById('ris-div-name-2').innerText = currentUserDivision;
+                        initUserDashboard(); initNotifications(); initUserConsolidatedRIS(); initAnnouncements();
                     }
                 });
             } else window.location.href = "../index.html";
@@ -348,12 +376,13 @@
                 itemRows += `<tr><td>${item.stockNo || ''}</td><td>${item.unit || 'pc'}</td><td style="text-align:left;">${item.itemName}</td><td>${item.reqQty}</td><td>${item.availability === 'Yes' ? '✓' : ''}</td><td>${item.availability === 'No' ? '✓' : ''}</td><td>${item.availability === 'Yes' ? item.reqQty : ''}</td><td>${item.remarks || ''}</td></tr>`;
             });
             for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
+            
             const singleCopy = `
                 <div class="ris-copy">
                     <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
                     <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
                     <table style="width:100%; font-size:11px; margin-bottom:5px;"><tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr><tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr><tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr></table>
-                    <table class="ris-table"><thead><tr><th width="8%">STOCK NO.</th><th width="8%">UNIT</th><th width="34%">DESCRIPTION</th><th width="10%">QTY</th><th width="5%">YES</th><th width="5%">NO</th><th width="10%">QTY</th><th width="20%">REMARKS</th></tr></thead><tbody>${itemRows}</tbody></table>
+                    <table class="ris-table"><thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead><tbody>${itemRows}</tbody></table>
                     <table class="footer-table"><tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr><tr><td>Signature:</td><td style="height:25px;"></td><td></td><td></td><td style="border-right:none;"></td></tr><tr><td>Name:</td><td align="center"><b>JOVANIE M. MAZON</b></td><td align="center"><b>CESAR S. BUCSIT</b></td><td></td><td style="border-right:none;"></td></tr><tr><td>Designation:</td><td align="center">Admin Assistant I<br>ORD-PAU</td><td align="center">Admin Officer V<br>ORD-PAU Caretaker</td><td></td><td style="border-right:none;"></td></tr><tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr></table>
                 </div>`;
             return singleCopy + '<div class="cut-line"></div>' + singleCopy;
@@ -413,11 +442,16 @@
             if(qty > item.currentQty) return alert("Low Stock!");
             slipItems.push({...item, reqQty: qty}); renderSlip();
         }
+        
+        // --- FIXED: RENDER BOTH TOP AND BOTTOM COPIES ---
         function renderSlip() {
-            const b = document.getElementById('risTableBody_1'); b.innerHTML = '';
-            slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
-            for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            ['risTableBody_1', 'risTableBody_2'].forEach(tid => {
+                const b = document.getElementById(tid); b.innerHTML = '';
+                slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
+                for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            });
         }
+        
         async function submitRequisition() {
             if(!slipItems.length) return alert("No items");
             const batch = db.batch(), today = new Date().toISOString();
