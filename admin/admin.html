@@ -51,6 +51,8 @@
         .btn-print:hover { background: #1a252f; }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         @media print { body * { visibility: hidden; } .section.active, .section.active * { visibility: visible; } .section.active { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; } .sidebar, .btn-print, .action-btn { display: none !important; } .card { border: 1px solid #ccc; box-shadow: none; } }
+        .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+.btn-delete:hover { background: #c0392b; }
     </style>
 </head>
 <body>
@@ -259,6 +261,47 @@
             }
             batch.commit().then(() => alert(`Updated!`));
         }
+        function initMasterInventory() {
+    db.collection('ppmp_uploads').orderBy('timestamp', 'desc').onSnapshot(snap => {
+        let html = '';
+        snap.forEach(doc => {
+            const d = doc.data();
+            // Escape filename to prevent quote issues in the onclick
+            const safeFileName = d.fileName ? d.fileName.replace(/'/g, "\\'") : 'File';
+            
+            html += `<tr>
+                <td><strong>${d.division}</strong></td>
+                <td>${d.fileName}</td>
+                <td>${d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : ''}</td>
+                <td>${d.itemCount}</td>
+                <td>
+                    <button class="btn-download" onclick="downloadPPMP('${doc.id}')" title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deletePPMP('${doc.id}', '${safeFileName}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('ppmpTable').innerHTML = html;
+    });
+}
+        function deletePPMP(id, fileName) {
+    if(!confirm(`Are you sure you want to PERMANENTLY DELETE "${fileName}"?\n\nThis will remove the file and cannot be undone.`)) return;
+    
+    // Optional: Show loading state or changing text if desired
+    
+    db.collection('ppmp_uploads').doc(id).delete()
+    .then(() => {
+        // The table will auto-update because of the .onSnapshot listener in initMasterInventory
+        alert('File deleted successfully.');
+    })
+    .catch((error) => {
+        console.error("Error removing document: ", error);
+        alert('Error deleting file: ' + error.message);
+    });
+}
     </script>
 </body>
 </html>
