@@ -37,7 +37,11 @@
         .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
         .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
         .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
-        
+        .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
+        .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
+        .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; background: #fff; cursor: pointer; }
+        .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
+
         /* TABLES & CARDS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
@@ -51,15 +55,25 @@
         .btn-req { position: fixed; bottom: 30px; right: 30px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
         .btn-req:hover { transform: scale(1.05); }
 
+        .btn-print-official { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9em; display: inline-flex; align-items: center; gap: 8px; font-weight: bold; transition: all 0.2s; }
+        .btn-print-official:hover { background: #1a252f; transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        .status-badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        .status-Pending { background: #fff3cd; color: #856404; }
+        .status-Approved { background: #d4edda; color: #155724; }
+        .status-Rejected { background: #f8d7da; color: #721c24; }
+
         /* --- MULTI-STEP MODAL STYLES --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal-overlay.open { display: flex; }
         
-        /* STEP 1: SIGNATORIES (Small Centered Box) */
-        .modal-step-1 { 
-            background: white; width: 600px; max-width: 90vw; padding: 30px; border-radius: 12px; 
-            position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column;
+        .modal-window { 
+            background: white; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            transition: all 0.3s ease;
         }
+
+        /* STEP 1: SIGNATORIES (Small Centered Box) */
+        .modal-step-1 { width: 600px; max-width: 90vw; padding: 25px; position: relative; }
         
         .modal-close-icon { 
             position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: #aaa; cursor: pointer; transition: color 0.2s; 
@@ -67,24 +81,19 @@
         .modal-close-icon:hover { color: var(--red); }
 
         .modal-check-icon { 
-            display: flex; align-items: center; justify-content: center; margin: 25px auto 0 auto; 
-            width: 60px; height: 60px; border-radius: 50%; background: var(--green); color: white; 
-            font-size: 1.8rem; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4); 
-            transition: transform 0.2s; 
+            display: block; margin: 25px auto 0 auto; width: 50px; height: 50px; border-radius: 50%; background: var(--green); color: white; 
+            font-size: 1.5rem; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4); transition: transform 0.2s; 
+            display: flex; align-items: center; justify-content: center;
         }
-        .modal-check-icon:hover { transform: scale(1.1); background: #219150; }
+        .modal-check-icon:hover { transform: scale(1.1); }
 
-        .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+        .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95em; box-sizing: border-box; }
+        .form-group label { display: block; font-size: 0.8em; font-weight: bold; color: #666; margin-bottom: 4px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; }
 
         /* STEP 2: EDITOR (Full Screen Split) */
-        .modal-step-2 { 
-            width: 95vw; height: 90vh; background: white; border-radius: 8px; 
-            display: none; /* Hidden initially */
-            flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
-        }
+        .modal-step-2 { width: 95vw; height: 90vh; display: none; flex-direction: column; } /* Hidden initially */
         
         .modal-header { padding: 15px 20px; background: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
         .modal-header h2 { margin: 0; font-size: 1.2rem; }
@@ -92,20 +101,20 @@
         
         .modal-body { display: flex; flex: 1; overflow: hidden; }
 
-        .editor-panel { width: 350px; background: #f8f9fa; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .editor-panel { width: 400px; min-width: 350px; background: #f8f9fa; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
         .preview-panel { flex: 1; background: var(--dark-overlay); padding: 40px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; }
 
         .editor-section { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .editor-section h3 { margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: #555; border-bottom: 2px solid var(--accent); padding-bottom: 5px; display: inline-block; }
         
         .btn-action { padding: 8px 15px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.9em; }
-        .btn-add { background: var(--green); width: 100%; margin-top: 5px; padding: 10px; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-clear { background: #95a5a6; font-size: 0.8em; padding: 4px 8px; float: right; border:none; border-radius:3px; color:white; cursor:pointer;}
+        .btn-add { background: var(--green); width: 100%; margin-top: 5px; }
+        .btn-clear { background: #95a5a6; font-size: 0.8em; padding: 4px 8px; float: right; }
 
         .sig-canvas { border: 2px dashed #ccc; background: white; width: 100%; height: 120px; cursor: crosshair; touch-action: none; border-radius: 4px; }
 
         /* --- RIS PAPER SLIP --- */
-        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm 15mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', 'Arial', sans-serif; color: black; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; transform-origin: top center;}
+        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 10mm 15mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', 'Arial', sans-serif; color: black; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
         .ris-container { height: 48%; display: flex; flex-direction: column; }
         .ris-title { text-align: center; font-weight: bold; font-size: 14px; text-decoration: underline; margin: 5px 0; }
         .info-table, .ris-table, .footer-table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -148,6 +157,13 @@
         <div class="main">
             <div class="header-flex">
                 <div class="header-title"><h1>Welcome, <span id="division-name">Loading...</span></h1></div>
+                <div class="notification-wrapper" onclick="toggleNotifications()">
+                    <i class="fas fa-bell bell-icon"></i><span id="notif-badge" class="badge">0</span>
+                </div>
+                <div id="notif-dropdown" class="notif-dropdown">
+                    <div class="notif-header">Notifications</div>
+                    <div id="notif-list" class="notif-list"><div style="padding:15px; color:#777;">No notifications</div></div>
+                </div>
             </div>
 
             <div id="dashboard" class="section active">
@@ -171,14 +187,14 @@
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
                 <table class="inventory-table">
-                    <thead><tr><th>Item Name</th><th>Initial</th><th>Unit</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit</th><th>Price</th><th>Current Stock</th><th>Action</th></tr></thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
             </div>
 
             <div id="consolidated-ris" class="section">
-                <h1>Approved Requests</h1>
+                <div class="header-title"><h1>Consolidated RIS (Approved)</h1></div>
                 <div class="content-box">
                     <table class="inventory-table">
                         <thead><tr><th>Date</th><th>Items</th><th>Status</th><th>Official Copy</th></tr></thead>
@@ -190,122 +206,124 @@
     </div>
 
     <div class="modal-overlay" id="reqModal">
-        
-        <div id="step-1" class="modal-step-1">
-            <i class="fas fa-times modal-close-icon" onclick="closeModal()"></i>
-            <h2 style="text-align:center; color:#2c3e50; margin-top:0;">Step 1: Signatories</h2>
-            <p style="text-align:center; color:#666; font-size:0.9rem; margin-bottom:20px;">Please confirm the personnel who will sign this document.</p>
+        <div class="modal-window">
             
-            <div class="sig-grid">
-                <div>
-                    <div class="form-group"><label>Requested By (Name)</label><input type="text" id="sig-req-name"></div>
-                    <div class="form-group"><label>Position</label><input type="text" id="sig-req-pos"></div>
-                </div>
-                <div>
-                    <div class="form-group"><label>Approved By (Name)</label><input type="text" id="sig-app-name"></div>
-                    <div class="form-group"><label>Position</label><input type="text" id="sig-app-pos"></div>
-                </div>
-                <div>
-                    <div class="form-group"><label>Issued By (Name)</label><input type="text" id="sig-iss-name"></div>
-                    <div class="form-group"><label>Position</label><input type="text" id="sig-iss-pos"></div>
-                </div>
-                <div>
-                    <div class="form-group"><label>Received By (Name)</label><input type="text" id="sig-rec-name"></div>
-                    <div class="form-group"><label>Position</label><input type="text" id="sig-rec-pos"></div>
-                </div>
-            </div>
-
-            <button class="modal-check-icon" onclick="goToStep2()">
-                <i class="fas fa-check"></i>
-            </button>
-        </div>
-
-        <div id="step-2" class="modal-step-2">
-            <div class="modal-header">
-                <h2>📝 Create Requisition (Step 2/2)</h2>
-                <div class="modal-header-actions">
-                    <button class="btn-action" style="background:#e74c3c;" onclick="closeModal()">Close</button>
-                    <button class="btn-action" style="background:#3498db;" onclick="window.print()">Print Preview</button>
-                    <button class="btn-action" style="background:#27ae60;" onclick="submitRequisition()">Submit Request</button>
-                </div>
-            </div>
-
-            <div class="modal-body">
-                <div class="editor-panel">
-                    <div class="editor-section">
-                        <h3>Add Items</h3>
-                        <div class="form-group"><label>Select Item:</label><select id="itemSelect" style="width:100%; padding:8px;"></select></div>
-                        <div class="form-group"><label>Quantity:</label><input type="number" id="itemQty" placeholder="1"></div>
-                        <button class="btn-add" onclick="addItemToSlip()">+ Add to Slip</button>
+            <div id="step-1" class="modal-step-1">
+                <i class="fas fa-times modal-close-icon" onclick="closeModal()"></i>
+                <h2 style="text-align:center; color:#2c3e50; margin-top:0;">Step 1: Signatories</h2>
+                <p style="text-align:center; color:#666; font-size:0.9rem;">Please enter the personnel who will sign this document.</p>
+                
+                <div class="sig-grid">
+                    <div>
+                        <div class="form-group"><label>Requested By (Name)</label><input type="text" id="sig-req-name"></div>
+                        <div class="form-group"><label>Position</label><input type="text" id="sig-req-pos"></div>
                     </div>
-
-                    <div class="editor-section">
-                        <h3>Draw Signature <button class="btn-clear" onclick="clearSig()">Clear</button></h3>
-                        <canvas id="sigCanvas" class="sig-canvas" width="300" height="120"></canvas>
-                        <p style="font-size:0.7em; color:#777; margin-top:5px;">Sign in the box above.</p>
+                    <div>
+                        <div class="form-group"><label>Approved By (Name)</label><input type="text" id="sig-app-name"></div>
+                        <div class="form-group"><label>Position</label><input type="text" id="sig-app-pos"></div>
+                    </div>
+                    <div>
+                        <div class="form-group"><label>Issued By (Name)</label><input type="text" id="sig-iss-name"></div>
+                        <div class="form-group"><label>Position</label><input type="text" id="sig-iss-pos"></div>
+                    </div>
+                    <div>
+                        <div class="form-group"><label>Received By (Name)</label><input type="text" id="sig-rec-name"></div>
+                        <div class="form-group"><label>Position</label><input type="text" id="sig-rec-pos"></div>
                     </div>
                 </div>
 
-                <div class="preview-panel">
-                    <div class="paper-slip">
-                        <div class="ris-container">
-                            <div style="text-align:right; font-style:italic; font-size:10px;">Appendix 63</div>
-                            <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
-                            <table style="width:100%; font-size:11px; margin-bottom:5px;">
-                                <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
-                                <tr><td>Division:</td><td class="div-name-display" style="border-bottom:1px solid black; font-weight:bold;">...</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
-                                <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
-                            </table>
+                <button class="modal-check-icon" onclick="goToStep2()">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
 
-                            <table class="ris-table">
-                                <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="15%">Remarks</th></tr></thead>
-                                <tbody id="risTableBody_1"></tbody>
-                            </table>
+            <div id="step-2" class="modal-step-2">
+                <div class="modal-header">
+                    <h2>📝 Create Requisition (Step 2/2)</h2>
+                    <div class="modal-header-actions">
+                        <button class="btn-action" style="background:#e74c3c;" onclick="closeModal()">Close</button>
+                        <button class="btn-action" style="background:#3498db;" onclick="window.print()">Print Preview</button>
+                        <button class="btn-action" style="background:#27ae60;" onclick="submitRequisition()">Submit Request</button>
+                    </div>
+                </div>
 
-                            <table class="footer-table" style="margin-top:-2px; border-top:none;">
-                                <tr><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td>Received by:</td></tr>
-                                <tr>
-                                    <td class="sig-box"><img id="preview-sig-img" class="signature-img" style="display:none;"></td>
-                                    <td></td><td></td><td></td>
-                                </tr>
-                                <tr>
-                                    <td><div class="sig-name" id="prev-req-name"></div><div class="sig-pos" id="prev-req-pos"></div></td>
-                                    <td><div class="sig-name" id="prev-app-name"></div><div class="sig-pos" id="prev-app-pos"></div></td>
-                                    <td><div class="sig-name" id="prev-iss-name"></div><div class="sig-pos" id="prev-iss-pos"></div></td>
-                                    <td><div class="sig-name" id="prev-rec-name"></div><div class="sig-pos" id="prev-rec-pos"></div></td>
-                                </tr>
-                                <tr><td>Date:</td><td>Date:</td><td>Date:</td><td>Date:</td></tr>
-                            </table>
+                <div class="modal-body">
+                    <div class="editor-panel">
+                        <div class="editor-section">
+                            <h3>Add Items</h3>
+                            <div class="form-group"><label>Select Item:</label><select id="itemSelect" style="width:100%; padding:8px;"></select></div>
+                            <div class="form-group"><label>Quantity:</label><input type="number" id="itemQty" placeholder="1"></div>
+                            <button class="btn-action btn-add" onclick="addItemToSlip()">+ Add to Slip</button>
                         </div>
 
-                        <div class="cut-line"></div>
+                        <div class="editor-section">
+                            <h3>Draw Signature <button class="btn-clear" onclick="clearSig()">Clear</button></h3>
+                            <canvas id="sigCanvas" class="sig-canvas" width="300" height="100"></canvas>
+                            <p style="font-size:0.7em; color:#777; margin-top:5px;">Sign in the box above. It will appear on the form.</p>
+                        </div>
+                    </div>
 
-                        <div class="ris-container">
-                            <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
-                            <table style="width:100%; font-size:11px; margin-bottom:5px;">
-                                <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
-                                <tr><td>Division:</td><td class="div-name-display" style="border-bottom:1px solid black; font-weight:bold;">...</td><td colspan="2" style="font-size:9px;"></td></tr>
-                            </table>
+                    <div class="preview-panel">
+                        <div class="paper-slip">
+                            <div class="ris-container">
+                                <div style="text-align:right; font-style:italic; font-size:10px;">Appendix 63</div>
+                                <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
+                                <table style="width:100%; font-size:11px; margin-bottom:5px;">
+                                    <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
+                                    <tr><td>Division:</td><td class="div-name-display" style="border-bottom:1px solid black; font-weight:bold;">...</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
+                                    <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
+                                </table>
 
-                            <table class="ris-table">
-                                <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="15%">Remarks</th></tr></thead>
-                                <tbody id="risTableBody_2"></tbody>
-                            </table>
+                                <table class="ris-table">
+                                    <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="15%">Remarks</th></tr></thead>
+                                    <tbody id="risTableBody_1"></tbody>
+                                </table>
 
-                            <table class="footer-table" style="margin-top:-2px; border-top:none;">
-                                <tr><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td>Received by:</td></tr>
-                                <tr>
-                                    <td class="sig-box"><img id="preview-sig-img-2" class="signature-img" style="display:none;"></td>
-                                    <td></td><td></td><td></td>
-                                </tr>
-                                <tr>
-                                    <td><div class="sig-name" id="prev-req-name-2"></div><div class="sig-pos" id="prev-req-pos-2"></div></td>
-                                    <td><div class="sig-name" id="prev-app-name-2"></div><div class="sig-pos" id="prev-app-pos-2"></div></td>
-                                    <td><div class="sig-name" id="prev-iss-name-2"></div><div class="sig-pos" id="prev-iss-pos-2"></div></td>
-                                    <td><div class="sig-name" id="prev-rec-name-2"></div><div class="sig-pos" id="prev-rec-pos-2"></div></td>
-                                </tr>
-                                <tr><td>Date:</td><td>Date:</td><td>Date:</td><td>Date:</td></tr>
-                            </table>
+                                <table class="footer-table" style="margin-top:-2px; border-top:none;">
+                                    <tr><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td>Received by:</td></tr>
+                                    <tr>
+                                        <td class="sig-box"><img id="preview-sig-img" class="signature-img" style="display:none;"></td>
+                                        <td></td><td></td><td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="sig-name" id="prev-req-name"></div><div class="sig-pos" id="prev-req-pos"></div></td>
+                                        <td><div class="sig-name" id="prev-app-name"></div><div class="sig-pos" id="prev-app-pos"></div></td>
+                                        <td><div class="sig-name" id="prev-iss-name"></div><div class="sig-pos" id="prev-iss-pos"></div></td>
+                                        <td><div class="sig-name" id="prev-rec-name"></div><div class="sig-pos" id="prev-rec-pos"></div></td>
+                                    </tr>
+                                    <tr><td>Date:</td><td>Date:</td><td>Date:</td><td>Date:</td></tr>
+                                </table>
+                            </div>
+
+                            <div class="cut-line"></div>
+
+                            <div class="ris-container">
+                                <div class="ris-title">REQUISITION AND ISSUE SLIP</div>
+                                <table style="width:100%; font-size:11px; margin-bottom:5px;">
+                                    <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
+                                    <tr><td>Division:</td><td class="div-name-display" style="border-bottom:1px solid black; font-weight:bold;">...</td><td colspan="2" style="font-size:9px;"></td></tr>
+                                </table>
+
+                                <table class="ris-table">
+                                    <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="15%">Remarks</th></tr></thead>
+                                    <tbody id="risTableBody_2"></tbody>
+                                </table>
+
+                                <table class="footer-table" style="margin-top:-2px; border-top:none;">
+                                    <tr><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td>Received by:</td></tr>
+                                    <tr>
+                                        <td class="sig-box"><img id="preview-sig-img-2" class="signature-img" style="display:none;"></td>
+                                        <td></td><td></td><td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="sig-name" id="prev-req-name-2"></div><div class="sig-pos" id="prev-req-pos-2"></div></td>
+                                        <td><div class="sig-name" id="prev-app-name-2"></div><div class="sig-pos" id="prev-app-pos-2"></div></td>
+                                        <td><div class="sig-name" id="prev-iss-name-2"></div><div class="sig-pos" id="prev-iss-pos-2"></div></td>
+                                        <td><div class="sig-name" id="prev-rec-name-2"></div><div class="sig-pos" id="prev-rec-pos-2"></div></td>
+                                    </tr>
+                                    <tr><td>Date:</td><td>Date:</td><td>Date:</td><td>Date:</td></tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -365,15 +383,19 @@
         // --- WIZARD LOGIC ---
         function openModal() { 
             document.getElementById('reqModal').classList.add('open');
-            document.getElementById('step-1').style.display = 'flex';
+            document.getElementById('step-1').style.display = 'block';
             document.getElementById('step-2').style.display = 'none';
+            document.querySelector('.modal-window').style.width = 'auto'; // Reset width for step 1
+            document.querySelector('.modal-window').style.height = 'auto'; 
             slipItems = []; renderSlip(); loadSignatories();
         }
 
         function goToStep2() {
-            saveSignatories(); // Save inputs to localStorage
+            saveSignatories(); // Save inputs to localStorage and update text preview
             document.getElementById('step-1').style.display = 'none';
             document.getElementById('step-2').style.display = 'flex';
+            document.querySelector('.modal-window').style.width = '95vw'; // Expand for step 2
+            document.querySelector('.modal-window').style.height = '90vh';
             setTimeout(clearSig, 100); // Reset sig pad dimensions
         }
 
@@ -390,7 +412,7 @@
             document.getElementById('sig-iss-pos').value = saved.issPos || "";
             document.getElementById('sig-rec-name').value = saved.recName || "";
             document.getElementById('sig-rec-pos').value = saved.recPos || "";
-            updatePreviewText();
+            // We don't update preview text here because preview is hidden in Step 1
         }
 
         function saveSignatories() {
@@ -405,22 +427,19 @@
                 recPos: document.getElementById('sig-rec-pos').value,
             };
             localStorage.setItem('ims_signatories', JSON.stringify(data));
-            updatePreviewText();
-            return data;
-        }
-
-        function updatePreviewText() {
-            const d = JSON.parse(localStorage.getItem('ims_signatories')) || {};
+            
+            // Immediately update the Preview in Step 2
             ['', '-2'].forEach(s => {
-                document.getElementById(`prev-req-name${s}`).innerText = d.reqName;
-                document.getElementById(`prev-req-pos${s}`).innerText = d.reqPos;
-                document.getElementById(`prev-app-name${s}`).innerText = d.appName;
-                document.getElementById(`prev-app-pos${s}`).innerText = d.appPos;
-                document.getElementById(`prev-iss-name${s}`).innerText = d.issName;
-                document.getElementById(`prev-iss-pos${s}`).innerText = d.issPos;
-                document.getElementById(`prev-rec-name${s}`).innerText = d.recName;
-                document.getElementById(`prev-rec-pos${s}`).innerText = d.recPos;
+                document.getElementById(`prev-req-name${s}`).innerText = data.reqName;
+                document.getElementById(`prev-req-pos${s}`).innerText = data.reqPos;
+                document.getElementById(`prev-app-name${s}`).innerText = data.appName;
+                document.getElementById(`prev-app-pos${s}`).innerText = data.appPos;
+                document.getElementById(`prev-iss-name${s}`).innerText = data.issName;
+                document.getElementById(`prev-iss-pos${s}`).innerText = data.issPos;
+                document.getElementById(`prev-rec-name${s}`).innerText = data.recName;
+                document.getElementById(`prev-rec-pos${s}`).innerText = data.recPos;
             });
+            return data;
         }
 
         // --- CORE FUNCTIONS ---
@@ -544,12 +563,12 @@
                 document.getElementById('ann-msg-display').innerText = data.message;
             });
         }
-        function initNotifications() { /* ... existing notification code ... */ }
-        function handleFileUpload(input) { /* ... existing upload code ... */ }
+        function initNotifications() { /* ... existing ... */ }
+        function handleFileUpload(input) { /* ... existing ... */ }
         function deleteItem(id) { if(confirm("Delete?")) db.collection('inventory').doc(id).delete(); }
-        function clearMyInventory() { /* ... existing clear code ... */ }
+        function clearMyInventory() { /* ... existing ... */ }
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
-        function nav(id, btn) { /* ... existing nav code ... */ }
+        function nav(id, btn) { /* ... existing ... */ }
     </script>
 </body>
 </html>
