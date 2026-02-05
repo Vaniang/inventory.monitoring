@@ -13,90 +13,144 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --red: #e74c3c; --green: #27ae60; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
-        .view-container { display: flex; height: 100vh; overflow: hidden; }
-        .hidden { display: none !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+    :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --red: #e74c3c; --green: #27ae60; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
+    .view-container { display: flex; height: 100vh; overflow: hidden; }
+    .hidden { display: none !important; }
 
-        /* SIDEBAR */
-        .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
-        .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
-        .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
-        .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
-        .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
+    /* SIDEBAR */
+    .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+    .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+    .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+    .nav-link.active { background: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); }
+    .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
 
-        /* MAIN */
-        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
+    /* MAIN */
+    .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
+    
+    .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
+    .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
+    .bell-icon:hover { color: var(--accent); }
+    .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
+    .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
+    .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
+    .notif-header { background: var(--primary); color: white; padding: 10px 15px; font-weight: bold; font-size: 0.9rem; }
+    .notif-list { max-height: 300px; overflow-y: auto; }
+    .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; transition: 0.2s; background: #fff; }
+    .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
+    .notif-time { font-size: 0.75rem; color: #888; margin-top: 5px; display: block; }
+
+    /* DASHBOARD */
+    .section { display: none; animation: fadeIn 0.4s ease-out; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
+    .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
+    .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
+    .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+
+    .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; margin-top: 20px; border-left: 5px solid #007bff; }
+    .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
+    .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
+    .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
+    
+    .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
+    .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+    .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
+    .modal-overlay.open { display: flex; }
+    .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 3000; }
+    .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; }
+    .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
+    
+    /* --- IMPROVED RIS PAPER SLIP STYLES --- */
+    .paper-slip { 
+        width: 210mm; /* Screen View Width */
+        background: white; 
+        padding: 10mm; 
+        font-family: 'Arial', sans-serif; 
+        color: black; 
+        box-sizing: border-box; 
+        margin-top: 50px;
+    }
+    
+    .ris-container { 
+        margin-bottom: 10px; 
+    }
+    
+    .cut-line { 
+        border-top: 1px dashed black; 
+        margin: 15px 0; 
+        position: relative; 
+        height: 10px;
+    }
+    .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -12px; background: white; padding: 0 5px; font-size: 16px;}
+    
+    .ris-title { text-align: center; font-weight: bold; font-size: 16px; margin: 5px 0 10px 0; text-decoration: underline; }
+    .ris-header-italic { font-style: italic; font-size: 12px; font-weight: bold; text-align: right; margin-bottom: 5px; }
+
+    /* TABLE STYLING */
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
+    .info-table td { padding: 2px 4px; vertical-align: bottom; }
+    .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 16px; }
+    
+    table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; font-size: 12px; }
+    table.ris-table th, table.ris-table td { border: 1px solid black; padding: 4px; text-align: center; vertical-align: middle; }
+    table.ris-table th { font-weight: bold; background: #eee; text-transform: uppercase; font-size: 11px; }
+    
+    table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px; font-size: 12px; }
+    table.footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
+    table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; font-size: 11px; }
+    
+    .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 25px; font-size: 12px; }
+    .sig-title { text-align: center; font-size: 11px; margin-top: 2px; }
+
+    /* --- PRINT SETTINGS --- */
+    @media print {
+        @page { size: A4; margin: 5mm; } /* Small margin on printer */
+        body * { visibility: hidden; }
         
-        .notification-wrapper { position: relative; cursor: pointer; margin-right: 20px; }
-        .bell-icon { font-size: 1.5rem; color: var(--primary); transition: 0.3s; }
-        .bell-icon:hover { color: var(--accent); }
-        .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; display: none; }
-        .notif-dropdown { position: absolute; top: 50px; right: 40px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1000; display: none; overflow: hidden; }
-        .notif-dropdown.show { display: block; animation: fadeIn 0.2s; }
-        .notif-header { background: var(--primary); color: white; padding: 10px 15px; font-weight: bold; font-size: 0.9rem; }
-        .notif-list { max-height: 300px; overflow-y: auto; }
-        .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; transition: 0.2s; background: #fff; }
-        .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
-        .notif-time { font-size: 0.75rem; color: #888; margin-top: 5px; display: block; }
-
-        /* DASHBOARD */
-        .section { display: none; animation: fadeIn 0.4s ease-out; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
-        .card .number { font-size: 3rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
-        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
-
-        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; margin-top: 20px; border-left: 5px solid #007bff; }
-        .inventory-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; }
-        .inventory-table th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
-        .inventory-table td { padding: 15px; border-bottom: 1px solid #eee; }
-        
-        .btn-req { position: fixed; bottom: 40px; right: 40px; background: var(--green); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
-        .btn-delete { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
-        .btn-reset { position: absolute; top: 30px; right: 30px; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; overflow-y: auto; padding: 20px 0; z-index: 2000; }
-        .modal-overlay.open { display: flex; }
-        .modal-actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 3000; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; width: 150px; }
-        .add-item-controls { background: #eee; padding: 15px; border-radius: 5px; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2100; display: flex; gap: 10px; align-items: center; }
-        
-        /* PAPER SLIP (A4 Fixed) */
-        .paper-slip { width: 210mm; min-height: 297mm; background: white; padding: 5mm 10mm; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: 'Arial Narrow', Arial, sans-serif; color: black; font-size: 10px; box-sizing: border-box; position: relative; }
-        .ris-container { margin-bottom: 10px; }
-        .cut-line { border-top: 1px dashed black; margin: 15px 0; position: relative; }
-        .cut-line::after { content: "✂"; position: absolute; right: 50%; top: -10px; background: white; padding: 0 5px; font-size: 14px;}
-        .ris-title { text-align: center; font-weight: bold; font-size: 14px; margin: 5px 0 10px 0; text-decoration: underline; }
-        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
-        .info-table td { padding: 1px; vertical-align: bottom; }
-        .input-line { border-bottom: 1px solid black; text-align: center; font-weight: bold; display: block; width: 100%; min-height: 14px; }
-        table.ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; table-layout: fixed; }
-        table.ris-table th, table.ris-table td { border: 1px solid black; padding: 2px; text-align: center; vertical-align: middle; }
-        table.ris-table th { font-weight: bold; background: #eee; }
-        table.footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; table-layout: fixed; margin-top: -2px; }
-        table.footer-table td { border-right: 1px solid black; padding: 2px; vertical-align: top; font-size: 10px; }
-        table.footer-table tr:first-child td { border-bottom: none; font-weight: bold; }
-        .sig-name { text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 10px; font-size: 11px; }
-        .sig-title { text-align: center; font-size: 9px; }
-
-        @media print {
-            @page { margin: 0; }
-            body * { visibility: hidden; }
-            .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: block !important; padding: 0; overflow: visible; z-index: 9999; }
-            .paper-slip, .paper-slip * { visibility: visible; }
-            .paper-slip { transform: scale(1); width: 100%; margin: 0; padding: 10mm; position: absolute; top: 0; left: 0; box-shadow: none; }
-            .modal-actions, .add-item-controls { display: none !important; }
+        .modal-overlay { 
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: white; 
+            display: block !important; 
+            padding: 0; margin: 0;
+            overflow: visible; z-index: 9999; 
         }
-    </style>
+
+        .paper-slip, .paper-slip * { visibility: visible; }
+        
+        .paper-slip { 
+            width: 100%; /* Fill the printable area */
+            height: 100vh; /* Fill the height */
+            margin: 0; 
+            padding: 0; 
+            box-shadow: none; 
+            transform: none; /* Remove scale */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .modal-actions, .add-item-controls { display: none !important; }
+        
+        /* Ensure the two forms fit on one page */
+        .ris-container { height: 48%; display: flex; flex-direction: column; justify-content: space-between; }
+        .cut-line { margin: 5px 0; border-top: 1px dashed #333; }
+        
+        /* Adjust table spacing for print */
+        table.ris-table th, table.ris-table td { padding: 3px; }
+        .sig-name { margin-top: 20px; }
+    }
+</style>
 </head>
 <body>
 
@@ -380,3 +434,4 @@
     </script>
 </body>
 </html>
+
