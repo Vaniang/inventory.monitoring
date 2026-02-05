@@ -29,7 +29,7 @@
         .logout-btn { margin-top: auto; background: #c0392b; text-align: center; justify-content: center; }
 
         /* MAIN CONTENT */
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); }
+        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); position: relative; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0; }
         
@@ -42,7 +42,12 @@
         .notif-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.85rem; background: #fff; cursor: pointer; }
         .notif-item.unread { background: #f0f8ff; border-left: 4px solid var(--accent); }
 
-        /* TABLES & CARDS */
+        /* SECTIONS */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* DASHBOARD ELEMENTS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
         .card .number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-top: 10px; }
@@ -187,7 +192,7 @@
             <div id="inventory" class="section">
                 <h1>Inventory List</h1>
                 <table class="inventory-table">
-                    <thead><tr><th>Item Name</th><th>Initial Qty</th><th>Unit</th><th>Price</th><th>Current Stock</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Item Name</th><th>Initial</th><th>Unit</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
                 <button class="btn-req" onclick="openModal()">+ Request Supplies</button>
@@ -460,16 +465,30 @@
         }
 
         function initUserConsolidatedRIS() {
-            db.collection('requisitions').where('division', '==', currentUserDivision).where('status', '==', 'Approved').orderBy('date', 'desc').onSnapshot(snap => {
-                const tbody = document.getElementById('userRisTable');
-                let html = '';
-                snap.forEach(doc => {
-                    const r = doc.data();
-                    const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
-                    html += `<tr><td>${dateStr}</td><td>${r.items.length} Items</td><td><span class="status-badge status-Approved">Approved</span></td><td><button class="btn-print-official" onclick="printOfficialRIS('${doc.id}')"><i class="fas fa-print"></i> Official Copy</button></td></tr>`;
+            // Updated: Removed the Firestore .orderBy() to avoid index errors. Sorted in JS instead.
+            db.collection('requisitions')
+                .where('division', '==', currentUserDivision)
+                .where('status', '==', 'Approved')
+                .onSnapshot(snap => {
+                    const tbody = document.getElementById('userRisTable');
+                    let requests = [];
+                    snap.forEach(doc => requests.push({id: doc.id, ...doc.data()}));
+                    
+                    // Sort locally
+                    requests.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    if(requests.length === 0) { 
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No approved requests found.</td></tr>'; 
+                        return; 
+                    }
+
+                    let html = '';
+                    requests.forEach(r => {
+                        const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
+                        html += `<tr><td>${dateStr}</td><td>${r.items.length} Items</td><td><span class="status-badge status-Approved">Approved</span></td><td><button class="btn-print-official" onclick="printOfficialRIS('${r.id}')"><i class="fas fa-print"></i> Official Copy</button></td></tr>`;
+                    });
+                    tbody.innerHTML = html;
                 });
-                tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">No approved requests.</td></tr>';
-            });
         }
 
         // --- ITEM LOGIC ---
@@ -563,12 +582,95 @@
                 document.getElementById('ann-msg-display').innerText = data.message;
             });
         }
-        function initNotifications() { /* ... existing ... */ }
-        function handleFileUpload(input) { /* ... existing ... */ }
-        function deleteItem(id) { if(confirm("Delete?")) db.collection('inventory').doc(id).delete(); }
-        function clearMyInventory() { /* ... existing ... */ }
+        function initNotifications() {
+            db.collection('notifications').where('userId', '==', currentUserId).onSnapshot(snap => {
+                const list = document.getElementById('notif-list'), badge = document.getElementById('notif-badge');
+                let unread = 0, notifs = [];
+                snap.forEach(d => notifs.push({id: d.id, ...d.data()}));
+                notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777;">No notifications</div>';
+                notifs.forEach(n => {
+                    if(n.status === 'unread') unread++;
+                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}</div>`;
+                });
+                badge.style.display = unread > 0 ? 'block' : 'none'; badge.innerText = unread;
+            });
+        }
+        function toggleNotifications() { document.getElementById('notif-dropdown').classList.toggle('show'); }
+        function markRead(id) { db.collection('notifications').doc(id).update({ status: 'read' }); }
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
-        function nav(id, btn) { /* ... existing ... */ }
+        function nav(id, btn) { document.querySelectorAll('.section').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const dataReader = new FileReader();
+            dataReader.onload = (e) => {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const rawData = XLSX.utils.sheet_to_json(ws, {header: 1});
+                let headerIndex = 0;
+                rawData.forEach((row, i) => { if(row.some(c => c && c.toString().toUpperCase().includes("GENERAL DESCRIPTION"))) headerIndex = i; });
+                const json = XLSX.utils.sheet_to_json(ws, {range: headerIndex});
+                const batch = db.batch();
+                let count = 0;
+                json.forEach(row => {
+                    const name = row['GENERAL DESCRIPTION'] || row['Item Name'];
+                    const qty = row['QUANTITY/'] || row['Quantity'] || row['Qty'];
+                    const unit = row['UNIT OF MEASURE'] || row['Unit'];
+                    const price = row['UNIT PRICE'] || row['Unit Price'];
+                    if(name && qty) {
+                        count++;
+                        batch.set(db.collection('inventory').doc(), { itemName: String(name).trim(), initialQty: Number(qty), currentQty: Number(qty), unit: String(unit || 'pc'), unitPrice: Number(price || 0), division: currentUserDivision });
+                    }
+                });
+                const base64Reader = new FileReader();
+                base64Reader.onload = (b64e) => {
+                    const uploadRef = db.collection('ppmp_uploads').doc();
+                    batch.set(uploadRef, { division: currentUserDivision, fileName: file.name, timestamp: firebase.firestore.FieldValue.serverTimestamp(), fileBase64: b64e.target.result, itemCount: count });
+                    batch.commit().then(() => alert(`${count} Items Uploaded Successfully!`));
+                };
+                base64Reader.readAsDataURL(file);
+            };
+            dataReader.readAsArrayBuffer(file);
+        }
+        function deleteItem(id) { if(confirm("Delete item?")) db.collection('inventory').doc(id).delete(); }
+        function clearMyInventory() {
+            if(!confirm("⚠ Reset ALL Stocks & Requests?")) return;
+            const batch = db.batch();
+            const inv = await db.collection('inventory').where('division', '==', currentUserDivision).get();
+            inv.forEach(d => batch.delete(d.ref));
+            const reqs = await db.collection('requisitions').where('division', '==', currentUserDivision).get();
+            reqs.forEach(d => batch.delete(d.ref));
+            await batch.commit(); alert("Reset Complete!");
+        }
+        function exportToExcel() { 
+            let data = [];
+            for(let k=0; k<2; k++) {
+                data.push(["", "", "", "", "", "", "Appendix 63"]);
+                data.push(["REQUISITION AND ISSUE SLIP"]);
+                data.push(["Entity Name :", "", "DepED RO I", "", "", "", "Fund Cluster :", "01"]);
+                data.push(["Division :", currentUserDivision, "", "", "", "Responsibility Center Code :", ""]);
+                data.push(["Office :", "", "", "", "", "RIS No. :", ""]); 
+                data.push(["Requisition", "", "", "", "Stock Available?", "", "Issue", ""]);
+                data.push(["Stock No.", "Unit", "Description", "Quantity", "Yes", "No", "Quantity", "Remarks"]);
+                slipItems.forEach((item) => {
+                    let cleanName = item.itemName.split(',')[0].split(';')[0].trim();
+                    data.push(["", item.unit || "pc", cleanName, item.reqQty, "", "", "", ""]);
+                });
+                for(let i=0; i < (10 - slipItems.length); i++) data.push(["", "", "", "", "", "", "", ""]);
+                data.push(["Purpose: Office Use"]);
+                data.push(["", "Requested by:", "Approved by:", "Issued by:", "", "Received by:", ""]);
+                data.push(["Signature:", "", "", "", "", "", ""]);
+                data.push(["Printed Name:", "JOVANIE M. MAZON", "CESAR S. BUCSIT", "", "", "", ""]);
+                data.push(["Designation:", "Admin Assistant I", "Admin Officer V", "", "", "", ""]);
+                data.push(["Date:", "", "", "", "", "", ""]);
+                data.push(["", "", "", "", "", "", "", ""]); 
+            }
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "RIS_Double");
+            XLSX.writeFile(wb, "Requisition_Issue_Slip_Double.xlsx");
+        }
     </script>
 </body>
 </html>
