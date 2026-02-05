@@ -17,6 +17,7 @@
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; }
         
+        /* LAYOUT */
         .view-container { display: flex; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
@@ -25,11 +26,15 @@
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
+        
+        /* CONTENT */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .header-title h1 { color: var(--primary); font-size: 2rem; margin: 0 0 30px 0; }
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* CARDS & TABLES */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); transition: transform 0.2s; }
         .card .number { font-size: 2.5rem; font-weight: 800; color: #333; margin-top: 10px; }
@@ -37,10 +42,13 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
+        
+        /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
         .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
         .btn-print-tbl { background: var(--primary); }
@@ -48,10 +56,28 @@
         .btn-delete { background: var(--red); }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
+
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
         .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+
+        /* --- STYLED LIVE ANNOUNCEMENT PREVIEW --- */
+        .live-announcement {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 5px solid #ff9800;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s;
+        }
+        .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .live-title { font-weight: bold; color: #e65100; font-size: 1.1rem; }
+        .live-body { color: #5d4037; font-size: 0.95rem; line-height: 1.4; }
+
+        /* --- PRINT AREA (FIXED) --- */
         #print-area-forms { display: none; }
 
         @media print {
@@ -92,13 +118,24 @@
                     <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
                 </div>
 
-                <div class="content-box" style="border-left: 5px solid #e67e22;">
-                    <h3>📢 Post Announcement</h3>
-                    <p style="color:#666; font-size:0.9em; margin-bottom:10px;">Send a message to all users (visible on their dashboard).</p>
+                <div class="content-box">
+                    <h3>📢 Announcement Manager</h3>
+                    <p style="color:#666; font-size:0.9em; margin-bottom:10px;">Create a message for all users. Only the latest announcement is shown.</p>
+                    
                     <input type="text" id="ann-title" placeholder="Title (e.g., System Maintenance)" class="edit-input" style="margin-bottom:10px; font-weight:bold;">
                     <textarea id="ann-message" placeholder="Type your message here..." class="edit-input" style="height:80px;"></textarea>
-                    <div style="text-align:right; margin-top:10px;">
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                        <button class="btn-save" style="background:#7f8c8d;" onclick="clearAnnouncementInput()">Clear Form</button>
                         <button class="btn-save" style="background:#e67e22;" onclick="postAnnouncement()">Post Now</button>
+                    </div>
+
+                    <div id="live-announcement-box" class="live-announcement">
+                        <div class="live-header">
+                            <span class="live-title">✅ Currently Active: <span id="live-title"></span></span>
+                            <button class="action-btn btn-delete" onclick="deleteActiveAnnouncement()" title="Remove Announcement"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="live-body" id="live-message"></div>
+                        <input type="hidden" id="live-ann-id">
                     </div>
                 </div>
 
@@ -184,6 +221,7 @@
                         initMasterInventory();
                         initConsolidatedSupplies();
                         initConsolidatedRIS();
+                        initAnnouncementManager(); // NEW: Listen for active announcements
                     } else window.location.href = "../user/user.html";
                 });
             }
@@ -197,7 +235,7 @@
             btn.classList.add('active');
         }
 
-        // --- NEW: ANNOUNCEMENT FUNCTION ---
+        // --- ANNOUNCEMENT MANAGER ---
         function postAnnouncement() {
             const title = document.getElementById('ann-title').value;
             const message = document.getElementById('ann-message').value;
@@ -212,10 +250,44 @@
             })
             .then(() => {
                 alert("Announcement Posted Successfully!");
-                document.getElementById('ann-title').value = "";
-                document.getElementById('ann-message').value = "";
+                clearAnnouncementInput();
             })
             .catch(err => alert("Error: " + err.message));
+        }
+
+        function clearAnnouncementInput() {
+            document.getElementById('ann-title').value = "";
+            document.getElementById('ann-message').value = "";
+        }
+
+        // Listen for the active announcement to allow deletion
+        function initAnnouncementManager() {
+            db.collection('announcements').orderBy('timestamp', 'desc').limit(1).onSnapshot(snap => {
+                const box = document.getElementById('live-announcement-box');
+                
+                if (snap.empty) {
+                    box.style.display = 'none'; // Hide if no announcement
+                    return;
+                }
+
+                const doc = snap.docs[0];
+                const data = doc.data();
+                
+                box.style.display = 'block'; // Show box
+                document.getElementById('live-title').innerText = data.title;
+                document.getElementById('live-message').innerText = data.message;
+                document.getElementById('live-ann-id').value = doc.id;
+            });
+        }
+
+        function deleteActiveAnnouncement() {
+            const id = document.getElementById('live-ann-id').value;
+            if(!id) return;
+            if(confirm("Are you sure you want to remove this announcement? It will disappear from all user dashboards.")) {
+                db.collection('announcements').doc(id).delete()
+                .then(() => alert("Announcement Removed."))
+                .catch(err => alert("Error: " + err.message));
+            }
         }
 
         // --- DASHBOARD FUNCTIONS ---
