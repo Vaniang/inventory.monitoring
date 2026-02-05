@@ -379,19 +379,22 @@
         .where('division', '==', currentUserDivision)
         .where('status', '==', 'Approved')
         .orderBy('date', 'desc')
+        .limit(50)  // <--- ADDED: Limits to last 50 items to fix slow loading
         .onSnapshot(snap => {
             const tbody = document.getElementById('userRisTable');
             let html = '';
+            
             if(snap.empty) { 
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No approved requests found.</td></tr>'; 
                 return; 
             }
+
             snap.forEach(doc => {
                 const r = doc.data();
                 const dateStr = r.date ? new Date(r.date).toLocaleDateString() : 'N/A';
                 const itemsDesc = r.items ? r.items.length + ' Items' : '0 Items';
                 
-                // Added the Delete Button below inside the Action column
+                // Your existing layout with the Delete Button
                 html += `<tr>
                     <td>${dateStr}</td>
                     <td>${itemsDesc}</td>
@@ -409,6 +412,12 @@
                 </tr>`;
             });
             tbody.innerHTML = html;
+        }, error => {
+            // <--- ADDED: Error handling to catch missing index issues
+            console.error("Error loading RIS:", error);
+            if(error.message.includes("index")) {
+                alert("Database Error: A required index is missing. Please check the Console (F12) for the link to create it.");
+            }
         });
 }
 
@@ -670,6 +679,7 @@
     </script>
 </body>
 </html>
+
 
 
 
