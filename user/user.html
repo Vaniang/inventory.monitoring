@@ -157,6 +157,30 @@
         /* Hide UI */
         .modal-actions, .add-item-controls, .sidebar, .header-flex { display: none !important; }
     }
+        /* Update this class to keep the button inside the box */
+.content-box { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 12px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+    margin-top: 20px; 
+    border-left: 5px solid #007bff; 
+    position: relative; /* <--- THIS WAS MISSING */
+}
+
+/* Optional: Adjust the button slightly if needed */
+.btn-reset { 
+    position: absolute; 
+    top: 30px; 
+    right: 30px; 
+    background: var(--red); 
+    color: white; 
+    border: none; 
+    padding: 8px 15px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-weight: bold; 
+}
 </style>
 </head>
 <body>
@@ -441,5 +465,6 @@
     </script>
 </body>
 </html>
+
 
 
