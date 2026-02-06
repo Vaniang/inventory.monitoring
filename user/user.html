@@ -123,10 +123,12 @@
             background: transparent; 
             outline: none;
         }
-        .sig-input-title {
-            font-size: 9px; 
-            font-weight: normal;
-        }
+       .sig-input-title {
+    font-size: 9px; 
+    font-weight: normal;
+    text-transform: none !important; /* Forces normal casing (allows lower case) */
+    font-style: italic; /* Adds the requested italic style */
+}
         .sig-input:hover, .sig-input:focus { background: #f0f8ff; }
         
         .cut-line { border-top: 2px dashed #555; height: 10px; width: 100%; margin: 10px 0; position: relative; }
@@ -596,8 +598,8 @@
                         </tr>
                         <tr>
                             <td>Designation:</td>
-                            <td align="center"><div style="font-size:9px;">${rPos}</div></td>
-                            <td align="center"><div style="font-size:9px;">${aPos}</div></td>
+                            <td align="center"><div style="font-size:9px; font-style:italic;">${rPos}</div></td>
+                            <td align="center"><div style="font-size:9px; font-style:italic;">${aPos}</div></td>
                             <td></td><td style="border-right:none;"></td>
                         </tr>
                         <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
@@ -840,6 +842,7 @@
     </script>
 </body>
 </html>
+
 
 
 
