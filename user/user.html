@@ -670,13 +670,49 @@
             localStorage.setItem('ris_app_pos', ap);
         }
 
-        function addItemToSlip() {
-            const id = document.getElementById('itemSelect').value, qty = Number(document.getElementById('itemQty').value);
-            if(!id || qty <= 0) return;
-            const item = inventoryData.find(i => i.id === id);
-            if(qty > item.currentQty) return alert("Low Stock!");
-            slipItems.push({...item, reqQty: qty}); renderSlip();
-        }
+function addItemToSlip() {
+    const isManual = document.getElementById('chkManual').checked;
+    const qty = Number(document.getElementById('itemQty').value);
+
+    if (qty <= 0) return alert("Please enter a valid quantity.");
+
+    if (isManual) {
+        // --- LOGIC FOR "OTHERS" ---
+        const name = document.getElementById('manualName').value.trim();
+        const unit = document.getElementById('manualUnit').value.trim() || "pc"; // Default to pc if empty
+        
+        if (!name) return alert("Please type the Item Name.");
+
+        // Add manual item with a special flag 'isManual: true'
+        slipItems.push({
+            id: null, // No database ID
+            itemName: name,
+            unit: unit,
+            reqQty: qty,
+            isManual: true // Important flag!
+        });
+
+    } else {
+        // --- LOGIC FOR STANDARD ITEMS ---
+        const id = document.getElementById('itemSelect').value;
+        if (!id) return alert("Please select an item.");
+        
+        const item = inventoryData.find(i => i.id === id);
+        if (qty > item.currentQty) return alert("Low Stock! You only have " + item.currentQty);
+        
+        slipItems.push({
+            ...item, 
+            reqQty: qty,
+            isManual: false
+        });
+    }
+
+    renderSlip();
+    
+    // Optional: Reset fields for next entry
+    document.getElementById('itemQty').value = "";
+    document.getElementById('manualName').value = "";
+}
         
         // --- NEW: Remove Item Function ---
         function removeItemFromSlip(index) {
@@ -699,29 +735,46 @@
             });
         }
         
-        async function submitRequisition() {
-            if(!slipItems.length) return alert("No items");
-            const reqBy = document.getElementById('sig-req-name-1').value;
-            const reqDesig = document.getElementById('sig-req-pos-1').value;
-            const appBy = document.getElementById('sig-app-name-1').value;
-            const appDesig = document.getElementById('sig-app-pos-1').value;
-            const reqSig = localStorage.getItem('ris_sig_req') || "";
-            const appSig = localStorage.getItem('ris_sig_app') || "";
+      async function submitRequisition() {
+    if(!slipItems.length) return alert("No items");
+    
+    // ... (Your existing code for getting Signatures/Names stays the same) ...
+    const reqBy = document.getElementById('sig-req-name-1').value;
+    const reqDesig = document.getElementById('sig-req-pos-1').value;
+    const appBy = document.getElementById('sig-app-name-1').value;
+    const appDesig = document.getElementById('sig-app-pos-1').value;
+    const reqSig = localStorage.getItem('ris_sig_req') || "";
+    const appSig = localStorage.getItem('ris_sig_app') || "";
 
-            const batch = db.batch(), today = new Date().toISOString();
-            slipItems.forEach(i => { 
-                const ref = db.collection('inventory').doc(i.id); 
-                batch.update(ref, { currentQty: i.currentQty - i.reqQty }); 
-            });
-            
-            batch.set(db.collection('requisitions').doc(), { 
-                date: today, items: slipItems, division: currentUserDivision, userId: currentUserId, status: 'Pending',
-                requestedBy: reqBy, requestedDesig: reqDesig, approvedBy: appBy, approvedDesig: appDesig,
-                reqSig: reqSig, appSig: appSig
-            });
-            
-            await batch.commit(); alert("Request Submitted!"); closeModal();
+    const batch = db.batch(), today = new Date().toISOString();
+
+    // --- UPDATED LOGIC: Only subtract stock if it is NOT a manual item ---
+    slipItems.forEach(i => { 
+        if (i.isManual !== true && i.id) {
+            const ref = db.collection('inventory').doc(i.id); 
+            batch.update(ref, { currentQty: i.currentQty - i.reqQty }); 
         }
+    });
+    // ---------------------------------------------------------------------
+    
+    batch.set(db.collection('requisitions').doc(), { 
+        date: today, 
+        items: slipItems, 
+        division: currentUserDivision, 
+        userId: currentUserId, 
+        status: 'Pending',
+        requestedBy: reqBy, 
+        requestedDesig: reqDesig, 
+        approvedBy: appBy, 
+        approvedDesig: appDesig,
+        reqSig: reqSig, 
+        appSig: appSig
+    });
+    
+    await batch.commit(); 
+    alert("Request Submitted!"); 
+    closeModal();
+}
 
         function deleteRIS(id) {
             if(confirm("Are you sure you want to DELETE this approved record? \n\nWarning: This action cannot be undone.")) {
@@ -753,7 +806,20 @@
             if(bottomReq && reqSig) bottomReq.innerHTML = `<img src="${reqSig}" class="sig-img">`;
             if(bottomApp && appSig) bottomApp.innerHTML = `<img src="${appSig}" class="sig-img">`; 
         }
+       function toggleManualInput() {
+    const isManual = document.getElementById('chkManual').checked;
+    // Toggle visibility
+    document.getElementById('itemSelect').style.display = isManual ? 'none' : 'inline-block';
+    document.getElementById('manualName').style.display = isManual ? 'inline-block' : 'none';
+    document.getElementById('manualUnit').style.display = isManual ? 'inline-block' : 'none';
+    
+    // Clear values to avoid confusion
+    document.getElementById('itemSelect').value = "";
+    document.getElementById('manualName').value = "";
+    document.getElementById('manualUnit').value = "";
+}
     </script>
 </body>
 </html>
+
 
