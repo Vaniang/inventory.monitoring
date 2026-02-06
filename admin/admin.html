@@ -583,10 +583,10 @@
     for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
     
     // Get Names
-    const rName = data.requestedBy || "JOVANIE M. MAZON"; 
-    const rPos  = data.requestedDesig || "Admin Assistant I<br>ORD-PAU";
-    const aName = data.approvedBy || "CESAR S. BUCSIT";
-    const aPos  = data.approvedDesig || "Admin Officer V<br>ORD-PAU Caretaker";
+    const rName = data.requestedBy || "REQUESTING PERSONNEL"; 
+    const rPos  = data.requestedDesig || "Designation<br>Office";
+    const aName = data.approvedBy || "Chief/Section Head";
+    const aPos  = data.approvedDesig || "Designation<br>Office";
 
     // --- RETRIEVE SAVED SIGNATURES FROM DATABASE ---
     const reqImgTag = data.reqSig ? `<img src="${data.reqSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
