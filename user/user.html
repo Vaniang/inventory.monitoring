@@ -198,6 +198,36 @@
 @media print {
     .btn-remove-item { display: none !important; }
 }
+
+        /* Styling for the Notification Header with the Clear Button */
+.notif-header { 
+    padding: 15px; 
+    border-bottom: 1px solid #eee; 
+    font-weight: bold; 
+    background: #f8f9fa;
+    /* Flexbox allows the text and button to sit apart */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+/* The Clear Button Style */
+.btn-clear-notif {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+.btn-clear-notif:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
     </style>
 </head>
 <body>
@@ -218,10 +248,17 @@
                     <i class="fas fa-bell bell-icon"></i><span id="notif-badge" class="badge">0</span>
                 </div>
                 <div id="notif-dropdown" class="notif-dropdown">
-                    <div class="notif-header">Notifications</div>
-                    <div id="notif-list" class="notif-list"><div style="padding:15px; color:#777;">No notifications</div></div>
-                </div>
-            </div>
+    <div class="notif-header">
+        <span>Notifications</span>
+        <button class="btn-clear-notif" onclick="markAllRead()" title="Mark all as read">
+            <i class="fas fa-check-double"></i> Clear All
+        </button>
+    </div>
+    
+    <div id="notif-list" class="notif-list">
+        <div style="padding:15px; color:#777;">No notifications</div>
+    </div>
+</div>
 
             <div id="dashboard" class="section active">
                 <div id="announcement-area" class="announcement-banner">
@@ -888,6 +925,7 @@
     </script>
 </body>
 </html>
+
 
 
 
