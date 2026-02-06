@@ -922,9 +922,37 @@
     // Re-draw the table
     renderSlip();
 }
+
+       function markAllRead() {
+    const batch = db.batch();
+    
+    // Find all UNREAD notifications for this user
+    db.collection('notifications')
+        .where('userId', '==', currentUserId)
+        .where('status', '==', 'unread')
+        .get()
+        .then(snap => {
+            if (snap.empty) {
+                // Optional: Alert if already clear
+                // alert("All notifications are already read."); 
+                return;
+            }
+
+            // Loop through them and queue the update
+            snap.forEach(doc => {
+                batch.update(doc.ref, { status: 'read' });
+            });
+
+            // Commit the changes (This triggers the auto-refresh)
+            batch.commit()
+                .then(() => console.log("All notifications marked as read."))
+                .catch(err => console.error("Error clearing notifications:", err));
+        });
+}
     </script>
 </body>
 </html>
+
 
 
 
