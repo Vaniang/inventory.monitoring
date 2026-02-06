@@ -214,12 +214,21 @@
             <button class="btn" style="background:#e74c3c;" onclick="closeModal()">Close</button>
             <button class="btn" style="background:#2c3e50;" onclick="submitRequisition()">Submit & Save</button>
         </div>
-        <div class="add-item-controls">
-            <b>Add:</b>
-            <select id="itemSelect" style="padding:8px; border:1px solid #ccc; border-radius:4px;"><option value="">Select Item...</option></select>
-            <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:8px; border:1px solid #ccc; border-radius:4px;">
-            <button class="btn" style="background:#27ae60; width:auto; padding:8px 15px;" onclick="addItemToSlip()">Add</button>
-        </div>
+     <div class="add-item-controls">
+    <label style="margin-right:10px; font-size:12px; cursor:pointer;">
+        <input type="checkbox" id="chkManual" onchange="toggleManualInput()"> Others?
+    </label>
+
+    <select id="itemSelect" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="">Select Item...</option>
+    </select>
+
+    <input type="text" id="manualName" placeholder="Item Name (e.g. HDD)" style="display:none; width:150px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    <input type="text" id="manualUnit" placeholder="Unit" style="display:none; width:50px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+
+    <input type="number" id="itemQty" placeholder="Qty" style="width:60px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    <button class="btn" style="background:#27ae60; width:auto; padding:8px 15px;" onclick="addItemToSlip()">Add</button>
+</div>
         
         <div class="paper-slip">
             <div class="ris-container">
@@ -747,3 +756,4 @@
     </script>
 </body>
 </html>
+
