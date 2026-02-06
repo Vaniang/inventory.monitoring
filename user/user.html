@@ -179,6 +179,25 @@
     margin-left: 5px;
 }
 .btn-upload-sig:hover { background: #d35400; }
+        /* Styling for the remove button */
+.btn-remove-item {
+    background: transparent;
+    border: none;
+    color: #e74c3c; /* Red color */
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+.btn-remove-item:hover {
+    color: #c0392b;
+    transform: scale(1.2);
+}
+
+/* STRICTLY HIDE THIS BUTTON WHEN PRINTING */
+@media print {
+    .btn-remove-item { display: none !important; }
+}
     </style>
 </head>
 <body>
@@ -696,12 +715,33 @@
         }
         
         function renderSlip() {
-            ['risTableBody_1', 'risTableBody_2'].forEach(tid => {
-                const b = document.getElementById(tid); b.innerHTML = '';
-                slipItems.forEach(i => b.innerHTML += `<tr><td></td><td>${i.unit||'pc'}</td><td style="text-align:left">${i.itemName.split(',')[0]}</td><td>${i.reqQty}</td><td></td><td></td><td></td><td></td></tr>`);
-                for(let k = 0; k < (10 - slipItems.length); k++) b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-            });
+    ['risTableBody_1', 'risTableBody_2'].forEach(tid => {
+        const b = document.getElementById(tid); 
+        b.innerHTML = '';
+        
+        // Loop through items WITH index
+        slipItems.forEach((i, index) => {
+            b.innerHTML += `
+            <tr>
+                <td style="text-align:center;">
+                    <button class="btn-remove-item" onclick="removeItemFromSlip(${index})" title="Remove Item">✖</button>
+                </td>
+                <td>${i.unit || 'pc'}</td>
+                <td style="text-align:left">${i.itemName.split(',')[0]}</td>
+                <td>${i.reqQty}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>`;
+        });
+
+        // Fill remaining rows with empty space
+        for(let k = 0; k < (10 - slipItems.length); k++) {
+            b.innerHTML += `<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; 
         }
+    });
+}
         
         async function submitRequisition() {
             if(!slipItems.length) return alert("No items");
@@ -839,9 +879,16 @@
             originalOpenModal(); // Call original
             loadSignatures(); // Then load images
         };
+       function removeItemFromSlip(index) {
+    // Remove 1 item at the specific index
+    slipItems.splice(index, 1);
+    // Re-draw the table
+    renderSlip();
+}
     </script>
 </body>
 </html>
+
 
 
 
