@@ -548,10 +548,10 @@
             });
             for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
             
-            const rName = data.requestedBy || "JOVANIE M. MAZON"; 
-            const rPos  = data.requestedDesig || "Admin Assistant I<br>ORD-PAU";
-            const aName = data.approvedBy || "CESAR S. BUCSIT";
-            const aPos  = data.approvedDesig || "Admin Officer V<br>ORD-PAU Caretaker";
+            const rName = data.requestedBy || "JRequesting Personnel"; 
+            const rPos  = data.requestedDesig || "Designation I<br>Office";
+            const aName = data.approvedBy || "Chief/Section Head";
+            const aPos  = data.approvedDesig || "Designation<br>Office";
 
             // --- FIXED: Prioritize Database Signature, Fallback to Local Storage ---
             const reqSigData = data.reqSig || localStorage.getItem('ris_sig_req');
@@ -657,10 +657,10 @@
             slipItems = []; 
             renderSlip(); 
             // Load saved signatories from local storage
-            document.getElementById('sig-req-name-1').value = localStorage.getItem('ris_req_name') || "JOVANIE M. MAZON";
-            document.getElementById('sig-req-pos-1').value = localStorage.getItem('ris_req_pos') || "Admin Assistant I";
-            document.getElementById('sig-app-name-1').value = localStorage.getItem('ris_app_name') || "CESAR S. BUCSIT";
-            document.getElementById('sig-app-pos-1').value = localStorage.getItem('ris_app_pos') || "Admin Officer V";
+            document.getElementById('sig-req-name-1').value = localStorage.getItem('ris_req_name') || "Requesting Personnel";
+            document.getElementById('sig-req-pos-1').value = localStorage.getItem('ris_req_pos') || "Designation";
+            document.getElementById('sig-app-name-1').value = localStorage.getItem('ris_app_name') || "Chief/Section Head";
+            document.getElementById('sig-app-pos-1').value = localStorage.getItem('ris_app_pos') || "Designation";
             syncSignatories();
         }
         function closeModal() { document.getElementById('reqModal').classList.remove('open'); }
@@ -840,6 +840,7 @@
     </script>
 </body>
 </html>
+
 
 
 
