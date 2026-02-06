@@ -641,24 +641,51 @@
 let adminUnitListener = null;
 
 function loadUnitInventory() {
-    const unit = document.getElementById('adminUnitSelect').value;
+    let unit = document.getElementById('adminUnitSelect').value;
     const tbody = document.getElementById('adminUnitTable');
     
+    // --- 1. ADMIN-SIDE NAME CORRECTION ---
+    // This ensures that even if your Dropdown says "PROCUREMENT UNIT",
+    // we query the database for the official name "AD-Procurement Unit".
+    const correctionMap = {
+        "PROCUREMENT UNIT": "AD-Procurement Unit",
+        "ORD-PAU": "ORD-Public Affairs Unit",
+        "ORD-LEGAL": "ORD-Legal Unit",
+        "ORD-ICT": "ORD-ICT Unit",
+        "QAD": "QAD" // Add other corrections here if needed
+    };
+
+    // Apply correction if a match is found
+    if (correctionMap[unit]) {
+        console.log(`Auto-correcting query: "${unit}" -> "${correctionMap[unit]}"`);
+        unit = correctionMap[unit];
+    }
+    // -------------------------------------
+
     if(!unit) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Please select a unit.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading data...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading data for <b>' + unit + '</b>...</td></tr>';
 
-    if(adminUnitListener) adminUnitListener();
+    // Detach previous listener to prevent memory leaks/duplicate data
+    if(adminUnitListener) {
+        adminUnitListener();
+    }
+
+    console.log("Querying Firestore for Division:", unit); // Debugging Log
 
     adminUnitListener = db.collection('inventory')
         .where('division', '==', unit)
         .orderBy('itemName')
         .onSnapshot(snap => {
             if(snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No inventory records found for ' + unit + '.</td></tr>';
+                // Helpful error message telling you EXACTLY what it looked for
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">
+                    No inventory records found for: <b>${unit}</b><br>
+                    <small style="color:#777;">(Check if the User uploaded their PPMP correctly)</small>
+                </td></tr>`;
                 return;
             }
 
@@ -667,30 +694,34 @@ function loadUnitInventory() {
                 const item = doc.data();
                 const qty = item.currentQty;
                 let statusBadge = '';
-                let rowColor = '';
+                let rowStyle = '';
 
+                // Enhanced Status Logic
                 if(qty <= 0) {
-                    statusBadge = '<span class="status-badge" style="background:#e74c3c; color:white;">OUT OF STOCK</span>';
-                    rowColor = 'style="background-color: #fadbd8;"'; 
+                    statusBadge = '<span class="status-badge" style="background:#e74c3c; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">OUT OF STOCK</span>';
+                    rowStyle = 'background-color: #fdedec;'; 
                 } else if(qty < 5) {
-                    statusBadge = '<span class="status-badge" style="background:#f1c40f; color:black;">CRITICAL</span>';
+                    statusBadge = '<span class="status-badge" style="background:#f1c40f; color:black; padding:3px 8px; border-radius:12px; font-size:0.8rem;">CRITICAL</span>';
+                    rowStyle = 'background-color: #fef9e7;';
                 } else {
-                    statusBadge = '<span class="status-badge" style="background:#2ecc71; color:white;">GOOD</span>';
+                    statusBadge = '<span class="status-badge" style="background:#2ecc71; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">GOOD</span>';
                 }
 
-                html += `<tr ${rowColor}>
-                    <td style="font-weight:bold;">${item.itemName}</td>
+                html += `<tr style="${rowStyle}">
+                    <td style="font-weight:600; color:#2c3e50;">${item.itemName}</td>
                     <td>${item.unit || 'pc'}</td>
-                    <td style="font-size:1.1rem;">${qty}</td>
+                    <td style="font-size:1.1rem; font-weight:bold;">${qty}</td>
                     <td>${statusBadge}</td>
                 </tr>`;
             });
 
             tbody.innerHTML = html;
         }, error => {
-            console.error("Error:", error);
+            console.error("Database Error:", error);
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error loading data. Check Console.</td></tr>`;
+            
             if(error.message.includes("index")) {
-                alert("Database Error: Missing Index. Check Console (F12) for the link.");
+                alert("Database Error: A required Index is missing.\nPlease open the Browser Console (F12) and click the link from Firebase to create it.");
             }
         });
 }
