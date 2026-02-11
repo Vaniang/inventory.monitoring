@@ -91,6 +91,10 @@
         .restock-stat label { display: block; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
         .restock-stat div { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
 
+        /* PO LABEL IN TABLE */
+        .po-tag { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+        .po-none { color: #aaa; font-style: italic; }
+
         /* --- PRINT AREA (FIXED) --- */
         #print-area-forms { display: none; }
 
@@ -118,6 +122,7 @@
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
             <div class="nav-link" onclick="nav('master-list', this)">Master Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
+            <div class="nav-link" onclick="nav('purchase-orders', this)">Purchase Orders</div>
              <div class="nav-link" onclick="nav('unit-inventory', this)">Unit Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
@@ -162,6 +167,7 @@
                     </table>
                 </div>
             </div>
+
             <div id="unit-inventory" class="section">
                 <div class="header-title"><h1>Unit Stock Monitor</h1></div>
                 <div class="content-box">
@@ -170,7 +176,6 @@
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
                         <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
                             <option value="">-- Select Division/Unit --</option>
-                            
                             <option value="AD-Personnel Section">AD-Personnel Section</option>
                             <option value="AD-AMS">AD-AMS</option>
                             <option value="AD-Records">AD-Records</option>
@@ -179,24 +184,20 @@
                             <option value="AD-Procurement Unit">AD-Procurement Unit</option>
                             <option value="AD-Payroll">AD-Payroll</option>
                             <option value="Admin Proper">Admin Proper</option>
-
                             <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
                             <option value="ORD-ICT Unit">ORD-ICT Unit</option>
                             <option value="ORD-Legal Unit">ORD-Legal Unit</option>
                             <option value="ORD Proper">ORD Proper</option>
                             <option value="OARD">OARD</option>
-
                             <option value="Finance Proper">Finance Proper</option>
                             <option value="FD-Accounting">FD-Accounting</option>
                             <option value="FD-Budget">FD-Budget</option>
-
                             <option value="ESSD">ESSD</option>
                             <option value="FTAD">FTAD</option>
                             <option value="HRDD">HRDD</option>
                             <option value="CLMD">CLMD</option>
                             <option value="CLMD-LR">CLMD-LR</option>
                             <option value="QAD">QAD</option>
-
                             <option value="COA">COA</option>
                         </select>
                         <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
@@ -211,7 +212,6 @@
                                 <th>Unit</th>
                                 <th>Remaining Stock</th>
                                 <th>Status</th>
-                                <!-- Removed Action Column here as requested -->
                             </tr>
                         </thead>
                         <tbody id="adminUnitTable">
@@ -220,6 +220,7 @@
                     </table>
                 </div>
             </div>
+            
             <div id="master-list" class="section">
                 <div class="header-title"><h1>Master Inventory</h1></div>
                 <div class="content-box">
@@ -237,6 +238,28 @@
                     <table class="data-table">
                         <thead><tr><th>Item Name</th><th>Total Qty</th><th>Unit</th><th>Avg Price</th><th>Restock / Balance</th></tr></thead>
                         <tbody id="consolidatedTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- NEW SECTION: PURCHASE ORDERS -->
+            <div id="purchase-orders" class="section">
+                <div class="header-title"><h1>Purchase Orders Log</h1></div>
+                <div class="content-box">
+                    <p style="color:#666; margin-bottom:15px;">History of all restocks and purchase orders processed.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>PO Number</th>
+                                <th>Item Name</th>
+                                <th>Qty Added</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poTableBody">
+                            <tr><td colspan="5" style="text-align:center;">Loading PO history...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -275,7 +298,7 @@
                 </div>
             </div>
 
-            <!-- NEW CONSOLIDATED RESTOCK MODAL -->
+            <!-- NEW CONSOLIDATED RESTOCK MODAL WITH PO -->
             <div id="restockModal" class="modal-overlay">
                 <div class="modal-box small-modal">
                     <span class="close-modal" onclick="closeRestockModal()">&times;</span>
@@ -302,33 +325,8 @@
                     </div>
 
                     <div style="margin-bottom:15px;">
-                        <label><b>1. Select Destination Unit for Stock:</b></label>
-                        <select id="restock-unit-select" class="edit-input" style="padding:10px; font-weight:bold;">
-                            <option value="">-- Select Division/Unit --</option>
-                            <option value="Admin Proper">Admin Proper (Default)</option>
-                            <option value="AD-Personnel Section">AD-Personnel Section</option>
-                            <option value="AD-AMS">AD-AMS</option>
-                            <option value="AD-Records">AD-Records</option>
-                            <option value="AD-GSU">AD-GSU</option>
-                            <option value="AD-Cash Unit">AD-Cash Unit</option>
-                            <option value="AD-Procurement Unit">AD-Procurement Unit</option>
-                            <option value="AD-Payroll">AD-Payroll</option>
-                            <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
-                            <option value="ORD-ICT Unit">ORD-ICT Unit</option>
-                            <option value="ORD-Legal Unit">ORD-Legal Unit</option>
-                            <option value="ORD Proper">ORD Proper</option>
-                            <option value="OARD">OARD</option>
-                            <option value="Finance Proper">Finance Proper</option>
-                            <option value="FD-Accounting">FD-Accounting</option>
-                            <option value="FD-Budget">FD-Budget</option>
-                            <option value="ESSD">ESSD</option>
-                            <option value="FTAD">FTAD</option>
-                            <option value="HRDD">HRDD</option>
-                            <option value="CLMD">CLMD</option>
-                            <option value="CLMD-LR">CLMD-LR</option>
-                            <option value="QAD">QAD</option>
-                            <option value="COA">COA</option>
-                        </select>
+                        <label><b>1. Purchase Order Number (Optional):</b></label>
+                        <input type="text" id="restock-po-number" class="edit-input" placeholder="e.g., PO-2024-001 (Leave empty if not applicable)" style="padding:10px;">
                     </div>
 
                     <div style="margin-bottom:15px;">
@@ -363,6 +361,7 @@
                         initMasterInventory();
                         initConsolidatedSupplies();
                         initConsolidatedRIS();
+                        initPurchaseOrders(); // Init PO Table
                         initAnnouncementManager(); 
                     } else window.location.href = "../user/user.html";
                 });
@@ -538,6 +537,34 @@
                     </tr>`;
                 });
                 document.getElementById('consolidatedTable').innerHTML = html;
+            });
+        }
+
+        // --- NEW: PURCHASE ORDER TABLE INIT ---
+        function initPurchaseOrders() {
+            db.collection('purchase_orders').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
+                const tbody = document.getElementById('poTableBody');
+                if(snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No Purchase Orders recorded yet.</td></tr>';
+                    return;
+                }
+                let html = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const date = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : 'N/A';
+                    const poTag = d.poNumber && d.poNumber !== 'N/A' 
+                        ? `<span class="po-tag">${d.poNumber}</span>` 
+                        : `<span class="po-none">N/A</span>`;
+                    
+                    html += `<tr>
+                        <td>${date}</td>
+                        <td>${poTag}</td>
+                        <td>${d.itemName}</td>
+                        <td style="color:var(--green); font-weight:bold;">+${d.qty}</td>
+                        <td>${d.unit}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
             });
         }
 
@@ -804,7 +831,7 @@ function loadUnitInventory() {
         });
 }
 
-// --- NEW FUNCTIONS FOR CONSOLIDATED RESTOCKING ---
+// --- NEW FUNCTIONS FOR CONSOLIDATED RESTOCKING WITH PO ---
 
 function openGlobalRestockModal(itemName, currentTotal, itemUnit) {
     document.getElementById('restockModal').style.display = 'flex';
@@ -815,7 +842,7 @@ function openGlobalRestockModal(itemName, currentTotal, itemUnit) {
     
     // Reset inputs
     document.getElementById('restock-input').value = "";
-    document.getElementById('restock-unit-select').value = ""; // Default select reset
+    document.getElementById('restock-po-number').value = ""; // Reset PO Input
     document.getElementById('restock-added').innerText = "0";
     document.getElementById('restock-total').innerText = currentTotal;
     
@@ -837,40 +864,56 @@ function closeRestockModal() {
 async function saveGlobalRestock() {
     const itemName = document.getElementById('restock-item-name').innerText;
     const addedQty = parseInt(document.getElementById('restock-input').value);
-    const destinationUnit = document.getElementById('restock-unit-select').value;
+    const poNumber = document.getElementById('restock-po-number').value.trim() || 'N/A';
     const unitType = document.getElementById('restock-unit-val').value || 'pc';
 
-    if(!destinationUnit) return alert("Please select a Destination Unit for this stock.");
+    // Set Default Division for Warehouse / Supply Officer Buffer
+    const defaultWarehouseDivision = "General Supply Stock"; 
+
     if (isNaN(addedQty) || addedQty <= 0) return alert("Please enter a valid quantity to add.");
 
-    if(confirm(`Confirm adding ${addedQty} ${unitType} to ${destinationUnit}?`)) {
+    const confirmMsg = poNumber !== 'N/A' 
+        ? `Confirm adding ${addedQty} ${unitType} with PO# ${poNumber}?` 
+        : `Confirm adding ${addedQty} ${unitType} (No PO#)?`;
+
+    if(confirm(confirmMsg)) {
         
-        // 1. Check if this unit already has this item
+        // 1. Log to Purchase Orders Collection
+        await db.collection('purchase_orders').add({
+            poNumber: poNumber,
+            itemName: itemName,
+            qty: addedQty,
+            unit: unitType,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 2. Add to General Inventory (Warehouse)
+        // Check if "General Supply Stock" already has this item
         const snapshot = await db.collection('inventory')
-            .where('division', '==', destinationUnit)
+            .where('division', '==', defaultWarehouseDivision)
             .where('itemName', '==', itemName)
             .limit(1)
             .get();
 
         if (!snapshot.empty) {
-            // Update Existing
+            // Update Existing Warehouse Stock
             const docId = snapshot.docs[0].id;
             await db.collection('inventory').doc(docId).update({
                 currentQty: firebase.firestore.FieldValue.increment(addedQty)
             });
         } else {
-            // Create New Entry for this Unit
+            // Create New Warehouse Entry
             await db.collection('inventory').add({
-                division: destinationUnit,
+                division: defaultWarehouseDivision,
                 itemName: itemName,
                 currentQty: addedQty,
                 unit: unitType,
-                unitPrice: 0, // Default price since we don't have it here
+                unitPrice: 0, 
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
         }
 
-        alert("Stock Balanced Successfully!");
+        alert("Stock Added & PO Logged Successfully!");
         closeRestockModal();
     }
 }
