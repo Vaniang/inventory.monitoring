@@ -125,6 +125,7 @@
             <div class="nav-link" onclick="nav('purchase-orders', this)">Purchase Orders</div>
              <div class="nav-link" onclick="nav('unit-inventory', this)">Unit Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS</div>
+            <div class="nav-link" onclick="nav('user-management', this)">User Management</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
@@ -343,6 +344,26 @@
 
         </div>
     </div>
+
+    <div id="user-management" class="section">
+    <div class="header-title"><h1>User Management</h1></div>
+    <div class="content-box">
+        <p style="color:#666; margin-bottom:15px;">View and manage system users, their assigned divisions, and roles.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Division</th>
+                    <th>Role</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="4" style="text-align:center;">Loading users...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <div id="print-area-forms"></div>
 
@@ -917,6 +938,82 @@ async function saveGlobalRestock() {
         closeRestockModal();
     }
 }
+        // Function to initialize and listen to the users collection
+function initUserManagement() {
+    db.collection('users').onSnapshot(snap => {
+        const tbody = document.getElementById('userTableBody');
+        let html = '';
+        
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
+            return;
+        }
+
+        snap.forEach(doc => {
+            const user = doc.data();
+            const userId = doc.id;
+            // Use existing badge styles
+            const roleBadge = user.role === 'admin' ? 'badge-Approved' : 'badge-Pending';
+
+            html += `
+                <tr>
+                    <td>${user.email || 'No Email'}</td>
+                    <td><strong>${user.division || 'Unassigned'}</strong></td>
+                    <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
+                    <td style="text-align:center;">
+                        <button class="action-btn btn-edit" title="Toggle Admin/User Role" onclick="toggleUserRole('${userId}', '${user.role}')">
+                            <i class="fas fa-user-shield"></i>
+                        </button>
+                        <button class="action-btn btn-delete" title="Delete User Profile" onclick="deleteUserProfile('${userId}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        tbody.innerHTML = html;
+    });
+}
+
+// Function to promote/demote users
+async function toggleUserRole(id, currentRole) {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    if (confirm(`Change this user's role to ${newRole.toUpperCase()}?`)) {
+        try {
+            await db.collection('users').doc(id).update({ role: newRole });
+            alert("User role updated successfully.");
+        } catch (error) {
+            alert("Error updating role: " + error.message);
+        }
+    }
+}
+
+// Function to delete user profile from Firestore
+async function deleteUserProfile(id) {
+    if (confirm("Are you sure you want to delete this user profile? \n\nNote: This only removes their Firestore data, not their login account.")) {
+        try {
+            await db.collection('users').doc(id).delete();
+            alert("User profile removed.");
+        } catch (error) {
+            alert("Error deleting user: " + error.message);
+        }
+    }
+}
+        auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "../index.html";
+    else {
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists && doc.data().role === 'admin') {
+                initAdminDashboard();
+                initMasterInventory();
+                initConsolidatedSupplies();
+                initConsolidatedRIS();
+                initPurchaseOrders();
+                initAnnouncementManager(); 
+                initUserManagement(); // <--- Add this line here
+            } else window.location.href = "../user/user.html";
+        });
+    }
+});
     </script>
 </body>
 </html>
