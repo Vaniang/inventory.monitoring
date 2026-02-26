@@ -19,13 +19,11 @@
         
         /* LAYOUT */
         .view-container { display: flex; height: 100vh; overflow: hidden; }
-        .hidden { display: none !important; }
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; letter-spacing: 1px;}
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
         
         /* CONTENT */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
@@ -43,74 +41,24 @@
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
         
-        /* INVENTORY TABLE FOR UNIT MONITOR */
-        .inventory-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .inventory-table th { background: #34495e; color: white; padding: 15px; text-align: left; }
-        .inventory-table td { padding: 12px; border-bottom: 1px solid #eee; }
-        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-
-        /* BUTTONS */
+        /* BUTTONS & BADGES */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
         .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
-        .btn-print-tbl { background: var(--primary); }
-        .btn-excel { background: var(--green); }
         .btn-delete { background: var(--red); }
-        .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
+        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
 
-        /* MODAL */
+        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
-        .small-modal { max-width: 500px; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-
-        /* --- STYLED LIVE ANNOUNCEMENT PREVIEW --- */
-        .live-announcement {
-            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-            border-left: 5px solid #ff9800;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none; /* Hidden by default */
-            animation: fadeIn 0.5s;
-        }
-        .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .live-title { font-weight: bold; color: #e65100; font-size: 1.1rem; }
-        .live-body { color: #5d4037; font-size: 0.95rem; line-height: 1.4; }
-
-        /* RESTOCK MODAL STYLING */
-        .restock-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-        .restock-stat { text-align: center; }
-        .restock-stat label { display: block; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
-        .restock-stat div { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
-
-        /* PO LABEL IN TABLE */
-        .po-tag { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
-        .po-none { color: #aaa; font-style: italic; }
-
-        /* --- PRINT AREA (FIXED) --- */
-        #print-area-forms { display: none; }
-
+        .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; position: relative; }
+        
         @media print {
-            @page { size: A4 portrait; margin: 0; }
-            .view-container, .modal-overlay, .sidebar, .main { display: none !important; height: 0; overflow: hidden; }
-            #print-area-forms { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
-            .ris-page { width: 210mm; height: 296mm; padding: 10mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
-            .ris-copy { height: 48%; }
-            .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
-            .ris-table th, .ris-table td { border: 1px solid black; padding: 3px; text-align: center; vertical-align: middle; }
-            .ris-table th { background-color: #eee; font-weight: bold; text-transform: uppercase; }
-            .footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; font-size: 10px; table-layout: fixed; margin-top: -2px; }
-            .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
-            .cut-line { border-top: 1px dashed #333; margin: 0; text-align: center; font-size: 10px; position: relative; height: 10px; display: flex; align-items: center; justify-content: center; }
-            .cut-line::after { content: "✂ CUT HERE"; background: white; padding: 0 5px; }
+            .view-container, .modal-overlay, .sidebar { display: none !important; }
+            #print-area-forms { display: block !important; }
         }
     </style>
 </head>
@@ -120,12 +68,12 @@
         <div class="sidebar">
             <h2>Admin Panel</h2>
             <div class="nav-link active" onclick="nav('dashboard', this)">Dashboard</div>
+            <div class="nav-link" onclick="nav('user-management', this)">User Management</div>
             <div class="nav-link" onclick="nav('master-list', this)">Master Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-supplies', this)">Consolidated Supplies</div>
             <div class="nav-link" onclick="nav('purchase-orders', this)">Purchase Orders</div>
-             <div class="nav-link" onclick="nav('unit-inventory', this)">Unit Inventory</div>
+            <div class="nav-link" onclick="nav('unit-inventory', this)">Unit Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS</div>
-            <div class="nav-link" onclick="nav('user-management', this)">User Management</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
 
@@ -141,22 +89,10 @@
 
                 <div class="content-box">
                     <h3>📢 Announcement Manager</h3>
-                    <p style="color:#666; font-size:0.9em; margin-bottom:10px;">Create a message for all users. Only the latest announcement is shown.</p>
-                    
-                    <input type="text" id="ann-title" placeholder="Title (e.g., System Maintenance)" class="edit-input" style="margin-bottom:10px; font-weight:bold;">
-                    <textarea id="ann-message" placeholder="Type your message here..." class="edit-input" style="height:80px;"></textarea>
+                    <input type="text" id="ann-title" placeholder="Title" class="edit-input" style="margin-bottom:10px;">
+                    <textarea id="ann-message" placeholder="Message" class="edit-input" style="height:80px;"></textarea>
                     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
-                        <button class="btn-save" style="background:#7f8c8d;" onclick="clearAnnouncementInput()">Clear Form</button>
                         <button class="btn-save" style="background:#e67e22;" onclick="postAnnouncement()">Post Now</button>
-                    </div>
-
-                    <div id="live-announcement-box" class="live-announcement">
-                        <div class="live-header">
-                            <span class="live-title">✅ Currently Active: <span id="live-title"></span></span>
-                            <button class="action-btn btn-delete" onclick="deleteActiveAnnouncement()" title="Remove Announcement"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <div class="live-body" id="live-message"></div>
-                        <input type="hidden" id="live-ann-id">
                     </div>
                 </div>
 
@@ -169,64 +105,45 @@
                 </div>
             </div>
 
-            <div id="unit-inventory" class="section">
-                <div class="header-title"><h1>Unit Stock Monitor</h1></div>
+            <div id="user-management" class="section">
+                <div class="header-title"><h1>User Management</h1></div>
                 <div class="content-box">
-                    <p>Select a specific Division/Unit to view their remaining stock levels.</p>
-                    
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
-                            <option value="">-- Select Division/Unit --</option>
-                            <option value="AD-Personnel Section">AD-Personnel Section</option>
-                            <option value="AD-AMS">AD-AMS</option>
-                            <option value="AD-Records">AD-Records</option>
-                            <option value="AD-GSU">AD-GSU</option>
-                            <option value="AD-Cash Unit">AD-Cash Unit</option>
-                            <option value="AD-Procurement Unit">AD-Procurement Unit</option>
-                            <option value="AD-Payroll">AD-Payroll</option>
-                            <option value="Admin Proper">Admin Proper</option>
-                            <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
-                            <option value="ORD-ICT Unit">ORD-ICT Unit</option>
-                            <option value="ORD-Legal Unit">ORD-Legal Unit</option>
-                            <option value="ORD Proper">ORD Proper</option>
-                            <option value="OARD">OARD</option>
-                            <option value="Finance Proper">Finance Proper</option>
-                            <option value="FD-Accounting">FD-Accounting</option>
-                            <option value="FD-Budget">FD-Budget</option>
-                            <option value="ESSD">ESSD</option>
-                            <option value="FTAD">FTAD</option>
-                            <option value="HRDD">HRDD</option>
-                            <option value="CLMD">CLMD</option>
-                            <option value="CLMD-LR">CLMD-LR</option>
-                            <option value="QAD">QAD</option>
-                            <option value="COA">COA</option>
-                        </select>
-                        <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
-                            <i class="fas fa-sync"></i> Refresh
-                        </button>
-                    </div>
-
-                    <table class="inventory-table">
+                    <p style="color:#666; margin-bottom:15px;">View and manage system users, their assigned divisions, and roles.</p>
+                    <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Item Name</th>
-                                <th>Unit</th>
-                                <th>Remaining Stock</th>
-                                <th>Status</th>
+                                <th>Email</th>
+                                <th>Division</th>
+                                <th>Role</th>
+                                <th style="text-align:center;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="adminUnitTable">
-                            <tr><td colspan="4" style="text-align:center;">Select a unit to view stocks...</td></tr>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="4" style="text-align:center;">Loading users...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            
+
+            <div id="unit-inventory" class="section">
+                <div class="header-title"><h1>Unit Stock Monitor</h1></div>
+                <div class="content-box">
+                    <select id="adminUnitSelect" class="edit-input" style="width:300px;" onchange="loadUnitInventory()">
+                        <option value="">-- Select Division/Unit --</option>
+                        <option value="AD-Personnel Section">AD-Personnel Section</option>
+                        </select>
+                    <table class="data-table">
+                        <thead><tr><th>Item Name</th><th>Unit</th><th>Stock</th><th>Status</th></tr></thead>
+                        <tbody id="adminUnitTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="master-list" class="section">
                 <div class="header-title"><h1>Master Inventory</h1></div>
                 <div class="content-box">
                     <table class="data-table">
-                        <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items Count</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Division</th><th>File Name</th><th>Action</th></tr></thead>
                         <tbody id="ppmpTable"></tbody>
                     </table>
                 </div>
@@ -235,134 +152,34 @@
             <div id="consolidated-supplies" class="section">
                 <div class="header-title"><h1>Consolidated Supplies</h1></div>
                 <div class="content-box">
-                    <button class="btn-download" onclick="window.print()" style="float:right; margin-bottom:10px;">Print Summary</button>
                     <table class="data-table">
-                        <thead><tr><th>Item Name</th><th>Total Qty</th><th>Unit</th><th>Avg Price</th><th>Restock / Balance</th></tr></thead>
+                        <thead><tr><th>Item Name</th><th>Qty</th><th>Unit</th><th>Action</th></tr></thead>
                         <tbody id="consolidatedTable"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- NEW SECTION: PURCHASE ORDERS -->
             <div id="purchase-orders" class="section">
                 <div class="header-title"><h1>Purchase Orders Log</h1></div>
                 <div class="content-box">
-                    <p style="color:#666; margin-bottom:15px;">History of all restocks and purchase orders processed.</p>
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>PO Number</th>
-                                <th>Item Name</th>
-                                <th>Qty Added</th>
-                                <th>Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody id="poTableBody">
-                            <tr><td colspan="5" style="text-align:center;">Loading PO history...</td></tr>
-                        </tbody>
+                        <thead><tr><th>Date</th><th>PO Number</th><th>Item</th><th>Qty</th></tr></thead>
+                        <tbody id="poTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="consolidated-ris" class="section">
-                <div class="header-title"><h1>Consolidated RIS Management</h1></div>
+                <div class="header-title"><h1>Consolidated RIS</h1></div>
                 <div class="content-box">
-                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Manage, Edit, Print, and Download individual Requisition and Issue Slips (RIS).</p>
                     <table class="data-table">
-                        <thead><tr><th>Date</th><th>Division</th><th>Status</th><th style="text-align:center;">Actions</th></tr></thead>
+                        <thead><tr><th>Date</th><th>Division</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="risTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- EDIT RIS MODAL -->
-            <div id="editModal" class="modal-overlay">
-                <div class="modal-box">
-                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
-                    <h2>Edit RIS Details</h2>
-                    <p style="color:#666; font-size:0.9em;">Add Stock No., Remarks, or adjust Quantities before printing.</p>
-                    <input type="hidden" id="edit-doc-id">
-                    <div style="margin-bottom:15px;">
-                        <label><b>Status:</b></label>
-                        <select id="edit-status" style="padding:5px;">
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                    <table class="data-table" style="font-size:0.9em;">
-                        <thead><tr><th width="10%">Stock No.</th><th width="30%">Description</th><th width="10%">Req Qty</th><th width="10%">Unit</th><th width="10%">Yes/No</th><th width="30%">Remarks</th></tr></thead>
-                        <tbody id="editModalItems"></tbody>
-                    </table>
-                    <button class="btn-save" onclick="saveRISChanges()">Save Changes</button>
-                </div>
-            </div>
-
-            <!-- NEW CONSOLIDATED RESTOCK MODAL WITH PO -->
-            <div id="restockModal" class="modal-overlay">
-                <div class="modal-box small-modal">
-                    <span class="close-modal" onclick="closeRestockModal()">&times;</span>
-                    <h2 style="color:var(--primary); margin-top:0;">⚖️ Balance / Restock</h2>
-                    <p style="margin-bottom:20px; color:#555;">Add new purchase quantity to balance the supplies.</p>
-                    
-                    <h3 id="restock-item-name" style="text-align:center; color:var(--accent);">Item Name</h3>
-
-                    <div class="restock-info">
-                        <div class="restock-stat">
-                            <label>Existing Stock (Previous)</label>
-                            <div id="restock-current">0</div>
-                        </div>
-                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">+</div>
-                        <div class="restock-stat">
-                            <label>New Purchase (Recent)</label>
-                            <div id="restock-added" style="color:var(--green);">0</div>
-                        </div>
-                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">=</div>
-                        <div class="restock-stat">
-                            <label>Total Balance</label>
-                            <div id="restock-total" style="color:var(--accent);">0</div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label><b>1. Purchase Order Number (Optional):</b></label>
-                        <input type="text" id="restock-po-number" class="edit-input" placeholder="e.g., PO-2024-001 (Leave empty if not applicable)" style="padding:10px;">
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label><b>2. Enter Quantity Purchased:</b></label>
-                        <input type="number" id="restock-input" class="edit-input" placeholder="0" style="font-size:1.2rem; font-weight:bold; padding:10px; text-align:center;" oninput="calculateRestockTotal()">
-                    </div>
-
-                    <input type="hidden" id="restock-current-val">
-                    <input type="hidden" id="restock-unit-val"> <!-- Unit string like 'pc' -->
-
-                    <button class="btn-save" style="width:100%;" onclick="saveGlobalRestock()">Confirm & Update Balance</button>
-                </div>
-            </div>
-        </div>
-    <div id="user-management" class="section">
-    <div class="header-title"><h1>User Management</h1></div>
-    <div class="content-box">
-        <p style="color:#666; margin-bottom:15px;">View and manage system users, their assigned divisions, and roles.</p>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Division</th>
-                    <th>Role</th>
-                    <th style="text-align:center;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody">
-                <tr><td colspan="4" style="text-align:center;">Loading users...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-    </div>
+        </div> </div>
     <div id="print-area-forms"></div>
 
     <script>
@@ -971,6 +788,13 @@ function initUserManagement() {
         tbody.innerHTML = html;
     });
 }
+
+        function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
 // Function to promote/demote users
 async function toggleUserRole(id, currentRole) {
