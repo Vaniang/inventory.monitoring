@@ -131,6 +131,34 @@
                     <select id="adminUnitSelect" class="edit-input" style="width:300px;" onchange="loadUnitInventory()">
                         <option value="">-- Select Division/Unit --</option>
                         <option value="AD-Personnel Section">AD-Personnel Section</option>
+                            <option value="AD-AMS">AD-AMS</option>
+                            <option value="AD-Records">AD-Records</option>
+                            <option value="AD-GSU">AD-GSU</option>
+                            <option value="AD-Cash Unit">AD-Cash Unit</option>
+                            <option value="AD-Procurement Unit">AD-Procurement Unit</option>
+                            <option value="AD-Payroll">AD-Payroll</option>
+                            <option value="Admin Proper">Admin Proper</option>
+                            <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
+                            <option value="ORD-ICT Unit">ORD-ICT Unit</option>
+                            <option value="ORD-Legal Unit">ORD-Legal Unit</option>
+                            <option value="ORD Proper">ORD Proper</option>
+                            <option value="OARD">OARD</option>
+                            <option value="Finance Proper">Finance Proper</option>
+                            <option value="FD-Accounting">FD-Accounting</option>
+                            <option value="FD-Budget">FD-Budget</option>
+                            <option value="ESSD">ESSD</option>
+                            <option value="FTAD">FTAD</option>
+                            <option value="HRDD">HRDD</option>
+                            <option value="CLMD">CLMD</option>
+                            <option value="CLMD-LR">CLMD-LR</option>
+                            <option value="QAD">QAD</option>
+                            <option value="COA">COA</option>
+                        </select>
+                        <button class="btn" style="background:#3498db; width:auto;" onclick="loadUnitInventory()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+
                         </select>
                     <table class="data-table">
                         <thead><tr><th>Item Name</th><th>Unit</th><th>Stock</th><th>Status</th></tr></thead>
@@ -149,16 +177,31 @@
                 </div>
             </div>
 
-            <div id="consolidated-supplies" class="section">
-                <div class="header-title"><h1>Consolidated Supplies</h1></div>
+        <div id="consolidated-supplies" class="section">
+                <div class="header-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Consolidated Supplies</h1>
+                    <button class="btn-delete" style="padding: 10px 20px; width: auto; height: auto; font-weight: bold;" onclick="clearAllGlobalInventory()">
+                        <i class="fas fa-trash-alt"></i> Clear All Inventory
+                    </button>
+                </div>
                 <div class="content-box">
+                    <button class="btn-download" onclick="window.print()" style="float:right; margin-bottom:10px;">
+                        <i class="fas fa-print"></i> Print Summary
+                    </button>
                     <table class="data-table">
-                        <thead><tr><th>Item Name</th><th>Qty</th><th>Unit</th><th>Action</th></tr></thead>
-                        <tbody id="consolidatedTable"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Total Qty</th>
+                                <th>Unit</th>
+                                <th>Avg Price</th> <th style="text-align:center;">Restock / Balance</th> </tr>
+                        </thead>
+                        <tbody id="consolidatedTable">
+                            </tbody>
                     </table>
                 </div>
             </div>
-
+        
             <div id="purchase-orders" class="section">
                 <div class="header-title"><h1>Purchase Orders Log</h1></div>
                 <div class="content-box">
@@ -836,6 +879,40 @@ async function deleteUserProfile(id) {
         });
     }
 });
+
+        async function clearAllGlobalInventory() {
+    const password = prompt("Enter ADMIN PASSWORD to confirm clearing ALL global data:");
+    // Replace 'admin123' with your preferred secure password logic
+    if (password !== 'admin123') {
+        alert("Incorrect password. Action cancelled.");
+        return;
+    }
+
+    if (!confirm("🚨 DANGER: This will permanently delete ALL inventory items, ALL uploaded PPMPs, and ALL Purchase Order logs across ALL divisions. Do you want to proceed?")) return;
+
+    const batch = db.batch();
+    
+    try {
+        // 1. Clear Inventory
+        const invSnap = await db.collection('inventory').get();
+        invSnap.forEach(doc => batch.delete(doc.ref));
+
+        // 2. Clear PPMP Upload Logs
+        const ppmpSnap = await db.collection('ppmp_uploads').get();
+        ppmpSnap.forEach(doc => batch.delete(doc.ref));
+
+        // 3. Clear Purchase Order History
+        const poSnap = await db.collection('purchase_orders').get();
+        poSnap.forEach(doc => batch.delete(doc.ref));
+
+        await batch.commit();
+        alert("Global System Reset Successful.");
+        location.reload();
+    } catch (error) {
+        console.error("Reset Error: ", error);
+        alert("Error during reset: " + error.message);
+    }
+}
     </script>
 </body>
 </html>
