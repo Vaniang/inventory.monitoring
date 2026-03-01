@@ -19,11 +19,13 @@
         
         /* LAYOUT */
         .view-container { display: flex; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
         .sidebar { width: 260px; background: #1a252f; color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar h2 { text-align: center; font-size: 1.5rem; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; letter-spacing: 1px;}
         .nav-link { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-link.active { background: var(--accent); border-left: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .logout-btn { margin-top: auto; background: var(--red); text-align: center; justify-content: center; }
         
         /* CONTENT */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
@@ -41,24 +43,66 @@
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
         
-        /* BUTTONS & BADGES */
+        /* INVENTORY TABLE FOR UNIT MONITOR */
+        .inventory-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .inventory-table th { background: #34495e; color: white; padding: 15px; text-align: left; }
+        .inventory-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+
+        /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge-Rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
         .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
+        .btn-print-tbl { background: var(--primary); }
+        .btn-excel { background: var(--green); }
         .btn-delete { background: var(--red); }
-        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
 
-        /* MODALS */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; position: relative; }
-        
+        .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
+        .small-modal { max-width: 500px; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
+        .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+
+        /* --- STYLED LIVE ANNOUNCEMENT PREVIEW --- */
+        .live-announcement { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-left: 5px solid #ff9800; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; animation: fadeIn 0.5s; }
+        .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .live-title { font-weight: bold; color: #e65100; font-size: 1.1rem; }
+        .live-body { color: #5d4037; font-size: 0.95rem; line-height: 1.4; }
+
+        /* RESTOCK MODAL STYLING */
+        .restock-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .restock-stat { text-align: center; }
+        .restock-stat label { display: block; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
+        .restock-stat div { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+
+        /* PO LABEL IN TABLE */
+        .po-tag { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+        .po-none { color: #aaa; font-style: italic; }
+
+        /* --- PRINT AREA (FIXED) --- */
+        #print-area-forms { display: none; }
+
         @media print {
-            .view-container, .modal-overlay, .sidebar { display: none !important; }
-            #print-area-forms { display: block !important; }
+            @page { size: A4 portrait; margin: 0; }
+            .view-container, .modal-overlay, .sidebar, .main { display: none !important; height: 0; overflow: hidden; }
+            #print-area-forms { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
+            .ris-page { width: 210mm; height: 296mm; padding: 10mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+            .ris-copy { height: 48%; }
+            .ris-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; table-layout: fixed; margin-bottom: 5px; }
+            .ris-table th, .ris-table td { border: 1px solid black; padding: 3px; text-align: center; vertical-align: middle; }
+            .ris-table th { background-color: #eee; font-weight: bold; text-transform: uppercase; }
+            .footer-table { width: 100%; border-collapse: collapse; border: 2px solid black; border-top: none; font-size: 10px; table-layout: fixed; margin-top: -2px; }
+            .footer-table td { border-right: 1px solid black; padding: 4px; vertical-align: top; }
+            .cut-line { border-top: 1px dashed #333; margin: 0; text-align: center; font-size: 10px; position: relative; height: 10px; display: flex; align-items: center; justify-content: center; }
+            .cut-line::after { content: "✂ CUT HERE"; background: white; padding: 0 5px; }
         }
     </style>
 </head>
@@ -89,10 +133,21 @@
 
                 <div class="content-box">
                     <h3>📢 Announcement Manager</h3>
-                    <input type="text" id="ann-title" placeholder="Title" class="edit-input" style="margin-bottom:10px;">
-                    <textarea id="ann-message" placeholder="Message" class="edit-input" style="height:80px;"></textarea>
+                    <p style="color:#666; font-size:0.9em; margin-bottom:10px;">Create a message for all users. Only the latest announcement is shown.</p>
+                    <input type="text" id="ann-title" placeholder="Title (e.g., System Maintenance)" class="edit-input" style="margin-bottom:10px; font-weight:bold;">
+                    <textarea id="ann-message" placeholder="Type your message here..." class="edit-input" style="height:80px;"></textarea>
                     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                        <button class="btn-save" style="background:#7f8c8d;" onclick="clearAnnouncementInput()">Clear Form</button>
                         <button class="btn-save" style="background:#e67e22;" onclick="postAnnouncement()">Post Now</button>
+                    </div>
+
+                    <div id="live-announcement-box" class="live-announcement">
+                        <div class="live-header">
+                            <span class="live-title">✅ Currently Active: <span id="live-title"></span></span>
+                            <button class="action-btn btn-delete" onclick="deleteActiveAnnouncement()" title="Remove Announcement"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="live-body" id="live-message"></div>
+                        <input type="hidden" id="live-ann-id">
                     </div>
                 </div>
 
@@ -128,9 +183,11 @@
             <div id="unit-inventory" class="section">
                 <div class="header-title"><h1>Unit Stock Monitor</h1></div>
                 <div class="content-box">
-                    <select id="adminUnitSelect" class="edit-input" style="width:300px;" onchange="loadUnitInventory()">
-                        <option value="">-- Select Division/Unit --</option>
-                        <option value="AD-Personnel Section">AD-Personnel Section</option>
+                    <p>Select a specific Division/Unit to view their remaining stock levels.</p>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <select id="adminUnitSelect" style="padding:10px; border-radius:5px; border:1px solid #ccc; font-weight:bold; width:300px;" onchange="loadUnitInventory()">
+                            <option value="">-- Select Division/Unit --</option>
+                            <option value="AD-Personnel Section">AD-Personnel Section</option>
                             <option value="AD-AMS">AD-AMS</option>
                             <option value="AD-Records">AD-Records</option>
                             <option value="AD-GSU">AD-GSU</option>
@@ -159,25 +216,33 @@
                         </button>
                     </div>
 
-                        </select>
-                    <table class="data-table">
-                        <thead><tr><th>Item Name</th><th>Unit</th><th>Stock</th><th>Status</th></tr></thead>
-                        <tbody id="adminUnitTable"></tbody>
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Unit</th>
+                                <th>Remaining Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUnitTable">
+                            <tr><td colspan="4" style="text-align:center;">Select a unit to view stocks...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
-
+            
             <div id="master-list" class="section">
                 <div class="header-title"><h1>Master Inventory</h1></div>
                 <div class="content-box">
                     <table class="data-table">
-                        <thead><tr><th>Division</th><th>File Name</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Division</th><th>File Name</th><th>Date Uploaded</th><th>Items Count</th><th>Action</th></tr></thead>
                         <tbody id="ppmpTable"></tbody>
                     </table>
                 </div>
             </div>
 
-        <div id="consolidated-supplies" class="section">
+            <div id="consolidated-supplies" class="section">
                 <div class="header-title" style="display: flex; justify-content: space-between; align-items: center;">
                     <h1>Consolidated Supplies</h1>
                     <button class="btn-delete" style="padding: 10px 20px; width: auto; height: auto; font-weight: bold;" onclick="clearAllGlobalInventory()">
@@ -194,35 +259,112 @@
                                 <th>Item Name</th>
                                 <th>Total Qty</th>
                                 <th>Unit</th>
-                                <th>Avg Price</th> <th style="text-align:center;">Restock / Balance</th> </tr>
+                                <th>Avg Price</th>
+                                <th style="text-align:center;">Restock / Balance</th>
+                            </tr>
                         </thead>
-                        <tbody id="consolidatedTable">
-                            </tbody>
+                        <tbody id="consolidatedTable"></tbody>
                     </table>
                 </div>
             </div>
-        
+
             <div id="purchase-orders" class="section">
                 <div class="header-title"><h1>Purchase Orders Log</h1></div>
                 <div class="content-box">
+                    <p style="color:#666; margin-bottom:15px;">History of all restocks and purchase orders processed.</p>
                     <table class="data-table">
-                        <thead><tr><th>Date</th><th>PO Number</th><th>Item</th><th>Qty</th></tr></thead>
-                        <tbody id="poTableBody"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>PO Number</th>
+                                <th>Item Name</th>
+                                <th>Qty Added</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poTableBody">
+                            <tr><td colspan="5" style="text-align:center;">Loading PO history...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
             <div id="consolidated-ris" class="section">
-                <div class="header-title"><h1>Consolidated RIS</h1></div>
+                <div class="header-title"><h1>Consolidated RIS Management</h1></div>
                 <div class="content-box">
+                    <p style="color:#777; font-size:0.9rem; margin-bottom:15px;">Manage, Edit, Print, and Download individual Requisition and Issue Slips (RIS).</p>
                     <table class="data-table">
-                        <thead><tr><th>Date</th><th>Division</th><th>Status</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>Date</th><th>Division</th><th>Status</th><th style="text-align:center;">Actions</th></tr></thead>
                         <tbody id="risTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
-        </div> </div>
+            <div id="editModal" class="modal-overlay">
+                <div class="modal-box">
+                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
+                    <h2>Edit RIS Details</h2>
+                    <p style="color:#666; font-size:0.9em;">Add Stock No., Remarks, or adjust Quantities before printing.</p>
+                    <input type="hidden" id="edit-doc-id">
+                    <div style="margin-bottom:15px;">
+                        <label><b>Status:</b></label>
+                        <select id="edit-status" style="padding:5px;">
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <table class="data-table" style="font-size:0.9em;">
+                        <thead><tr><th width="10%">Stock No.</th><th width="30%">Description</th><th width="10%">Req Qty</th><th width="10%">Unit</th><th width="10%">Yes/No</th><th width="30%">Remarks</th></tr></thead>
+                        <tbody id="editModalItems"></tbody>
+                    </table>
+                    <button class="btn-save" onclick="saveRISChanges()">Save Changes</button>
+                </div>
+            </div>
+
+            <div id="restockModal" class="modal-overlay">
+                <div class="modal-box small-modal">
+                    <span class="close-modal" onclick="closeRestockModal()">&times;</span>
+                    <h2 style="color:var(--primary); margin-top:0;">⚖️ Balance / Restock</h2>
+                    <p style="margin-bottom:20px; color:#555;">Add new purchase quantity to balance the supplies.</p>
+                    
+                    <h3 id="restock-item-name" style="text-align:center; color:var(--accent);">Item Name</h3>
+
+                    <div class="restock-info">
+                        <div class="restock-stat">
+                            <label>Existing Stock (Previous)</label>
+                            <div id="restock-current">0</div>
+                        </div>
+                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">+</div>
+                        <div class="restock-stat">
+                            <label>New Purchase (Recent)</label>
+                            <div id="restock-added" style="color:var(--green);">0</div>
+                        </div>
+                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">=</div>
+                        <div class="restock-stat">
+                            <label>Total Balance</label>
+                            <div id="restock-total" style="color:var(--accent);">0</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:15px;">
+                        <label><b>1. Purchase Order Number (Optional):</b></label>
+                        <input type="text" id="restock-po-number" class="edit-input" placeholder="e.g., PO-2024-001 (Leave empty if not applicable)" style="padding:10px;">
+                    </div>
+
+                    <div style="margin-bottom:15px;">
+                        <label><b>2. Enter Quantity Purchased:</b></label>
+                        <input type="number" id="restock-input" class="edit-input" placeholder="0" style="font-size:1.2rem; font-weight:bold; padding:10px; text-align:center;" oninput="calculateRestockTotal()">
+                    </div>
+
+                    <input type="hidden" id="restock-current-val">
+                    <input type="hidden" id="restock-unit-val"> <button class="btn-save" style="width:100%;" onclick="saveGlobalRestock()">Confirm & Update Balance</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div id="print-area-forms"></div>
 
     <script>
@@ -231,6 +373,7 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // 1. CLEANED AUTH LISTENER
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
             else {
@@ -240,14 +383,17 @@
                         initMasterInventory();
                         initConsolidatedSupplies();
                         initConsolidatedRIS();
-                        initPurchaseOrders(); // Init PO Table
+                        initPurchaseOrders();
                         initAnnouncementManager(); 
+                        initUserManagement();
                     } else window.location.href = "../user/user.html";
                 });
             }
         });
 
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
+        
+        // 2. CLEANED NAVIGATION FUNCTION
         function nav(id, btn) {
             document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -267,12 +413,10 @@
                 message: message,
                 date: new Date().toISOString(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
+            }).then(() => {
                 alert("Announcement Posted Successfully!");
                 clearAnnouncementInput();
-            })
-            .catch(err => alert("Error: " + err.message));
+            }).catch(err => alert("Error: " + err.message));
         }
 
         function clearAnnouncementInput() {
@@ -299,14 +443,84 @@
         function deleteActiveAnnouncement() {
             const id = document.getElementById('live-ann-id').value;
             if(!id) return;
-            if(confirm("Are you sure you want to remove this announcement? It will disappear from all user dashboards.")) {
+            if(confirm("Are you sure you want to remove this announcement?")) {
                 db.collection('announcements').doc(id).delete()
                 .then(() => alert("Announcement Removed."))
                 .catch(err => alert("Error: " + err.message));
             }
         }
 
-        // --- DASHBOARD FUNCTIONS ---
+        // --- USER MANAGEMENT ---
+        function initUserManagement() {
+            db.collection('users').onSnapshot(snap => {
+                const tbody = document.getElementById('userTableBody');
+                let html = '';
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
+                    return;
+                }
+                snap.forEach(doc => {
+                    const user = doc.data();
+                    const userId = doc.id;
+                    const roleBadge = user.role === 'admin' ? 'badge-Approved' : 'badge-Pending';
+
+                    html += `
+                        <tr>
+                            <td>${user.email || 'No Email'}</td>
+                            <td><strong>${user.division || 'Unassigned'}</strong></td>
+                            <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
+                            <td style="text-align:center;">
+                                <button class="action-btn btn-edit" title="Toggle Admin/User Role" onclick="toggleUserRole('${userId}', '${user.role}')"><i class="fas fa-user-shield"></i></button>
+                                <button class="action-btn btn-delete" title="Delete User Profile" onclick="deleteUserProfile('${userId}')"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        </tr>`;
+                });
+                tbody.innerHTML = html;
+            });
+        }
+
+        async function toggleUserRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            if (confirm(`Change this user's role to ${newRole.toUpperCase()}?`)) {
+                try { await db.collection('users').doc(id).update({ role: newRole }); alert("User role updated."); } 
+                catch (error) { alert("Error updating role: " + error.message); }
+            }
+        }
+
+        async function deleteUserProfile(id) {
+            if (confirm("Are you sure you want to delete this user profile?")) {
+                try { await db.collection('users').doc(id).delete(); alert("User profile removed."); } 
+                catch (error) { alert("Error deleting user: " + error.message); }
+            }
+        }
+
+        // --- CLEAR ALL GLOBAL INVENTORY ---
+        async function clearAllGlobalInventory() {
+            const password = prompt("Enter ADMIN PASSWORD to confirm clearing ALL global data:");
+            if (password !== 'admin123') { alert("Incorrect password. Action cancelled."); return; }
+            if (!confirm("🚨 DANGER: This will permanently delete ALL inventory items, ALL uploaded PPMPs, and ALL Purchase Order logs. Proceed?")) return;
+
+            const batch = db.batch();
+            try {
+                const invSnap = await db.collection('inventory').get();
+                invSnap.forEach(doc => batch.delete(doc.ref));
+
+                const ppmpSnap = await db.collection('ppmp_uploads').get();
+                ppmpSnap.forEach(doc => batch.delete(doc.ref));
+
+                const poSnap = await db.collection('purchase_orders').get();
+                poSnap.forEach(doc => batch.delete(doc.ref));
+
+                await batch.commit();
+                alert("Global System Reset Successful.");
+                location.reload();
+            } catch (error) {
+                console.error("Reset Error: ", error);
+                alert("Error during reset: " + error.message);
+            }
+        }
+
+        // --- DASHBOARD & INVENTORY LOGIC ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
@@ -374,6 +588,7 @@
                 document.getElementById('ppmpTable').innerHTML = html;
             });
         }
+
         async function downloadPPMP(id) {
             const doc = await db.collection('ppmp_uploads').doc(id).get();
             if(!doc.exists) return alert("File not found");
@@ -386,6 +601,7 @@
             link.click();
             document.body.removeChild(link);
         }
+
         function deletePPMP(id) { if(confirm("Delete this file?")) db.collection('ppmp_uploads').doc(id).delete(); }
 
         function initConsolidatedSupplies() {
@@ -400,15 +616,13 @@
                 });
                 let html = '';
                 Object.values(map).sort((a,b)=>a.name.localeCompare(b.name)).forEach(s => {
-                    // Escape item name for function parameter
                     const safeName = s.name.replace(/'/g, "\\'");
-                    
                     html += `<tr>
                         <td>${s.name}</td>
                         <td>${s.qty}</td>
                         <td>${s.unit}</td>
                         <td>${(s.prices.reduce((a,b)=>a+b,0)/s.prices.length||0).toFixed(2)}</td>
-                        <td>
+                        <td style="text-align:center;">
                              <button class="action-btn" style="background:var(--green); width:auto; padding:5px 10px;" onclick="openGlobalRestockModal('${safeName}', ${s.qty}, '${s.unit}')">
                                 <i class="fas fa-plus"></i> Balance / Restock
                             </button>
@@ -419,29 +633,16 @@
             });
         }
 
-        // --- NEW: PURCHASE ORDER TABLE INIT ---
         function initPurchaseOrders() {
             db.collection('purchase_orders').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
                 const tbody = document.getElementById('poTableBody');
-                if(snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No Purchase Orders recorded yet.</td></tr>';
-                    return;
-                }
+                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No Purchase Orders recorded yet.</td></tr>'; return; }
                 let html = '';
                 snap.forEach(doc => {
                     const d = doc.data();
                     const date = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleDateString() : 'N/A';
-                    const poTag = d.poNumber && d.poNumber !== 'N/A' 
-                        ? `<span class="po-tag">${d.poNumber}</span>` 
-                        : `<span class="po-none">N/A</span>`;
-                    
-                    html += `<tr>
-                        <td>${date}</td>
-                        <td>${poTag}</td>
-                        <td>${d.itemName}</td>
-                        <td style="color:var(--green); font-weight:bold;">+${d.qty}</td>
-                        <td>${d.unit}</td>
-                    </tr>`;
+                    const poTag = d.poNumber && d.poNumber !== 'N/A' ? `<span class="po-tag">${d.poNumber}</span>` : `<span class="po-none">N/A</span>`;
+                    html += `<tr><td>${date}</td><td>${poTag}</td><td>${d.itemName}</td><td style="color:var(--green); font-weight:bold;">+${d.qty}</td><td>${d.unit}</td></tr>`;
                 });
                 tbody.innerHTML = html;
             });
@@ -455,7 +656,6 @@
                 snap.forEach(doc => {
                     const d = doc.data();
                     if (d.adminHidden) return; 
-
                     const dateStr = d.date ? d.date.split('T')[0] : '';
                     html += `
                     <tr>
@@ -489,8 +689,7 @@
             const tbody = document.getElementById('editModalItems');
             let html = '';
             currentRisItems.forEach((item, index) => {
-                html += `
-                <tr>
+                html += `<tr>
                     <td><input type="text" class="edit-input" value="${item.stockNo || ''}" onchange="updateItem(${index}, 'stockNo', this.value)"></td>
                     <td>${item.itemName}</td>
                     <td>${item.reqQty}</td>
@@ -501,6 +700,7 @@
             });
             tbody.innerHTML = html;
         }
+
         function updateItem(index, field, value) { currentRisItems[index][field] = value; }
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
@@ -542,9 +742,7 @@
         async function downloadRISExcel(id) {
             const doc = await db.collection('requisitions').doc(id).get();
             const data = doc.data();
-            let wsData = [
-                ["REQUISITION AND ISSUE SLIP"], ["Division:", data.division, "Date:", data.date.split('T')[0]], [], ["Stock No.", "Unit", "Description", "Req Qty", "Yes", "No", "Remarks"]
-            ];
+            let wsData = [ ["REQUISITION AND ISSUE SLIP"], ["Division:", data.division, "Date:", data.date.split('T')[0]], [], ["Stock No.", "Unit", "Description", "Req Qty", "Yes", "No", "Remarks"] ];
             data.items.forEach(i => { wsData.push([i.stockNo || '', i.unit || 'pc', i.itemName, i.reqQty, i.availability === 'Yes'?'✓':'', i.availability === 'No'?'✓':'', i.remarks || '']); });
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
@@ -554,365 +752,172 @@
 
         function deleteRIS(id) {
             if(confirm("Remove this Request from your view? (It will NOT be deleted for the User)")) {
-                db.collection('requisitions').doc(id).update({ adminHidden: true })
-                .then(() => alert("Request hidden."))
-                .catch(err => alert("Error: " + err.message));
+                db.collection('requisitions').doc(id).update({ adminHidden: true }).then(() => alert("Request hidden.")).catch(err => alert("Error: " + err.message));
             }
         }
 
-     function generateSingleRISHtml(data) {
-    let itemRows = '';
-    const items = data.items || [];
-    
-    // Generate Items
-    items.forEach(item => {
-        itemRows += `<tr>
-            <td>${item.stockNo || ''}</td>
-            <td>${item.unit || 'pc'}</td>
-            <td style="text-align:left;">${item.itemName}</td>
-            <td>${item.reqQty}</td>
-            <td>${item.availability === 'Yes' ? '✓' : ''}</td>
-            <td>${item.availability === 'No' ? '✓' : ''}</td>
-            <td>${item.availability === 'Yes' ? item.reqQty : ''}</td>
-            <td>${item.remarks || ''}</td>
-        </tr>`;
-    });
-    for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
-    
-    // Get Names
-    const rName = data.requestedBy || "REQUESTING PERSONNEL"; 
-    const rPos  = data.requestedDesig || "Designation<br>Office";
-    const aName = data.approvedBy || "Chief/Section Head";
-    const aPos  = data.approvedDesig || "Designation<br>Office";
-
-    // --- RETRIEVE SAVED SIGNATURES FROM DATABASE ---
-    const reqImgTag = data.reqSig ? `<img src="${data.reqSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
-    const appImgTag = data.appSig ? `<img src="${data.appSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
-    // ----------------------------------------------------
-
-    const singleCopy = `
-        <div class="ris-copy">
-            <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
-            <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
-            <table style="width:100%; font-size:11px; margin-bottom:5px;">
-                <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
-                <tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
-                <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
-            </table>
-
-            <table class="ris-table">
-                <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead>
-                <tbody>${itemRows}</tbody>
-            </table>
-
-            <table class="footer-table">
-                <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
-                
-                <tr>
-                    <td>Signature:</td>
-                    <td style="border-bottom:1px solid black; height:35px; vertical-align:bottom;" align="center">${reqImgTag}</td>
-                    <td style="border-bottom:1px solid black; vertical-align:bottom;" align="center">${appImgTag}</td>
-                    <td style="border-bottom:1px solid black;"></td>
-                    <td style="border-bottom:1px solid black; border-right:none;"></td>
-                </tr>
-
-                <tr>
-                    <td>Name:</td>
-                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${rName}</div></td>
-                    <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${aName}</div></td>
-                    <td></td><td style="border-right:none;"></td>
-                </tr>
-                <tr>
-                    <td>Designation:</td>
-                    <td align="center"><div style="font-size:9px;">${rPos}</div></td>
-                    <td align="center"><div style="font-size:9px;">${aPos}</div></td>
-                    <td></td><td style="border-right:none;"></td>
-                </tr>
-                <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
-            </table>
-        </div>`;
-
-    return singleCopy + '<div class="cut-line"></div>' + singleCopy;
-}
-
-let adminUnitListener = null;
-
-function loadUnitInventory() {
-    let unit = document.getElementById('adminUnitSelect').value;
-    const tbody = document.getElementById('adminUnitTable');
-    
-    // --- 1. ADMIN-SIDE NAME CORRECTION ---
-    const correctionMap = {
-        "PROCUREMENT UNIT": "AD-Procurement Unit",
-        "ORD-PAU": "ORD-Public Affairs Unit",
-        "ORD-LEGAL": "ORD-Legal Unit",
-        "ORD-ICT": "ORD-ICT Unit",
-        "QAD": "QAD"
-    };
-
-    if (correctionMap[unit]) {
-        unit = correctionMap[unit];
-    }
-
-    if(!unit) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Please select a unit.</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading data for <b>' + unit + '</b>...</td></tr>';
-
-    if(adminUnitListener) {
-        adminUnitListener();
-    }
-
-    adminUnitListener = db.collection('inventory')
-        .where('division', '==', unit)
-        .orderBy('itemName')
-        .onSnapshot(snap => {
-            if(snap.empty) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">
-                    No inventory records found for: <b>${unit}</b><br>
-                    <small style="color:#777;">(Check if the User uploaded their PPMP correctly)</small>
-                </td></tr>`;
-                return;
-            }
-
-            let html = '';
-            snap.forEach(doc => {
-                const item = doc.data();
-                const qty = item.currentQty;
-                let statusBadge = '';
-                let rowStyle = '';
-
-                if(qty <= 0) {
-                    statusBadge = '<span class="status-badge" style="background:#e74c3c; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">OUT OF STOCK</span>';
-                    rowStyle = 'background-color: #fdedec;'; 
-                } else if(qty < 5) {
-                    statusBadge = '<span class="status-badge" style="background:#f1c40f; color:black; padding:3px 8px; border-radius:12px; font-size:0.8rem;">CRITICAL</span>';
-                    rowStyle = 'background-color: #fef9e7;';
-                } else {
-                    statusBadge = '<span class="status-badge" style="background:#2ecc71; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">GOOD</span>';
-                }
-
-                // Removed Action Button (Reverted to read-only)
-                html += `<tr style="${rowStyle}">
-                    <td style="font-weight:600; color:#2c3e50;">${item.itemName}</td>
+        function generateSingleRISHtml(data) {
+            let itemRows = '';
+            const items = data.items || [];
+            
+            items.forEach(item => {
+                itemRows += `<tr>
+                    <td>${item.stockNo || ''}</td>
                     <td>${item.unit || 'pc'}</td>
-                    <td style="font-size:1.1rem; font-weight:bold;">${qty}</td>
-                    <td>${statusBadge}</td>
+                    <td style="text-align:left;">${item.itemName}</td>
+                    <td>${item.reqQty}</td>
+                    <td>${item.availability === 'Yes' ? '✓' : ''}</td>
+                    <td>${item.availability === 'No' ? '✓' : ''}</td>
+                    <td>${item.availability === 'Yes' ? item.reqQty : ''}</td>
+                    <td>${item.remarks || ''}</td>
                 </tr>`;
             });
+            for(let i=0; i < (10 - items.length); i++) { itemRows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`; }
+            
+            const rName = data.requestedBy || "REQUESTING PERSONNEL"; 
+            const rPos  = data.requestedDesig || "Designation<br>Office";
+            const aName = data.approvedBy || "Chief/Section Head";
+            const aPos  = data.approvedDesig || "Designation<br>Office";
 
-            tbody.innerHTML = html;
-        }, error => {
-            console.error("Database Error:", error);
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error loading data. Check Console.</td></tr>`;
-        });
-}
+            const reqImgTag = data.reqSig ? `<img src="${data.reqSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
+            const appImgTag = data.appSig ? `<img src="${data.appSig}" class="sig-img" style="height:45px; display:block; margin:0 auto;">` : '';
 
-// --- NEW FUNCTIONS FOR CONSOLIDATED RESTOCKING WITH PO ---
+            const singleCopy = `
+                <div class="ris-copy">
+                    <div style="text-align:right; font-style:italic; font-size:10px; font-weight:bold;">Appendix 63</div>
+                    <div style="text-align:center; font-weight:bold; text-decoration:underline; margin-bottom:5px; font-size:14px;">REQUISITION AND ISSUE SLIP</div>
+                    <table style="width:100%; font-size:11px; margin-bottom:5px;">
+                        <tr><td width="15%">Entity Name:</td><td style="border-bottom:1px solid black; font-weight:bold;">DepEd RO I</td><td width="15%" align="right">Fund Cluster:</td><td style="border-bottom:1px solid black; font-weight:bold; width:10%;">01</td></tr>
+                        <tr><td>Division:</td><td style="border-bottom:1px solid black; font-weight:bold;">${data.division || ''}</td><td colspan="2" style="font-size:9px;">Responsibility Center Code: __________</td></tr>
+                        <tr><td>Office:</td><td style="border-bottom:1px solid black;"></td><td align="right">RIS No.:</td><td style="border-bottom:1px solid black;"></td></tr>
+                    </table>
+                    <table class="ris-table">
+                        <thead><tr><th width="10%">Stock No.</th><th width="10%">Unit</th><th width="40%">Description</th><th width="10%">Qty</th><th width="5%">Yes</th><th width="5%">No</th><th width="10%">Issued</th><th width="10%">Remarks</th></tr></thead>
+                        <tbody>${itemRows}</tbody>
+                    </table>
+                    <table class="footer-table">
+                        <tr><td></td><td>Requested by:</td><td>Approved by:</td><td>Issued by:</td><td style="border-right:none;">Received by:</td></tr>
+                        <tr>
+                            <td>Signature:</td>
+                            <td style="border-bottom:1px solid black; height:35px; vertical-align:bottom;" align="center">${reqImgTag}</td>
+                            <td style="border-bottom:1px solid black; vertical-align:bottom;" align="center">${appImgTag}</td>
+                            <td style="border-bottom:1px solid black;"></td>
+                            <td style="border-bottom:1px solid black; border-right:none;"></td>
+                        </tr>
+                        <tr>
+                            <td>Name:</td>
+                            <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${rName}</div></td>
+                            <td align="center"><div style="text-transform:uppercase; font-weight:bold;">${aName}</div></td>
+                            <td></td><td style="border-right:none;"></td>
+                        </tr>
+                        <tr>
+                            <td>Designation:</td>
+                            <td align="center"><div style="font-size:9px;">${rPos}</div></td>
+                            <td align="center"><div style="font-size:9px;">${aPos}</div></td>
+                            <td></td><td style="border-right:none;"></td>
+                        </tr>
+                        <tr><td>Date:</td><td></td><td></td><td></td><td style="border-right:none;"></td></tr>
+                    </table>
+                </div>`;
+            return singleCopy + '<div class="cut-line"></div>' + singleCopy;
+        }
 
-function openGlobalRestockModal(itemName, currentTotal, itemUnit) {
-    document.getElementById('restockModal').style.display = 'flex';
-    document.getElementById('restock-item-name').innerText = itemName;
-    document.getElementById('restock-current').innerText = currentTotal;
-    document.getElementById('restock-current-val').value = currentTotal;
-    document.getElementById('restock-unit-val').value = itemUnit;
-    
-    // Reset inputs
-    document.getElementById('restock-input').value = "";
-    document.getElementById('restock-po-number').value = ""; // Reset PO Input
-    document.getElementById('restock-added').innerText = "0";
-    document.getElementById('restock-total').innerText = currentTotal;
-    
-    setTimeout(() => document.getElementById('restock-input').focus(), 100);
-}
+        let adminUnitListener = null;
 
-function calculateRestockTotal() {
-    const current = parseInt(document.getElementById('restock-current-val').value) || 0;
-    const added = parseInt(document.getElementById('restock-input').value) || 0;
-    
-    document.getElementById('restock-added').innerText = added;
-    document.getElementById('restock-total').innerText = current + added;
-}
+        function loadUnitInventory() {
+            let unit = document.getElementById('adminUnitSelect').value;
+            const tbody = document.getElementById('adminUnitTable');
+            
+            const correctionMap = { "PROCUREMENT UNIT": "AD-Procurement Unit", "ORD-PAU": "ORD-Public Affairs Unit", "ORD-LEGAL": "ORD-Legal Unit", "ORD-ICT": "ORD-ICT Unit", "QAD": "QAD" };
+            if (correctionMap[unit]) unit = correctionMap[unit];
 
-function closeRestockModal() {
-    document.getElementById('restockModal').style.display = 'none';
-}
+            if(!unit) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Please select a unit.</td></tr>'; return; }
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading data for <b>' + unit + '</b>...</td></tr>';
 
-async function saveGlobalRestock() {
-    const itemName = document.getElementById('restock-item-name').innerText;
-    const addedQty = parseInt(document.getElementById('restock-input').value);
-    const poNumber = document.getElementById('restock-po-number').value.trim() || 'N/A';
-    const unitType = document.getElementById('restock-unit-val').value || 'pc';
+            if(adminUnitListener) adminUnitListener();
 
-    // Set Default Division for Warehouse / Supply Officer Buffer
-    const defaultWarehouseDivision = "General Supply Stock"; 
+            adminUnitListener = db.collection('inventory').where('division', '==', unit).orderBy('itemName').onSnapshot(snap => {
+                if(snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">No inventory records found for: <b>${unit}</b><br><small style="color:#777;">(Check if the User uploaded their PPMP correctly)</small></td></tr>`;
+                    return;
+                }
+                let html = '';
+                snap.forEach(doc => {
+                    const item = doc.data();
+                    const qty = item.currentQty;
+                    let statusBadge = '', rowStyle = '';
 
-    if (isNaN(addedQty) || addedQty <= 0) return alert("Please enter a valid quantity to add.");
+                    if(qty <= 0) {
+                        statusBadge = '<span class="status-badge" style="background:#e74c3c; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">OUT OF STOCK</span>';
+                        rowStyle = 'background-color: #fdedec;'; 
+                    } else if(qty < 5) {
+                        statusBadge = '<span class="status-badge" style="background:#f1c40f; color:black; padding:3px 8px; border-radius:12px; font-size:0.8rem;">CRITICAL</span>';
+                        rowStyle = 'background-color: #fef9e7;';
+                    } else {
+                        statusBadge = '<span class="status-badge" style="background:#2ecc71; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">GOOD</span>';
+                    }
 
-    const confirmMsg = poNumber !== 'N/A' 
-        ? `Confirm adding ${addedQty} ${unitType} with PO# ${poNumber}?` 
-        : `Confirm adding ${addedQty} ${unitType} (No PO#)?`;
-
-    if(confirm(confirmMsg)) {
-        
-        // 1. Log to Purchase Orders Collection
-        await db.collection('purchase_orders').add({
-            poNumber: poNumber,
-            itemName: itemName,
-            qty: addedQty,
-            unit: unitType,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        // 2. Add to General Inventory (Warehouse)
-        // Check if "General Supply Stock" already has this item
-        const snapshot = await db.collection('inventory')
-            .where('division', '==', defaultWarehouseDivision)
-            .where('itemName', '==', itemName)
-            .limit(1)
-            .get();
-
-        if (!snapshot.empty) {
-            // Update Existing Warehouse Stock
-            const docId = snapshot.docs[0].id;
-            await db.collection('inventory').doc(docId).update({
-                currentQty: firebase.firestore.FieldValue.increment(addedQty)
+                    html += `<tr style="${rowStyle}">
+                        <td style="font-weight:600; color:#2c3e50;">${item.itemName}</td>
+                        <td>${item.unit || 'pc'}</td>
+                        <td style="font-size:1.1rem; font-weight:bold;">${qty}</td>
+                        <td>${statusBadge}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            }, error => {
+                console.error("Database Error:", error);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error loading data. Check Console.</td></tr>`;
             });
-        } else {
-            // Create New Warehouse Entry
-            await db.collection('inventory').add({
-                division: defaultWarehouseDivision,
-                itemName: itemName,
-                currentQty: addedQty,
-                unit: unitType,
-                unitPrice: 0, 
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
         }
 
-        alert("Stock Added & PO Logged Successfully!");
-        closeRestockModal();
-    }
-}
-        // Function to initialize and listen to the users collection
-function initUserManagement() {
-    db.collection('users').onSnapshot(snap => {
-        const tbody = document.getElementById('userTableBody');
-        let html = '';
-        
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
-            return;
+        // --- RESTOCK MODAL FUNCTIONS ---
+        function openGlobalRestockModal(itemName, currentTotal, itemUnit) {
+            document.getElementById('restockModal').style.display = 'flex';
+            document.getElementById('restock-item-name').innerText = itemName;
+            document.getElementById('restock-current').innerText = currentTotal;
+            document.getElementById('restock-current-val').value = currentTotal;
+            document.getElementById('restock-unit-val').value = itemUnit;
+            document.getElementById('restock-input').value = "";
+            document.getElementById('restock-po-number').value = "";
+            document.getElementById('restock-added').innerText = "0";
+            document.getElementById('restock-total').innerText = currentTotal;
+            setTimeout(() => document.getElementById('restock-input').focus(), 100);
         }
 
-        snap.forEach(doc => {
-            const user = doc.data();
-            const userId = doc.id;
-            // Use existing badge styles
-            const roleBadge = user.role === 'admin' ? 'badge-Approved' : 'badge-Pending';
-
-            html += `
-                <tr>
-                    <td>${user.email || 'No Email'}</td>
-                    <td><strong>${user.division || 'Unassigned'}</strong></td>
-                    <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
-                    <td style="text-align:center;">
-                        <button class="action-btn btn-edit" title="Toggle Admin/User Role" onclick="toggleUserRole('${userId}', '${user.role}')">
-                            <i class="fas fa-user-shield"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Delete User Profile" onclick="deleteUserProfile('${userId}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>`;
-        });
-        tbody.innerHTML = html;
-    });
-}
-
-        function nav(id, btn) {
-            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
-            btn.classList.add('active');
+        function calculateRestockTotal() {
+            const current = parseInt(document.getElementById('restock-current-val').value) || 0;
+            const added = parseInt(document.getElementById('restock-input').value) || 0;
+            document.getElementById('restock-added').innerText = added;
+            document.getElementById('restock-total').innerText = current + added;
         }
 
-// Function to promote/demote users
-async function toggleUserRole(id, currentRole) {
-    const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    if (confirm(`Change this user's role to ${newRole.toUpperCase()}?`)) {
-        try {
-            await db.collection('users').doc(id).update({ role: newRole });
-            alert("User role updated successfully.");
-        } catch (error) {
-            alert("Error updating role: " + error.message);
+        function closeRestockModal() { document.getElementById('restockModal').style.display = 'none'; }
+
+        async function saveGlobalRestock() {
+            const itemName = document.getElementById('restock-item-name').innerText;
+            const addedQty = parseInt(document.getElementById('restock-input').value);
+            const poNumber = document.getElementById('restock-po-number').value.trim() || 'N/A';
+            const unitType = document.getElementById('restock-unit-val').value || 'pc';
+            const defaultWarehouseDivision = "General Supply Stock"; 
+
+            if (isNaN(addedQty) || addedQty <= 0) return alert("Please enter a valid quantity to add.");
+            const confirmMsg = poNumber !== 'N/A' ? `Confirm adding ${addedQty} ${unitType} with PO# ${poNumber}?` : `Confirm adding ${addedQty} ${unitType} (No PO#)?`;
+
+            if(confirm(confirmMsg)) {
+                await db.collection('purchase_orders').add({ poNumber: poNumber, itemName: itemName, qty: addedQty, unit: unitType, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                const snapshot = await db.collection('inventory').where('division', '==', defaultWarehouseDivision).where('itemName', '==', itemName).limit(1).get();
+
+                if (!snapshot.empty) {
+                    const docId = snapshot.docs[0].id;
+                    await db.collection('inventory').doc(docId).update({ currentQty: firebase.firestore.FieldValue.increment(addedQty) });
+                } else {
+                    await db.collection('inventory').add({ division: defaultWarehouseDivision, itemName: itemName, currentQty: addedQty, unit: unitType, unitPrice: 0, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+                alert("Stock Added & PO Logged Successfully!");
+                closeRestockModal();
+            }
         }
-    }
-}
-
-// Function to delete user profile from Firestore
-async function deleteUserProfile(id) {
-    if (confirm("Are you sure you want to delete this user profile? \n\nNote: This only removes their Firestore data, not their login account.")) {
-        try {
-            await db.collection('users').doc(id).delete();
-            alert("User profile removed.");
-        } catch (error) {
-            alert("Error deleting user: " + error.message);
-        }
-    }
-}
-        auth.onAuthStateChanged(user => {
-    if (!user) window.location.href = "../index.html";
-    else {
-        db.collection('users').doc(user.uid).get().then(doc => {
-            if (doc.exists && doc.data().role === 'admin') {
-                initAdminDashboard();
-                initMasterInventory();
-                initConsolidatedSupplies();
-                initConsolidatedRIS();
-                initPurchaseOrders();
-                initAnnouncementManager(); 
-                initUserManagement(); // <--- Add this line here
-            } else window.location.href = "../user/user.html";
-        });
-    }
-});
-
-        async function clearAllGlobalInventory() {
-    const password = prompt("Enter ADMIN PASSWORD to confirm clearing ALL global data:");
-    // Replace 'admin123' with your preferred secure password logic
-    if (password !== 'admin123') {
-        alert("Incorrect password. Action cancelled.");
-        return;
-    }
-
-    if (!confirm("🚨 DANGER: This will permanently delete ALL inventory items, ALL uploaded PPMPs, and ALL Purchase Order logs across ALL divisions. Do you want to proceed?")) return;
-
-    const batch = db.batch();
-    
-    try {
-        // 1. Clear Inventory
-        const invSnap = await db.collection('inventory').get();
-        invSnap.forEach(doc => batch.delete(doc.ref));
-
-        // 2. Clear PPMP Upload Logs
-        const ppmpSnap = await db.collection('ppmp_uploads').get();
-        ppmpSnap.forEach(doc => batch.delete(doc.ref));
-
-        // 3. Clear Purchase Order History
-        const poSnap = await db.collection('purchase_orders').get();
-        poSnap.forEach(doc => batch.delete(doc.ref));
-
-        await batch.commit();
-        alert("Global System Reset Successful.");
-        location.reload();
-    } catch (error) {
-        console.error("Reset Error: ", error);
-        alert("Error during reset: " + error.message);
-    }
-}
     </script>
 </body>
 </html>
