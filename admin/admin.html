@@ -117,6 +117,7 @@
             <div class="nav-link" onclick="nav('purchase-orders', this)">Purchase Orders</div>
             <div class="nav-link" onclick="nav('unit-inventory', this)">Unit Inventory</div>
             <div class="nav-link" onclick="nav('consolidated-ris', this)">Consolidated RIS</div>
+            <div class="nav-link" onclick="nav('consumption-report', this)">Consumption Report</div>
             <div class="nav-link" onclick="nav('user-management', this)">User Management</div>
             <div class="nav-link" onclick="logout()" style="margin-top:auto; background:#c0392b; text-align:center;">Logout</div>
         </div>
@@ -361,6 +362,94 @@
                     <input type="hidden" id="restock-unit-val"> <button class="btn-save" style="width:100%;" onclick="saveGlobalRestock()">Confirm & Update Balance</button>
                 </div>
             </div>
+
+            <div id="consumption-report" class="section">
+    <div class="header-title"><h1>Consumption Report</h1></div>
+    <div class="content-box">
+        <p style="color:#666; margin-bottom:15px;">Monitor and consolidate approved requests by division, quarter, or month.</p>
+        
+        <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center;">
+            <select id="cons-division" class="edit-input" style="width:250px; font-weight:bold;">
+                <option value="ALL">-- ALL DIVISIONS --</option>
+                <option value="AD-Personnel Section">AD-Personnel Section</option>
+                <option value="AD-AMS">AD-AMS</option>
+                <option value="AD-Records Section">AD-Records Section</option>
+                <option value="AD-GSU">AD-GSU</option>
+                <option value="AD-Cash Unit">AD-Cash Unit</option>
+                <option value="AD-Procurement Unit">AD-Procurement Unit</option>
+                <option value="AD-Payroll">AD-Payroll</option>
+                <option value="Admin Proper">Admin Proper</option>
+                <option value="ORD-Public Affairs Unit">ORD-Public Affairs Unit</option>
+                <option value="ORD-ICT Unit">ORD-ICT Unit</option>
+                <option value="ORD-Legal Unit">ORD-Legal Unit</option>
+                <option value="ORD Proper">ORD Proper</option>
+                <option value="OARD">OARD</option>
+                <option value="Finance Proper">Finance Proper</option>
+                <option value="FD-Accounting">FD-Accounting</option>
+                <option value="FD-Budget">FD-Budget</option>
+                <option value="ESSD">ESSD</option>
+                <option value="FTAD">FTAD</option>
+                <option value="HRDD">HRDD</option>
+                <option value="CLMD">CLMD</option>
+                <option value="CLMD-LR">CLMD-LR</option>
+                <option value="QAD">QAD</option>
+                <option value="COA">COA</option>
+            </select>
+
+            <select id="cons-year" class="edit-input" style="width:100px; font-weight:bold;">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+            </select>
+
+            <select id="cons-period" class="edit-input" style="width:180px; font-weight:bold;">
+                <option value="ALL">Entire Year</option>
+                <optgroup label="By Quarter">
+                    <option value="Q1">Quarter 1 (Jan-Mar)</option>
+                    <option value="Q2">Quarter 2 (Apr-Jun)</option>
+                    <option value="Q3">Quarter 3 (Jul-Sep)</option>
+                    <option value="Q4">Quarter 4 (Oct-Dec)</option>
+                </optgroup>
+                <optgroup label="By Month">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </optgroup>
+            </select>
+
+            <button class="btn" style="background:var(--accent);" onclick="generateConsumptionReport()">
+                <i class="fas fa-filter"></i> Consolidate
+            </button>
+            <button class="btn" style="background:var(--primary); margin-left:auto;" onclick="printConsumptionReport()">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="40%">Item Name</th>
+                    <th width="15%">Unit</th>
+                    <th width="15%" style="text-align:center;">Total Consumed</th>
+                    <th width="30%">Remarks (Editable for Print)</th>
+                </tr>
+            </thead>
+            <tbody id="consumptionTableBody">
+                <tr><td colspan="4" style="text-align:center; padding:30px;">Select filters and click Consolidate.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
         </div>
     </div>
@@ -918,6 +1007,163 @@
                 closeRestockModal();
             }
         }
+        // --- CONSUMPTION REPORT LOGIC ---
+
+async function generateConsumptionReport() {
+    const divSelect = document.getElementById('cons-division').value;
+    const yearSelect = document.getElementById('cons-year').value;
+    const periodSelect = document.getElementById('cons-period').value;
+    const tbody = document.getElementById('consumptionTableBody');
+
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Fetching and consolidating data...</td></tr>';
+
+    try {
+        // Query only Approved requests
+        const snap = await db.collection('requisitions').where('status', '==', 'Approved').get();
+        const consolidated = {};
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            if(!data.date || !data.items) return;
+            
+            // 1. Filter Division
+            if(divSelect !== 'ALL' && data.division !== divSelect) return;
+
+            // 2. Parse Date
+            const dateObj = new Date(data.date);
+            const reqYear = dateObj.getFullYear().toString();
+            const reqMonth = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            
+            // 3. Filter Year
+            if(reqYear !== yearSelect) return;
+
+            // 4. Filter Quarter or Month
+            if(periodSelect !== 'ALL') {
+                if(periodSelect.startsWith('Q')) {
+                    const quarter = Math.ceil((dateObj.getMonth() + 1) / 3);
+                    if(`Q${quarter}` !== periodSelect) return;
+                } else {
+                    if(reqMonth !== periodSelect) return;
+                }
+            }
+
+            // 5. Aggregate Quantities
+            data.items.forEach(item => {
+                const itemName = item.itemName;
+                if(!consolidated[itemName]) {
+                    consolidated[itemName] = { unit: item.unit || 'pc', totalQty: 0 };
+                }
+                consolidated[itemName].totalQty += parseInt(item.reqQty) || 0;
+            });
+        });
+
+        // 6. Render the Table
+        let html = '';
+        const keys = Object.keys(consolidated).sort();
+        
+        if(keys.length === 0) {
+            html = '<tr><td colspan="4" style="text-align:center; padding:30px;">No approved consumption found for the selected parameters.</td></tr>';
+        } else {
+            keys.forEach(key => {
+                html += `
+                <tr>
+                    <td style="font-weight:600;">${key}</td>
+                    <td>${consolidated[key].unit}</td>
+                    <td style="text-align:center; font-size:1.2rem; font-weight:bold; color:var(--primary);">${consolidated[key].totalQty}</td>
+                    <td><input type="text" class="edit-input" placeholder="Add remarks before printing..."></td>
+                </tr>`;
+            });
+        }
+        tbody.innerHTML = html;
+
+    } catch(error) {
+        console.error(error);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error loading report: ${error.message}</td></tr>`;
+    }
+}
+
+function printConsumptionReport() {
+    const tbodyHTML = document.getElementById('consumptionTableBody').innerHTML;
+    if(tbodyHTML.includes('Fetching') || tbodyHTML.includes('Select filters')) {
+        return alert("Please click 'Consolidate' to generate a report first.");
+    }
+
+    // Get filter names for the document header
+    const divSelect = document.getElementById('cons-division');
+    const divText = divSelect.options[divSelect.selectedIndex].text;
+    const periodText = document.getElementById('cons-period').options[document.getElementById('cons-period').selectedIndex].text;
+    const yearText = document.getElementById('cons-year').value;
+
+    // Build the rows, preserving the typed text from inputs
+    const rows = document.getElementById('consumptionTableBody').querySelectorAll('tr');
+    let printRows = '';
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        if(cols.length === 4) {
+            const itemName = cols[0].innerText;
+            const unit = cols[1].innerText;
+            const qty = cols[2].innerText;
+            // Extract the user-typed value from the input field
+            const remarksInput = cols[3].querySelector('input');
+            const remarks = remarksInput ? remarksInput.value : '';
+            
+            printRows += `
+                <tr>
+                    <td style="border:1px solid #000; padding:6px;">${itemName}</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center;">${unit}</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center; font-weight:bold;">${qty}</td>
+                    <td style="border:1px solid #000; padding:6px;">${remarks}</td>
+                </tr>`;
+        } else {
+            printRows += `<tr><td colspan="4" style="border:1px solid #000; padding:10px; text-align:center;">${cols[0].innerText}</td></tr>`;
+        }
+    });
+
+    // Create the Print Layout
+    const printHTML = `
+        <div style="padding: 20px; font-family: Arial, sans-serif;">
+            <h2 style="text-align:center; margin-bottom:5px; text-transform:uppercase;">Supply Consumption Report</h2>
+            <h4 style="text-align:center; margin-top:0; margin-bottom:20px; color:#333;">
+                Division/Office: ${divText} <br>
+                Period: ${periodText} ${yearText}
+            </h4>
+            <table style="width:100%; border-collapse: collapse; font-size:13px;">
+                <thead>
+                    <tr>
+                        <th style="border:1px solid #000; padding:8px; background:#f0f0f0; width:40%;">Item Description</th>
+                        <th style="border:1px solid #000; padding:8px; background:#f0f0f0; width:10%;">Unit</th>
+                        <th style="border:1px solid #000; padding:8px; background:#f0f0f0; width:15%;">Total Consumed</th>
+                        <th style="border:1px solid #000; padding:8px; background:#f0f0f0; width:35%;">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${printRows}
+                </tbody>
+            </table>
+            
+            <table style="width:100%; margin-top:50px; font-size:12px;">
+                <tr>
+                    <td width="50%" align="center">
+                        Prepared by:<br><br><br>
+                        ___________________________<br>
+                        <b>Admin / Supply Officer</b>
+                    </td>
+                    <td width="50%" align="center">
+                        Noted by:<br><br><br>
+                        ___________________________<br>
+                        <b>Chief / Head of Office</b>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    `;
+
+    // Inject and trigger print
+    const container = document.getElementById('print-area-forms');
+    container.innerHTML = printHTML;
+    setTimeout(() => window.print(), 500);
+}
     </script>
 </body>
 </html>
