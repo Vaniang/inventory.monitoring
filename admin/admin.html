@@ -1127,10 +1127,18 @@ function printConsumptionReport() {
     else if (periodSelect === 'Q4') periodLabel = "4th QUARTER (October, November, December)";
     else periodLabel = monthNames[periodSelect].toUpperCase();
 
-    // Rebuild Headers for Print
+    // Rebuild Headers for Print with adjusted widths
     let printHeaders = '<tr>';
-    document.getElementById('consumptionTableHead').querySelectorAll('th').forEach(th => {
-        printHeaders += `<th style="border:1px solid #000; padding:8px; background:#f0f0f0;">${th.innerText}</th>`;
+    const thElements = document.getElementById('consumptionTableHead').querySelectorAll('th');
+    thElements.forEach((th, index) => {
+        let widthStyle = "";
+        if(index === 0) widthStyle = "width: 25%;"; // Item Name
+        else if(index === 1) widthStyle = "width: 5%;"; // Unit
+        else if(index === thElements.length - 1) widthStyle = "width: 20%;"; // Remarks
+        else if(index === thElements.length - 2) widthStyle = "width: 8%;"; // Total
+        else widthStyle = "width: auto;"; // Months
+        
+        printHeaders += `<th style="border:1px solid #000; padding:8px; background:#f0f0f0; font-size:11px; ${widthStyle}">${th.innerText}</th>`;
     });
     printHeaders += '</tr>';
 
@@ -1144,34 +1152,41 @@ function printConsumptionReport() {
                 if (index === cols.length - 1) { // Remarks input
                     const input = col.querySelector('input');
                     const val = input ? input.value : '';
-                    rowHtml += `<td style="border:1px solid #000; padding:6px;">${val}</td>`;
+                    rowHtml += `<td style="border:1px solid #000; padding:6px; font-size:11px;">${val}</td>`;
                 } else {
                     const align = index >= 2 ? 'center' : 'left';
                     const bold = index === cols.length - 2 ? 'font-weight:bold; background:#f9f9f9;' : '';
-                    rowHtml += `<td style="border:1px solid #000; padding:6px; text-align:${align}; ${bold}">${col.innerText}</td>`;
+                    rowHtml += `<td style="border:1px solid #000; padding:6px; text-align:${align}; font-size:11px; ${bold}">${col.innerText}</td>`;
                 }
             });
             rowHtml += '</tr>';
             printRows += rowHtml;
         } else {
-            printRows += `<tr><td colspan="100%" style="border:1px solid #000; padding:10px; text-align:center;">${cols[0].innerText}</td></tr>`;
+            printRows += `<tr><td colspan="100%" style="border:1px solid #000; padding:10px; text-align:center; font-size:12px;">${cols[0].innerText}</td></tr>`;
         }
     });
 
-    // Create the Print Layout
+    // Create the Print Layout WITH LANDSCAPE OVERRIDE
     const printHTML = `
-        <div style="padding: 20px; font-family: Arial, sans-serif;">
+        <style>
+            /* Force Landscape and Auto-Height for this specific report */
+            @media print {
+                @page { size: A4 landscape; margin: 10mm; }
+                #print-area-forms { height: auto !important; position: relative !important; display: block !important; }
+            }
+        </style>
+        <div style="padding: 10px; font-family: Arial, sans-serif; background: white; min-height: 100vh;">
             <h2 style="text-align:center; margin-bottom:5px; text-transform:uppercase;">Supply Consumption Report</h2>
             <h4 style="text-align:center; margin-top:0; margin-bottom:20px; color:#333;">
                 Division/Office: ${divText} <br>
                 Period: ${periodLabel} ${yearText}
             </h4>
-            <table style="width:100%; border-collapse: collapse; font-size:12px;">
+            <table style="width:100%; border-collapse: collapse; table-layout: fixed;">
                 <thead>${printHeaders}</thead>
                 <tbody>${printRows}</tbody>
             </table>
             
-            <table style="width:100%; margin-top:50px; font-size:12px;">
+            <table style="width:100%; margin-top:40px; font-size:12px; page-break-inside: avoid;">
                 <tr>
                     <td width="50%" align="center">
                         Prepared by:<br><br><br>
@@ -1191,7 +1206,12 @@ function printConsumptionReport() {
     // Inject and trigger print
     const container = document.getElementById('print-area-forms');
     container.innerHTML = printHTML;
-    setTimeout(() => window.print(), 500);
+    
+    setTimeout(() => {
+        window.print();
+        // Clear the container after printing so it doesn't mess up your Portrait RIS forms later
+        setTimeout(() => { container.innerHTML = ''; }, 1000);
+    }, 500);
 }
     </script>
 </body>
