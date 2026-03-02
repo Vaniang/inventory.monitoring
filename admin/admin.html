@@ -481,6 +481,8 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        Chart.defaults.animation = false;
+
         // 1. CLEANED AUTH LISTENER
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
