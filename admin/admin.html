@@ -541,26 +541,24 @@
             }
         }
 
-        // --- USER MANAGEMENT ---
-        function initUserManagement() {
+      function initUserManagement() {
             db.collection('users').onSnapshot(snap => {
                 const tbody = document.getElementById('userTableBody');
                 let html = '';
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
-                    return;
-                }
+                if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>'; return; }
                 snap.forEach(doc => {
                     const user = doc.data();
                     const userId = doc.id;
                     const roleBadge = user.role === 'admin' ? 'badge-Approved' : 'badge-Pending';
+                    const divName = user.division || 'Unassigned';
 
-                    html += `
-                        <tr>
+                    html += `<tr>
                             <td>${user.email || 'No Email'}</td>
-                            <td><strong>${user.division || 'Unassigned'}</strong></td>
+                            <td><strong>${divName}</strong></td>
                             <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
                             <td style="text-align:center;">
+                                <button class="action-btn" style="background:#f39c12;" title="Send Direct Message" onclick="sendDirectMessage('${userId}', '${divName}')"><i class="fas fa-envelope"></i></button>
+                                
                                 <button class="action-btn btn-edit" title="Toggle Admin/User Role" onclick="toggleUserRole('${userId}', '${user.role}')"><i class="fas fa-user-shield"></i></button>
                                 <button class="action-btn btn-delete" title="Delete User Profile" onclick="deleteUserProfile('${userId}')"><i class="fas fa-trash-alt"></i></button>
                             </td>
@@ -569,7 +567,6 @@
                 tbody.innerHTML = html;
             });
         }
-
         async function toggleUserRole(id, currentRole) {
             const newRole = currentRole === 'admin' ? 'user' : 'admin';
             if (confirm(`Change this user's role to ${newRole.toUpperCase()}?`)) {
@@ -644,7 +641,19 @@
         }
 
         async function setStatus(docId, newStatus, userId) {
-            if(!confirm(`Mark as ${newStatus}?`)) return;
+            let customMessage = "";
+            
+            // Trigger customized prompt based on whether Admin is Approving or Rejecting
+            if (newStatus === 'Approved') {
+                customMessage = prompt("Add a message for this division:", "Your supplies are ready for pick up. Please proceed to the Supply Office.");
+                if (customMessage === null) return; // User clicked cancel
+            } else if (newStatus === 'Rejected') {
+                customMessage = prompt("Reason for rejection (optional):", "Items out of stock or invalid request.");
+                if (customMessage === null) return; // User clicked cancel
+            } else {
+                if(!confirm(`Mark as ${newStatus}?`)) return;
+            }
+
             const docRef = db.collection('requisitions').doc(docId);
             const doc = await docRef.get();
             if(!doc.exists) return;
@@ -658,15 +667,24 @@
                 data.items.forEach(item => { const invRef = db.collection('inventory').doc(item.id); batch.update(invRef, { currentQty: firebase.firestore.FieldValue.increment(-item.reqQty) }); });
             }
             batch.update(docRef, { status: newStatus });
+            
+            // Send the direct notification to that specific user
             if(userId) {
+                let finalMessage = newStatus === 'Approved' ? "Your request is approved." : "Your request was rejected.";
+                if (customMessage && customMessage.trim() !== "") {
+                    finalMessage = customMessage.trim();
+                }
+
                 batch.set(db.collection('notifications').doc(), {
-                    userId: userId, title: `Request ${newStatus}`,
-                    message: newStatus === 'Approved' ? "Your request is approved." : "Your request was rejected.",
-                    status: 'unread', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    userId: userId, 
+                    title: `Request ${newStatus}`,
+                    message: finalMessage,
+                    status: 'unread', 
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
             await batch.commit();
-            alert(`Updated to ${newStatus}!`);
+            alert(`Updated to ${newStatus} & message sent!`);
         }
 
         function initMasterInventory() {
@@ -1329,6 +1347,24 @@
                 </html>
             `);
             printWindow.document.close();
+        }
+        // --- SEND DIRECT MESSAGE TO SPECIFIC DIVISION ---
+        function sendDirectMessage(userId, divisionName) {
+            const msg = prompt(`Send a direct message to ${divisionName}:`, "Your supplies are ready for pick up.");
+            
+            if (!msg || msg.trim() === "") return; // Cancelled or empty
+
+            db.collection('notifications').add({
+                userId: userId,
+                title: "📩 Message from Supply Officer",
+                message: msg.trim(),
+                status: 'unread',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert(`Message successfully sent to ${divisionName}!`);
+            }).catch(err => {
+                alert("Error sending message: " + err.message);
+            });
         }
     </script>
 </body>
