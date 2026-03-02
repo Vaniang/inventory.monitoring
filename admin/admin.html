@@ -1038,10 +1038,10 @@ async function generateConsumptionReport() {
     // 2. Generate the Top Banner Text
     let periodTopHeader = "";
     if (periodSelect === 'ALL') periodTopHeader = "ENTIRE YEAR CONSOLIDATION";
-    else if (periodSelect === 'Q1') periodTopHeader = "1st Quarter (Jan, Feb., March)";
-    else if (periodSelect === 'Q2') periodTopHeader = "2nd Quarter (April, May, June)";
-    else if (periodSelect === 'Q3') periodTopHeader = "3rd Quarter (July, Aug., Sept.)";
-    else if (periodSelect === 'Q4') periodTopHeader = "4th Quarter (Oct., Nov., Dec.)";
+    else if (periodSelect === 'Q1') periodTopHeader = "1st Quarter";
+    else if (periodSelect === 'Q2') periodTopHeader = "2nd Quarter";
+    else if (periodSelect === 'Q3') periodTopHeader = "3rd Quarter";
+    else if (periodSelect === 'Q4') periodTopHeader = "4th Quarter";
     else periodTopHeader = monthNames[periodSelect].toUpperCase();
 
     // 3. Build the 2-Tier Table Header
