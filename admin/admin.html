@@ -1366,6 +1366,46 @@
                 alert("Error sending message: " + err.message);
             });
         }
+        let isFirstNotifLoad = true; // Prevents the sound from playing when they first log in
+
+        function initNotifications() {
+            db.collection('notifications').where('userId', '==', currentUserId).onSnapshot(snap => {
+                const list = document.getElementById('notif-list');
+                const badge = document.getElementById('notif-badge');
+                let unread = 0, notifs = [];
+                
+                // 1. Check if there are strictly *new* unread messages arriving
+                let playSound = false;
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added" && change.doc.data().status === 'unread') {
+                        playSound = true;
+                    }
+                });
+
+                // 2. Process and sort the notifications
+                snap.forEach(d => notifs.push({id: d.id, ...d.data()}));
+                notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                
+                list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777;">No notifications</div>';
+                
+                notifs.forEach(n => {
+                    if(n.status === 'unread') unread++;
+                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}</div>`;
+                });
+                
+                badge.style.display = unread > 0 ? 'block' : 'none'; 
+                badge.innerText = unread;
+
+                // 3. Play the sound if there is a new message (ignoring the initial page load)
+                if (playSound && !isFirstNotifLoad) {
+                    const audio = new Audio('https://actions.google.com/sounds/v1/ui/beep_short.ogg');
+                    // Modern browsers require the user to have clicked anywhere on the screen at least once before allowing sound
+                    audio.play().catch(err => console.log("Browser auto-play prevented the sound."));
+                }
+                
+                isFirstNotifLoad = false; 
+            });
+        }
     </script>
 </body>
 </html>
