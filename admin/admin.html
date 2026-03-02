@@ -1037,26 +1037,27 @@
             let theadHtml = '';
             
             if (periodSelect === 'ALL') {
-                // 3-Tier Header specifically for Entire Year
+                // 3-Tier Header for Entire Year (Squeezed to fit printed page)
                 theadHtml = `
                     <tr>
                         <th width="15%" rowspan="3" style="vertical-align:middle;">Item Name</th>
                         <th width="5%" rowspan="3" style="vertical-align:middle; text-align:center;">Unit</th>
-                        <th colspan="12" style="text-align:center; background:#d9edf7; padding:8px; font-size:14px;">ENTIRE YEAR CONSOLIDATION</th>
-                        <th width="8%" rowspan="3" style="vertical-align:middle; text-align:center; background:#e8f4f8;">Total</th>
-                        <th width="15%" rowspan="3" style="vertical-align:middle;">Remarks (Editable)</th>
+                        <th width="6%" rowspan="3" style="vertical-align:middle; text-align:center; background:#e8f4f8; color:#000;">PPMP Stock</th>
+                        <th colspan="12" style="text-align:center; background:#d9edf7; padding:8px; font-size:14px; color:#000;">ENTIRE YEAR CONSOLIDATION</th>
+                        <th width="6%" rowspan="3" style="vertical-align:middle; text-align:center; background:#fce4d6; color:#000;">Consumed</th>
+                        <th width="6%" rowspan="3" style="vertical-align:middle; text-align:center; background:#e2f0d9; color:#000;">Remaining</th>
+                        <th width="12%" rowspan="3" style="vertical-align:middle;">Remarks (Editable)</th>
                     </tr>
                     <tr>
-                        <th colspan="3" style="text-align:center; background:#e2f0d9; font-size:12px; padding:4px;">1st Quarter</th>
-                        <th colspan="3" style="text-align:center; background:#fff2cc; font-size:12px; padding:4px;">2nd Quarter</th>
-                        <th colspan="3" style="text-align:center; background:#fce4d6; font-size:12px; padding:4px;">3rd Quarter</th>
-                        <th colspan="3" style="text-align:center; background:#e6e6fa; font-size:12px; padding:4px;">4th Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#e2f0d9; font-size:12px; padding:4px; color:#000;">1st Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#fff2cc; font-size:12px; padding:4px; color:#000;">2nd Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#fce4d6; font-size:12px; padding:4px; color:#000;">3rd Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#e6e6fa; font-size:12px; padding:4px; color:#000;">4th Quarter</th>
                     </tr>
                     <tr>
                 `;
                 targetMonths.forEach(m => { 
-                    // Abbreviate month names to 3 letters to save space (e.g., Jan, Feb)
-                    theadHtml += `<th style="text-align:center; font-size:11px; background:#f4f9f9; padding:4px;">${monthNames[m].substring(0,3)}</th>`; 
+                    theadHtml += `<th style="text-align:center; font-size:11px; background:#f4f9f9; padding:4px; color:#000;">${monthNames[m].substring(0,3)}</th>`; 
                 });
                 theadHtml += `</tr>`;
             } else {
@@ -1070,16 +1071,18 @@
 
                 theadHtml = `
                     <tr>
-                        <th width="25%" rowspan="2" style="vertical-align:middle;">Item Name</th>
+                        <th width="20%" rowspan="2" style="vertical-align:middle;">Item Name</th>
                         <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center;">Unit</th>
-                        <th colspan="${targetMonths.length}" style="text-align:center; background:#d9edf7; padding:10px; font-size:14px;">${periodTopHeader}</th>
-                        <th width="10%" rowspan="2" style="vertical-align:middle; text-align:center; background:#e8f4f8;">Total</th>
-                        <th width="22%" rowspan="2" style="vertical-align:middle;">Remarks (Editable)</th>
+                        <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center; background:#e8f4f8; color:#000;">PPMP Stock</th>
+                        <th colspan="${targetMonths.length}" style="text-align:center; background:#d9edf7; padding:10px; font-size:14px; color:#000;">${periodTopHeader}</th>
+                        <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center; background:#fce4d6; color:#000;">Consumed</th>
+                        <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center; background:#e2f0d9; color:#000;">Remaining</th>
+                        <th width="15%" rowspan="2" style="vertical-align:middle;">Remarks (Editable)</th>
                     </tr>
                     <tr>
                 `;
                 targetMonths.forEach(m => { 
-                    theadHtml += `<th style="text-align:center; font-size:13px; background:#f4f9f9;">${monthNames[m]}</th>`; 
+                    theadHtml += `<th style="text-align:center; font-size:13px; background:#f4f9f9; color:#000;">${monthNames[m]}</th>`; 
                 });
                 theadHtml += `</tr>`;
             }
@@ -1087,10 +1090,29 @@
             thead.innerHTML = theadHtml;
 
             try {
-                const snap = await db.collection('requisitions').where('status', '==', 'Approved').get();
                 const consolidated = {};
 
-                snap.forEach(doc => {
+                // 1. Fetch Master Inventory (PPMP Stocks)
+                let invQuery = db.collection('inventory');
+                if (divSelect !== 'ALL') {
+                    invQuery = invQuery.where('division', '==', divSelect);
+                }
+                const invSnap = await invQuery.get();
+                
+                invSnap.forEach(doc => {
+                    const item = doc.data();
+                    const key = item.itemName.trim();
+                    if (!consolidated[key]) {
+                        consolidated[key] = { unit: item.unit || 'pc', currentQty: 0, periodConsumed: 0, monthly: {} };
+                        targetMonths.forEach(m => consolidated[key].monthly[m] = 0);
+                    }
+                    consolidated[key].currentQty += (item.currentQty || 0); // Aggregates if ALL divisions selected
+                });
+
+                // 2. Fetch Requisitions (Approved Only)
+                const reqSnap = await db.collection('requisitions').where('status', '==', 'Approved').get();
+
+                reqSnap.forEach(doc => {
                     const data = doc.data();
                     if(!data.date || !data.items) return;
                     if(divSelect !== 'ALL' && data.division !== divSelect) return;
@@ -1103,29 +1125,42 @@
                     if(!targetMonths.includes(reqMonth)) return; 
 
                     data.items.forEach(item => {
-                        const itemName = item.itemName;
-                        if(!consolidated[itemName]) {
-                            consolidated[itemName] = { unit: item.unit || 'pc', monthly: {}, total: 0 };
-                            targetMonths.forEach(m => consolidated[itemName].monthly[m] = 0);
+                        const key = item.itemName.trim();
+                        if(!consolidated[key]) {
+                            // Failsafe in case an item was requested but deleted from inventory later
+                            consolidated[key] = { unit: item.unit || 'pc', currentQty: 0, periodConsumed: 0, monthly: {} };
+                            targetMonths.forEach(m => consolidated[key].monthly[m] = 0);
                         }
                         const qty = parseInt(item.reqQty) || 0;
-                        consolidated[itemName].monthly[reqMonth] += qty;
-                        consolidated[itemName].total += qty;
+                        consolidated[key].monthly[reqMonth] += qty;
+                        consolidated[key].periodConsumed += qty;
                     });
                 });
 
+                // 3. Render Data Rows
                 let html = '';
                 const keys = Object.keys(consolidated).sort();
                 
                 if(keys.length === 0) {
-                    html = `<tr><td colspan="${targetMonths.length + 4}" style="text-align:center; padding:30px;">No approved consumption found for the selected parameters.</td></tr>`;
+                    html = `<tr><td colspan="100%" style="text-align:center; padding:30px;">No supplies found for the selected parameters.</td></tr>`;
                 } else {
                     keys.forEach(key => {
                         const row = consolidated[key];
-                        html += `<tr><td style="font-weight:600;">${key}</td><td style="text-align:center;">${row.unit}</td>`;
-                        targetMonths.forEach(m => { html += `<td style="text-align:center;">${row.monthly[m]}</td>`; });
+                        // Initial PPMP Stock = What's currently left + What was consumed in this period
+                        const ppmpStock = row.currentQty + row.periodConsumed; 
+
+                        html += `<tr>
+                            <td style="font-weight:600;">${key}</td>
+                            <td style="text-align:center;">${row.unit}</td>
+                            <td style="text-align:center; font-weight:bold; background:#f4f9f9; color:#2c3e50;">${ppmpStock}</td>`;
+                        
+                        targetMonths.forEach(m => { 
+                            html += `<td style="text-align:center;">${row.monthly[m] === 0 ? '-' : row.monthly[m]}</td>`; 
+                        });
+                        
                         html += `
-                            <td style="text-align:center; font-weight:bold; color:var(--primary); background:#f4f9f9;">${row.total}</td>
+                            <td style="text-align:center; font-weight:bold; color:#e74c3c; background:#fdf2f0;">${row.periodConsumed}</td>
+                            <td style="text-align:center; font-weight:bold; color:var(--green); background:#f4f9f4;">${row.currentQty}</td>
                             <td><input type="text" class="edit-input" placeholder="Type notes here..."></td>
                         </tr>`;
                     });
@@ -1153,8 +1188,8 @@
             let reportHeaderTitle = "";
             if (periodSelect === 'ALL') {
                 reportHeaderTitle = `
-                    <h2 style="text-align:center; text-transform:uppercase;">Supply Consumption Report</h2>
-                    <h4 style="text-align:center; margin-bottom:30px; color:#333;">
+                    <h2 style="text-align:center; margin-bottom:5px; text-transform:uppercase;">Supply Consumption Report</h2>
+                    <h4 style="text-align:center; margin-top:0; margin-bottom:30px; color:#333;">
                         Department of Education Regional Office I <br>
                         F.Y. ${yearText}
                     </h4>
@@ -1168,8 +1203,8 @@
                 else periodLabel = monthNames[periodSelect].toUpperCase();
 
                 reportHeaderTitle = `
-                    <h2 style="text-align:center; text-transform:uppercase;">Supply Consumption Report</h2>
-                    <h4 style="text-align:center; margin-bottom:30px; color:#333;">
+                    <h2 style="text-align:center; margin-bottom:5px; text-transform:uppercase;">Supply Consumption Report</h2>
+                    <h4 style="text-align:center; margin-top:0; margin-bottom:30px; color:#333;">
                         Division/Office: ${divText} <br>
                         Period: ${periodLabel} ${yearText}
                     </h4>
@@ -1184,13 +1219,20 @@
                 if (cols.length > 1) { 
                     let rowHtml = '<tr>';
                     cols.forEach((col, index) => {
-                        if (index === cols.length - 1) { 
+                        if (index === cols.length - 1) { // Remarks input
                             const input = col.querySelector('input');
                             const val = input ? input.value : '';
                             rowHtml += `<td>${val}</td>`;
                         } else {
-                            const align = (index === 1 || index >= 2) ? 'center' : 'left';
-                            const bold = index === cols.length - 2 ? 'font-weight:bold; background:#f9f9f9;' : '';
+                            const align = (index === 0) ? 'left' : 'center'; 
+                            
+                            const isPPMP = index === 2;
+                            const isConsumed = index === cols.length - 3;
+                            const isRemaining = index === cols.length - 2;
+                            
+                            let bold = '';
+                            if (isPPMP || isConsumed || isRemaining) bold = 'font-weight:bold; background:#f9f9f9;';
+                            
                             rowHtml += `<td style="text-align:${align}; ${bold}">${col.innerText}</td>`;
                         }
                     });
@@ -1219,10 +1261,9 @@
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         thead { display: table-header-group; }
                         
+                        /* Adjusted font size to fit ALL 12 months perfectly */
                         th { border: 1px solid #000 !important; padding: 6px; background: #f0f0f0 !important; font-size: 11px; }
                         td { border: 1px solid #000 !important; padding: 5px; font-size: 11px; }
-                        
-                        h2, h4 { margin: 5px 0; color: #000; }
                     </style>
                 </head>
                 <body>
