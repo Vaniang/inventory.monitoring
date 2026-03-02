@@ -34,22 +34,27 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* CARDS & TABLES */
+        /* CARDS & CHARTS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid var(--primary); transition: transform 0.2s; }
         .card .number { font-size: 2.5rem; font-weight: 800; color: #333; margin-top: 10px; }
+        
+        .charts-grid { display: flex; gap: 30px; margin-bottom: 30px; flex-wrap: wrap; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-width: 300px; }
+
         .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* TABLES */
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th { background: #eee; padding: 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #ddd; }
         .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 0.95rem; }
         
-        /* INVENTORY TABLE FOR UNIT MONITOR */
         .inventory-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .inventory-table th { background: #34495e; color: white; padding: 15px; text-align: left; }
         .inventory-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        /* BUTTONS & BADGES */
         .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-
-        /* BUTTONS */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .badge-Pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-Approved { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -64,14 +69,14 @@
         .btn-save { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; float: right; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
 
-        /* MODAL */
+        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-box { background: white; width: 80%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .small-modal { max-width: 500px; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
         .edit-input { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 
-        /* --- STYLED LIVE ANNOUNCEMENT PREVIEW --- */
+        /* LIVE ANNOUNCEMENT PREVIEW */
         .live-announcement { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-left: 5px solid #ff9800; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; animation: fadeIn 0.5s; }
         .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .live-title { font-weight: bold; color: #e65100; font-size: 1.1rem; }
@@ -87,9 +92,8 @@
         .po-tag { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
         .po-none { color: #aaa; font-style: italic; }
 
-        /* --- PRINT AREA (FIXED) --- */
+        /* PRINT RULES (FOR RIS FORMS) */
         #print-area-forms { display: none; }
-
         @media print {
             @page { size: A4 portrait; margin: 0; }
             .view-container, .modal-overlay, .sidebar, .main { display: none !important; height: 0; overflow: hidden; }
@@ -125,6 +129,7 @@
         <div class="main">
             <div id="dashboard" class="section active">
                 <div class="header-title"><h1>Admin Dashboard</h1></div>
+                
                 <div class="cards-grid">
                     <div class="card" style="border-color: #3498db;"><h3>PPMPs Uploaded</h3><div class="number" id="adm-ppmp-count">0</div></div>
                     <div class="card" style="border-color: #2c3e50;"><h3>Total Requests</h3><div class="number" id="adm-total">0</div></div>
@@ -132,24 +137,14 @@
                     <div class="card" style="border-color: #27ae60;"><h3>Approved</h3><div class="number" id="adm-approved" style="color:#27ae60">0</div></div>
                 </div>
 
-             <div class="charts-grid" style="display: flex; gap: 30px; margin-bottom: 30px; flex-wrap: wrap;">
-                    
-                    <div class="chart-container" style="flex: 2; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-width: 300px;">
-                        <h3 style="margin-top:0; color:var(--primary); text-align:center; margin-bottom: 15px;">
-                            <i class="fas fa-chart-line"></i> Monthly Consumption Trend (Approved)
-                        </h3>
-                        <div style="position: relative; height: 280px; width: 100%;">
-                            <canvas id="monthlyChart"></canvas>
-                        </div>
+                <div class="charts-grid">
+                    <div class="chart-container" style="flex: 2;">
+                        <h3 style="margin-top:0; color:var(--primary); text-align:center; margin-bottom: 15px;"><i class="fas fa-chart-line"></i> Monthly Consumption Trend</h3>
+                        <div style="position: relative; height: 280px; width: 100%;"><canvas id="monthlyChart"></canvas></div>
                     </div>
-                
-                    <div class="chart-container" style="flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-width: 300px;">
-                        <h3 style="margin-top:0; color:var(--primary); text-align:center; margin-bottom: 15px;">
-                            <i class="fas fa-chart-pie"></i> Usage by Division
-                        </h3>
-                        <div style="position: relative; height: 280px; width: 100%;">
-                            <canvas id="divisionChart"></canvas>
-                        </div>
+                    <div class="chart-container" style="flex: 1;">
+                        <h3 style="margin-top:0; color:var(--primary); text-align:center; margin-bottom: 15px;"><i class="fas fa-chart-pie"></i> Usage by Division</h3>
+                        <div style="position: relative; height: 280px; width: 100%;"><canvas id="divisionChart"></canvas></div>
                     </div>
                 </div>
 
@@ -188,12 +183,7 @@
                     <p style="color:#666; margin-bottom:15px;">View and manage system users, their assigned divisions, and roles.</p>
                     <table class="data-table">
                         <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Division</th>
-                                <th>Role</th>
-                                <th style="text-align:center;">Actions</th>
-                            </tr>
+                            <tr><th>Email</th><th>Division</th><th>Role</th><th style="text-align:center;">Actions</th></tr>
                         </thead>
                         <tbody id="userTableBody">
                             <tr><td colspan="4" style="text-align:center;">Loading users...</td></tr>
@@ -239,14 +229,7 @@
                     </div>
 
                     <table class="inventory-table">
-                        <thead>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Unit</th>
-                                <th>Remaining Stock</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Item Name</th><th>Unit</th><th>Remaining Stock</th><th>Status</th></tr></thead>
                         <tbody id="adminUnitTable">
                             <tr><td colspan="4" style="text-align:center;">Select a unit to view stocks...</td></tr>
                         </tbody>
@@ -276,15 +259,7 @@
                         <i class="fas fa-print"></i> Print Summary
                     </button>
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Total Qty</th>
-                                <th>Unit</th>
-                                <th>Avg Price</th>
-                                <th style="text-align:center;">Restock / Balance</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Item Name</th><th>Total Qty</th><th>Unit</th><th>Avg Price</th><th style="text-align:center;">Restock / Balance</th></tr></thead>
                         <tbody id="consolidatedTable"></tbody>
                     </table>
                 </div>
@@ -295,15 +270,7 @@
                 <div class="content-box">
                     <p style="color:#666; margin-bottom:15px;">History of all restocks and purchase orders processed.</p>
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>PO Number</th>
-                                <th>Item Name</th>
-                                <th>Qty Added</th>
-                                <th>Unit</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Date</th><th>PO Number</th><th>Item Name</th><th>Qty Added</th><th>Unit</th></tr></thead>
                         <tbody id="poTableBody">
                             <tr><td colspan="5" style="text-align:center;">Loading PO history...</td></tr>
                         </tbody>
@@ -319,69 +286,6 @@
                         <thead><tr><th>Date</th><th>Division</th><th>Status</th><th style="text-align:center;">Actions</th></tr></thead>
                         <tbody id="risTableBody"></tbody>
                     </table>
-                </div>
-            </div>
-
-            <div id="editModal" class="modal-overlay">
-                <div class="modal-box">
-                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
-                    <h2>Edit RIS Details</h2>
-                    <p style="color:#666; font-size:0.9em;">Add Stock No., Remarks, or adjust Quantities before printing.</p>
-                    <input type="hidden" id="edit-doc-id">
-                    <div style="margin-bottom:15px;">
-                        <label><b>Status:</b></label>
-                        <select id="edit-status" style="padding:5px;">
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                    <table class="data-table" style="font-size:0.9em;">
-                        <thead><tr><th width="10%">Stock No.</th><th width="30%">Description</th><th width="10%">Req Qty</th><th width="10%">Unit</th><th width="10%">Yes/No</th><th width="30%">Remarks</th></tr></thead>
-                        <tbody id="editModalItems"></tbody>
-                    </table>
-                    <button class="btn-save" onclick="saveRISChanges()">Save Changes</button>
-                </div>
-            </div>
-
-            <div id="restockModal" class="modal-overlay">
-                <div class="modal-box small-modal">
-                    <span class="close-modal" onclick="closeRestockModal()">&times;</span>
-                    <h2 style="color:var(--primary); margin-top:0;">⚖️ Balance / Restock</h2>
-                    <p style="margin-bottom:20px; color:#555;">Add new purchase quantity to balance the supplies.</p>
-                    
-                    <h3 id="restock-item-name" style="text-align:center; color:var(--accent);">Item Name</h3>
-
-                    <div class="restock-info">
-                        <div class="restock-stat">
-                            <label>Existing Stock (Previous)</label>
-                            <div id="restock-current">0</div>
-                        </div>
-                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">+</div>
-                        <div class="restock-stat">
-                            <label>New Purchase (Recent)</label>
-                            <div id="restock-added" style="color:var(--green);">0</div>
-                        </div>
-                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">=</div>
-                        <div class="restock-stat">
-                            <label>Total Balance</label>
-                            <div id="restock-total" style="color:var(--accent);">0</div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label><b>1. Purchase Order Number (Optional):</b></label>
-                        <input type="text" id="restock-po-number" class="edit-input" placeholder="e.g., PO-2024-001 (Leave empty if not applicable)" style="padding:10px;">
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label><b>2. Enter Quantity Purchased:</b></label>
-                        <input type="number" id="restock-input" class="edit-input" placeholder="0" style="font-size:1.2rem; font-weight:bold; padding:10px; text-align:center;" oninput="calculateRestockTotal()">
-                    </div>
-
-                    <input type="hidden" id="restock-current-val">
-                    <input type="hidden" id="restock-unit-val">
-                    <button class="btn-save" style="width:100%;" onclick="saveGlobalRestock()">Confirm & Update Balance</button>
                 </div>
             </div>
 
@@ -474,6 +378,70 @@
                     </div>
                 </div>
             </div>
+
+            <div id="editModal" class="modal-overlay">
+                <div class="modal-box">
+                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
+                    <h2>Edit RIS Details</h2>
+                    <p style="color:#666; font-size:0.9em;">Add Stock No., Remarks, or adjust Quantities before printing.</p>
+                    <input type="hidden" id="edit-doc-id">
+                    <div style="margin-bottom:15px;">
+                        <label><b>Status:</b></label>
+                        <select id="edit-status" style="padding:5px;">
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <table class="data-table" style="font-size:0.9em;">
+                        <thead><tr><th width="10%">Stock No.</th><th width="30%">Description</th><th width="10%">Req Qty</th><th width="10%">Unit</th><th width="10%">Yes/No</th><th width="30%">Remarks</th></tr></thead>
+                        <tbody id="editModalItems"></tbody>
+                    </table>
+                    <button class="btn-save" onclick="saveRISChanges()">Save Changes</button>
+                </div>
+            </div>
+
+            <div id="restockModal" class="modal-overlay">
+                <div class="modal-box small-modal">
+                    <span class="close-modal" onclick="closeRestockModal()">&times;</span>
+                    <h2 style="color:var(--primary); margin-top:0;">⚖️ Balance / Restock</h2>
+                    <p style="margin-bottom:20px; color:#555;">Add new purchase quantity to balance the supplies.</p>
+                    
+                    <h3 id="restock-item-name" style="text-align:center; color:var(--accent);">Item Name</h3>
+
+                    <div class="restock-info">
+                        <div class="restock-stat">
+                            <label>Existing Stock (Previous)</label>
+                            <div id="restock-current">0</div>
+                        </div>
+                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">+</div>
+                        <div class="restock-stat">
+                            <label>New Purchase (Recent)</label>
+                            <div id="restock-added" style="color:var(--green);">0</div>
+                        </div>
+                        <div style="font-size:1.5rem; align-self:center; color:#95a5a6;">=</div>
+                        <div class="restock-stat">
+                            <label>Total Balance</label>
+                            <div id="restock-total" style="color:var(--accent);">0</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:15px;">
+                        <label><b>1. Purchase Order Number (Optional):</b></label>
+                        <input type="text" id="restock-po-number" class="edit-input" placeholder="e.g., PO-2024-001 (Leave empty if not applicable)" style="padding:10px;">
+                    </div>
+
+                    <div style="margin-bottom:15px;">
+                        <label><b>2. Enter Quantity Purchased:</b></label>
+                        <input type="number" id="restock-input" class="edit-input" placeholder="0" style="font-size:1.2rem; font-weight:bold; padding:10px; text-align:center;" oninput="calculateRestockTotal()">
+                    </div>
+
+                    <input type="hidden" id="restock-current-val">
+                    <input type="hidden" id="restock-unit-val">
+                    <button class="btn-save" style="width:100%;" onclick="saveGlobalRestock()">Confirm & Update Balance</button>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -485,8 +453,10 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Prevent Charts from animating and looking distorted on update
         Chart.defaults.animation = false;
 
+        // --- AUTHENTICATION LISTENER ---
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
             else {
@@ -505,7 +475,16 @@
             }
         });
 
-        // --- NEW: ANALYTICS DASHBOARD ---
+        function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
+        
+        function nav(id, btn) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // --- VISUAL ANALYTICS DASHBOARD ---
         let monthlyChartInstance = null;
         let divisionChartInstance = null;
 
@@ -549,7 +528,7 @@
 
             const currentMonthIndex = new Date().getMonth() + 1;
             const chartValues = Object.keys(data).map(monthKey => {
-                if (parseInt(monthKey) > currentMonthIndex) { return null; }
+                if (parseInt(monthKey) > currentMonthIndex) return null; 
                 return data[monthKey];
             });
 
@@ -581,7 +560,15 @@
 
         function renderDivisionChart(data) {
             const ctx = document.getElementById('divisionChart').getContext('2d');
-          divisionChartInstance = new Chart(ctx, {
+            if(divisionChartInstance) divisionChartInstance.destroy();
+
+            // THESE TWO LINES WERE MISSING:
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            const bgColors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22', '#1abc9c', '#34495e', '#d35400', '#c0392b', '#16a085', '#8e44ad', '#2980b9', '#f39c12', '#27ae60'];
+
+            divisionChartInstance = new Chart(ctx, {
                 type: 'doughnut', 
                 data: {
                     labels: labels,
@@ -591,24 +578,10 @@
                     animation: false,
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'bottom', /* Changed from 'right' to 'bottom' */
-                            labels: { boxWidth: 12, font: { size: 11 }, padding: 15 } 
-                        } 
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, padding: 15 } } },
                     cutout: '60%' 
                 }
             });
-        }
-        
-        function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
-        
-        function nav(id, btn) {
-            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
-            btn.classList.add('active');
         }
 
         // --- ANNOUNCEMENT MANAGER ---
@@ -619,10 +592,7 @@
             if(!title || !message) return alert("Please fill in both title and message.");
 
             db.collection('announcements').add({
-                title: title,
-                message: message,
-                date: new Date().toISOString(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                title: title, message: message, date: new Date().toISOString(), timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
                 alert("Announcement Posted Successfully!");
                 clearAnnouncementInput();
@@ -645,6 +615,7 @@
                 document.getElementById('live-message').innerText = data.message;
                 document.getElementById('live-ann-id').value = doc.id;
             });
+        }
 
         function deleteActiveAnnouncement() {
             const id = document.getElementById('live-ann-id').value;
@@ -656,7 +627,8 @@
             }
         }
 
-      function initUserManagement() {
+        // --- USER MANAGEMENT & DIRECT MESSAGING ---
+        function initUserManagement() {
             db.collection('users').onSnapshot(snap => {
                 const tbody = document.getElementById('userTableBody');
                 let html = '';
@@ -682,7 +654,6 @@
             });
         }
         
-        // --- SEND DIRECT MESSAGE ---
         function sendDirectMessage(userId, divisionName) {
             const msg = prompt(`Send a direct message to ${divisionName}:`, "Your supplies are ready for pick up.");
             if (!msg || msg.trim() === "") return; 
@@ -715,6 +686,7 @@
             }
         }
 
+        // --- CLEAR ALL GLOBAL INVENTORY ---
         async function clearAllGlobalInventory() {
             const password = prompt("Enter ADMIN PASSWORD to confirm clearing ALL global data:");
             if (password === null) return; 
@@ -726,10 +698,8 @@
             try {
                 const invSnap = await db.collection('inventory').get();
                 invSnap.forEach(doc => batch.delete(doc.ref));
-
                 const ppmpSnap = await db.collection('ppmp_uploads').get();
                 ppmpSnap.forEach(doc => batch.delete(doc.ref));
-
                 const poSnap = await db.collection('purchase_orders').get();
                 poSnap.forEach(doc => batch.delete(doc.ref));
 
@@ -742,6 +712,7 @@
             }
         }
 
+        // --- DASHBOARD & INVENTORY LOGIC ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
@@ -842,8 +813,7 @@
         }
 
         async function deletePPMP(id) {
-            if(!confirm("🚨 WARNING: Are you sure you want to delete this PPMP?\n\nThis will permanently remove ALL inventory items and ALL past requests (RIS) for this specific division, clearing them from the Consolidated Supplies and Consumption Reports. Proceed?")) return;
-
+            if(!confirm("🚨 WARNING: Are you sure you want to delete this PPMP?\n\nThis will permanently remove ALL inventory items and ALL past requests (RIS) for this specific division. Proceed?")) return;
             try {
                 const ppmpDoc = await db.collection('ppmp_uploads').doc(id).get();
                 if (!ppmpDoc.exists) return;
@@ -1134,7 +1104,6 @@
             });
         }
 
-        // --- RESTOCK MODAL FUNCTIONS ---
         function openGlobalRestockModal(itemName, currentTotal, itemUnit) {
             document.getElementById('restockModal').style.display = 'flex';
             document.getElementById('restock-item-name').innerText = itemName;
@@ -1408,8 +1377,8 @@
             });
 
             const printWindow = window.open('', '_blank');
-            const scriptStart = "<script>";
-            const scriptEnd = "</scr" + "ipt>";
+            const scriptStart = "\x3Cscript>";
+            const scriptEnd = "\x3C/script>";
             
             printWindow.document.write(`
                 <html>
