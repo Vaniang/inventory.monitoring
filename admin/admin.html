@@ -62,7 +62,7 @@
         
         .action-btn { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-edit { background: var(--accent); }
-        .btn-print-tbl { background: var(--primary); }
+        .btn--tbl { background: var(--primary); }
         .btn-excel { background: var(--green); }
         .btn-delete { background: var(--red); }
         .btn-download { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
@@ -564,13 +564,12 @@
                     <h2>CONSOLIDATED SUPPLIES SUMMARY</h2>
                     <h4>Master Inventory Balance - Department of Education Regional Office I</h4>
                     
-                    <table>
+                   <table>
                         <thead>
                             <tr>
                                 <th>Item Name</th>
                                 <th>Total Qty</th>
                                 <th>Unit</th>
-                                <th>Avg Price</th>
                                 <th>Action</th> </tr>
                         </thead>
                         <tbody>${tbodyHTML}</tbody>
