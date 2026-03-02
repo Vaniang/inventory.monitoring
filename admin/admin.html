@@ -133,7 +133,6 @@
                 </div>
 
                 <div class="charts-grid" style="display: flex; gap: 30px; margin-bottom: 30px; flex-wrap: wrap;">
-    
                     <div class="chart-container" style="flex: 2; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-width: 300px;">
                         <h3 style="margin-top:0; color:var(--primary); text-align:center;">
                             <i class="fas fa-chart-line"></i> Monthly Consumption Trend (Approved)
@@ -207,7 +206,7 @@
                             <option value="">-- Select Division/Unit --</option>
                             <option value="AD-Personnel Section">AD-Personnel Section</option>
                             <option value="AD-AMS">AD-AMS</option>
-                            <option value="AD-Records">AD-Records</option>
+                            <option value="AD-Records Section">AD-Records Section</option>
                             <option value="AD-GSU">AD-GSU</option>
                             <option value="AD-Cash Unit">AD-Cash Unit</option>
                             <option value="AD-Procurement Unit">AD-Procurement Unit</option>
@@ -483,7 +482,6 @@
 
         Chart.defaults.animation = false;
 
-        // 1. CLEANED AUTH LISTENER
         auth.onAuthStateChanged(user => {
             if (!user) window.location.href = "../index.html";
             else {
@@ -503,60 +501,50 @@
         });
 
         // --- NEW: ANALYTICS DASHBOARD ---
-let monthlyChartInstance = null;
-let divisionChartInstance = null;
+        let monthlyChartInstance = null;
+        let divisionChartInstance = null;
 
-function initAnalyticsDashboard() {
-    db.collection('requisitions').where('status', '==', 'Approved').onSnapshot(snap => {
-        const currentYear = new Date().getFullYear().toString();
-        
-        // Base data structures
-        const monthlyData = { '01':0, '02':0, '03':0, '04':0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11':0, '12':0 };
-        const divisionData = {};
+        function initAnalyticsDashboard() {
+            db.collection('requisitions').where('status', '==', 'Approved').onSnapshot(snap => {
+                const currentYear = new Date().getFullYear().toString();
+                
+                const monthlyData = { '01':0, '02':0, '03':0, '04':0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11':0, '12':0 };
+                const divisionData = {};
 
-        snap.forEach(doc => {
-            const data = doc.data();
-            if (!data.date || !data.items) return;
-            
-            const dateObj = new Date(data.date);
-            const reqYear = dateObj.getFullYear().toString();
-            const reqMonth = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-            
-            // Count total items requested in this RIS
-            let totalQty = 0;
-            data.items.forEach(item => {
-                totalQty += parseInt(item.reqQty) || 0;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.date || !data.items) return;
+                    
+                    const dateObj = new Date(data.date);
+                    const reqYear = dateObj.getFullYear().toString();
+                    const reqMonth = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    
+                    let totalQty = 0;
+                    data.items.forEach(item => {
+                        totalQty += parseInt(item.reqQty) || 0;
+                    });
+
+                    const div = data.division || 'Unknown';
+                    if(!divisionData[div]) divisionData[div] = 0;
+                    divisionData[div] += totalQty;
+
+                    if (reqYear === currentYear) {
+                        monthlyData[reqMonth] += totalQty;
+                    }
+                });
+
+                renderMonthlyChart(monthlyData);
+                renderDivisionChart(divisionData);
             });
+        }
 
-            // Tally for Pie Chart (Division Breakdown)
-            const div = data.division || 'Unknown';
-            if(!divisionData[div]) divisionData[div] = 0;
-            divisionData[div] += totalQty;
-
-            // Tally for Line Chart (Months of current year only)
-            if (reqYear === currentYear) {
-                monthlyData[reqMonth] += totalQty;
-            }
-        });
-
-        // Draw the charts
-        renderMonthlyChart(monthlyData);
-        renderDivisionChart(divisionData);
-    });
-}
-
-function renderMonthlyChart(data) {
+        function renderMonthlyChart(data) {
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             if(monthlyChartInstance) monthlyChartInstance.destroy();
 
-            // Find out what month we are currently in (1-12)
             const currentMonthIndex = new Date().getMonth() + 1;
-            
-            // If the month is in the future, set it to 'null' instead of 0 so the line stops
             const chartValues = Object.keys(data).map(monthKey => {
-                if (parseInt(monthKey) > currentMonthIndex) {
-                    return null; 
-                }
+                if (parseInt(monthKey) > currentMonthIndex) { return null; }
                 return data[monthKey];
             });
 
@@ -577,7 +565,7 @@ function renderMonthlyChart(data) {
                     }]
                 },
                 options: {
-                    animation: false, // <--- THIS DISABLES THE ANIMATION
+                    animation: false,
                     responsive: true, 
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
@@ -592,32 +580,19 @@ function renderMonthlyChart(data) {
 
             const labels = Object.keys(data);
             const values = Object.values(data);
-            
-            const bgColors = [
-                '#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', 
-                '#e67e22', '#1abc9c', '#34495e', '#d35400', '#c0392b',
-                '#16a085', '#8e44ad', '#2980b9', '#f39c12', '#27ae60'
-            ];
+            const bgColors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22', '#1abc9c', '#34495e', '#d35400', '#c0392b', '#16a085', '#8e44ad', '#2980b9', '#f39c12', '#27ae60'];
 
             divisionChartInstance = new Chart(ctx, {
                 type: 'doughnut', 
                 data: {
                     labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: bgColors.slice(0, labels.length)
-                    }]
+                    datasets: [{ data: values, backgroundColor: bgColors.slice(0, labels.length) }]
                 },
                 options: {
-                    animation: false, // <--- THIS DISABLES THE ANIMATION
+                    animation: false,
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'right', 
-                            labels: { boxWidth: 12, font: { size: 10 } } 
-                        } 
-                    },
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } },
                     cutout: '60%' 
                 }
             });
@@ -625,7 +600,6 @@ function renderMonthlyChart(data) {
         
         function logout() { auth.signOut().then(() => window.location.href = "../index.html"); }
         
-        // 2. CLEANED NAVIGATION FUNCTION
         function nav(id, btn) {
             document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -659,10 +633,7 @@ function renderMonthlyChart(data) {
         function initAnnouncementManager() {
             db.collection('announcements').orderBy('timestamp', 'desc').limit(1).onSnapshot(snap => {
                 const box = document.getElementById('live-announcement-box');
-                if (snap.empty) {
-                    box.style.display = 'none'; 
-                    return;
-                }
+                if (snap.empty) { box.style.display = 'none'; return; }
                 const doc = snap.docs[0];
                 const data = doc.data();
                 box.style.display = 'block'; 
@@ -699,7 +670,6 @@ function renderMonthlyChart(data) {
                             <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
                             <td style="text-align:center;">
                                 <button class="action-btn" style="background:#f39c12;" title="Send Direct Message" onclick="sendDirectMessage('${userId}', '${divName}')"><i class="fas fa-envelope"></i></button>
-                                
                                 <button class="action-btn btn-edit" title="Toggle Admin/User Role" onclick="toggleUserRole('${userId}', '${user.role}')"><i class="fas fa-user-shield"></i></button>
                                 <button class="action-btn btn-delete" title="Delete User Profile" onclick="deleteUserProfile('${userId}')"><i class="fas fa-trash-alt"></i></button>
                             </td>
@@ -708,6 +678,25 @@ function renderMonthlyChart(data) {
                 tbody.innerHTML = html;
             });
         }
+        
+        // --- SEND DIRECT MESSAGE ---
+        function sendDirectMessage(userId, divisionName) {
+            const msg = prompt(`Send a direct message to ${divisionName}:`, "Your supplies are ready for pick up.");
+            if (!msg || msg.trim() === "") return; 
+
+            db.collection('notifications').add({
+                userId: userId,
+                title: "📩 Message from Supply Officer",
+                message: msg.trim(),
+                status: 'unread',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert(`Message successfully sent to ${divisionName}!`);
+            }).catch(err => {
+                alert("Error sending message: " + err.message);
+            });
+        }
+
         async function toggleUserRole(id, currentRole) {
             const newRole = currentRole === 'admin' ? 'user' : 'admin';
             if (confirm(`Change this user's role to ${newRole.toUpperCase()}?`)) {
@@ -723,10 +712,11 @@ function renderMonthlyChart(data) {
             }
         }
 
-        // --- CLEAR ALL GLOBAL INVENTORY ---
         async function clearAllGlobalInventory() {
             const password = prompt("Enter ADMIN PASSWORD to confirm clearing ALL global data:");
-            if (password !== 'admin123') { alert("Incorrect password. Action cancelled."); return; }
+            if (password === null) return; 
+            if (password.trim() !== 'admin123') { alert("Incorrect password. Action cancelled."); return; }
+            
             if (!confirm("🚨 DANGER: This will permanently delete ALL inventory items, ALL uploaded PPMPs, and ALL Purchase Order logs. Proceed?")) return;
 
             const batch = db.batch();
@@ -749,7 +739,6 @@ function renderMonthlyChart(data) {
             }
         }
 
-        // --- DASHBOARD & INVENTORY LOGIC ---
         function initAdminDashboard() {
             db.collection('ppmp_uploads').onSnapshot(snap => document.getElementById('adm-ppmp-count').innerText = snap.size);
             db.collection('requisitions').orderBy('date', 'desc').onSnapshot(snap => {
@@ -783,14 +772,12 @@ function renderMonthlyChart(data) {
 
         async function setStatus(docId, newStatus, userId) {
             let customMessage = "";
-            
-            // Trigger customized prompt based on whether Admin is Approving or Rejecting
             if (newStatus === 'Approved') {
                 customMessage = prompt("Add a message for this division:", "Your supplies are ready for pick up. Please proceed to the Supply Office.");
-                if (customMessage === null) return; // User clicked cancel
+                if (customMessage === null) return; 
             } else if (newStatus === 'Rejected') {
                 customMessage = prompt("Reason for rejection (optional):", "Items out of stock or invalid request.");
-                if (customMessage === null) return; // User clicked cancel
+                if (customMessage === null) return; 
             } else {
                 if(!confirm(`Mark as ${newStatus}?`)) return;
             }
@@ -809,7 +796,6 @@ function renderMonthlyChart(data) {
             }
             batch.update(docRef, { status: newStatus });
             
-            // Send the direct notification to that specific user
             if(userId) {
                 let finalMessage = newStatus === 'Approved' ? "Your request is approved." : "Your request was rejected.";
                 if (customMessage && customMessage.trim() !== "") {
@@ -852,32 +838,26 @@ function renderMonthlyChart(data) {
             document.body.removeChild(link);
         }
 
-       async function deletePPMP(id) {
+        async function deletePPMP(id) {
             if(!confirm("🚨 WARNING: Are you sure you want to delete this PPMP?\n\nThis will permanently remove ALL inventory items and ALL past requests (RIS) for this specific division, clearing them from the Consolidated Supplies and Consumption Reports. Proceed?")) return;
 
             try {
-                // 1. Get the PPMP document to find out which division it belongs to
                 const ppmpDoc = await db.collection('ppmp_uploads').doc(id).get();
                 if (!ppmpDoc.exists) return;
                 
                 const division = ppmpDoc.data().division;
                 const batch = db.batch();
 
-                // 2. Find and queue deletion for ALL inventory items belonging to this division
                 const invSnap = await db.collection('inventory').where('division', '==', division).get();
                 invSnap.forEach(doc => batch.delete(doc.ref));
 
-                // 3. Find and queue deletion for ALL Requisition (RIS) history for this division
                 const reqSnap = await db.collection('requisitions').where('division', '==', division).get();
                 reqSnap.forEach(doc => batch.delete(doc.ref));
 
-                // 4. Delete the PPMP upload record itself
                 batch.delete(db.collection('ppmp_uploads').doc(id));
 
-                // 5. Execute all deletions at exactly the same time
                 await batch.commit();
                 alert(`Success: The PPMP and all associated data for ${division} have been deleted.`);
-                
             } catch (error) {
                 console.error("Error deleting PPMP data: ", error);
                 alert("Error deleting PPMP: " + error.message);
@@ -1199,7 +1179,7 @@ function renderMonthlyChart(data) {
             }
         }
 
-// --- DYNAMIC CONSUMPTION REPORT LOGIC ---
+        // --- DYNAMIC CONSUMPTION REPORT LOGIC ---
         const monthNames = {
             '01': 'January', '02': 'February', '03': 'March', '04': 'April',
             '05': 'May', '06': 'June', '07': 'July', '08': 'August',
@@ -1226,7 +1206,6 @@ function renderMonthlyChart(data) {
             let theadHtml = '';
             
             if (periodSelect === 'ALL') {
-                // 3-Tier Header for Entire Year (Squeezed to fit printed page)
                 theadHtml = `
                     <tr>
                         <th width="15%" rowspan="3" style="vertical-align:middle;">Item Name</th>
@@ -1250,7 +1229,6 @@ function renderMonthlyChart(data) {
                 });
                 theadHtml += `</tr>`;
             } else {
-                // Standard 2-Tier Header for Quarters / Months
                 let periodTopHeader = "";
                 if (periodSelect === 'Q1') periodTopHeader = "1st Quarter (Jan, Feb., March)";
                 else if (periodSelect === 'Q2') periodTopHeader = "2nd Quarter (April, May, June)";
@@ -1281,7 +1259,6 @@ function renderMonthlyChart(data) {
             try {
                 const consolidated = {};
 
-                // 1. Fetch Master Inventory (PPMP Stocks)
                 let invQuery = db.collection('inventory');
                 if (divSelect !== 'ALL') {
                     invQuery = invQuery.where('division', '==', divSelect);
@@ -1295,10 +1272,9 @@ function renderMonthlyChart(data) {
                         consolidated[key] = { unit: item.unit || 'pc', currentQty: 0, periodConsumed: 0, monthly: {} };
                         targetMonths.forEach(m => consolidated[key].monthly[m] = 0);
                     }
-                    consolidated[key].currentQty += (item.currentQty || 0); // Aggregates if ALL divisions selected
+                    consolidated[key].currentQty += (item.currentQty || 0); 
                 });
 
-                // 2. Fetch Requisitions (Approved Only)
                 const reqSnap = await db.collection('requisitions').where('status', '==', 'Approved').get();
 
                 reqSnap.forEach(doc => {
@@ -1316,7 +1292,6 @@ function renderMonthlyChart(data) {
                     data.items.forEach(item => {
                         const key = item.itemName.trim();
                         if(!consolidated[key]) {
-                            // Failsafe in case an item was requested but deleted from inventory later
                             consolidated[key] = { unit: item.unit || 'pc', currentQty: 0, periodConsumed: 0, monthly: {} };
                             targetMonths.forEach(m => consolidated[key].monthly[m] = 0);
                         }
@@ -1326,7 +1301,6 @@ function renderMonthlyChart(data) {
                     });
                 });
 
-                // 3. Render Data Rows
                 let html = '';
                 const keys = Object.keys(consolidated).sort();
                 
@@ -1335,7 +1309,6 @@ function renderMonthlyChart(data) {
                 } else {
                     keys.forEach(key => {
                         const row = consolidated[key];
-                        // Initial PPMP Stock = What's currently left + What was consumed in this period
                         const ppmpStock = row.currentQty + row.periodConsumed; 
 
                         html += `<tr>
@@ -1373,7 +1346,6 @@ function renderMonthlyChart(data) {
             const yearText = document.getElementById('cons-year').value;
             const periodSelect = document.getElementById('cons-period').value;
 
-            // Generate Custom Header based on Period Selection
             let reportHeaderTitle = "";
             if (periodSelect === 'ALL') {
                 reportHeaderTitle = `
@@ -1408,7 +1380,7 @@ function renderMonthlyChart(data) {
                 if (cols.length > 1) { 
                     let rowHtml = '<tr>';
                     cols.forEach((col, index) => {
-                        if (index === cols.length - 1) { // Remarks input
+                        if (index === cols.length - 1) { 
                             const input = col.querySelector('input');
                             const val = input ? input.value : '';
                             rowHtml += `<td>${val}</td>`;
@@ -1450,7 +1422,6 @@ function renderMonthlyChart(data) {
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         thead { display: table-header-group; }
                         
-                        /* Adjusted font size to fit ALL 12 months perfectly */
                         th { border: 1px solid #000 !important; padding: 6px; background: #f0f0f0 !important; font-size: 11px; }
                         td { border: 1px solid #000 !important; padding: 5px; font-size: 11px; }
                     </style>
@@ -1488,64 +1459,6 @@ function renderMonthlyChart(data) {
                 </html>
             `);
             printWindow.document.close();
-        }
-        // --- SEND DIRECT MESSAGE TO SPECIFIC DIVISION ---
-        function sendDirectMessage(userId, divisionName) {
-            const msg = prompt(`Send a direct message to ${divisionName}:`, "Your supplies are ready for pick up.");
-            
-            if (!msg || msg.trim() === "") return; // Cancelled or empty
-
-            db.collection('notifications').add({
-                userId: userId,
-                title: "📩 Message from Supply Officer",
-                message: msg.trim(),
-                status: 'unread',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert(`Message successfully sent to ${divisionName}!`);
-            }).catch(err => {
-                alert("Error sending message: " + err.message);
-            });
-        }
-        let isFirstNotifLoad = true; // Prevents the sound from playing when they first log in
-
-        function initNotifications() {
-            db.collection('notifications').where('userId', '==', currentUserId).onSnapshot(snap => {
-                const list = document.getElementById('notif-list');
-                const badge = document.getElementById('notif-badge');
-                let unread = 0, notifs = [];
-                
-                // 1. Check if there are strictly *new* unread messages arriving
-                let playSound = false;
-                snap.docChanges().forEach(change => {
-                    if (change.type === "added" && change.doc.data().status === 'unread') {
-                        playSound = true;
-                    }
-                });
-
-                // 2. Process and sort the notifications
-                snap.forEach(d => notifs.push({id: d.id, ...d.data()}));
-                notifs.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                
-                list.innerHTML = notifs.length ? '' : '<div style="padding:15px; color:#777;">No notifications</div>';
-                
-                notifs.forEach(n => {
-                    if(n.status === 'unread') unread++;
-                    list.innerHTML += `<div class="notif-item ${n.status}" onclick="markRead('${n.id}')"><strong>${n.title}</strong><br>${n.message}</div>`;
-                });
-                
-                badge.style.display = unread > 0 ? 'block' : 'none'; 
-                badge.innerText = unread;
-
-                // 3. Play the sound if there is a new message (ignoring the initial page load)
-                if (playSound && !isFirstNotifLoad) {
-                    const audio = new Audio('https://actions.google.com/sounds/v1/ui/beep_short.ogg');
-                    // Modern browsers require the user to have clicked anywhere on the screen at least once before allowing sound
-                    audio.play().catch(err => console.log("Browser auto-play prevented the sound."));
-                }
-                
-                isFirstNotifLoad = false; 
-            });
         }
     </script>
 </body>
