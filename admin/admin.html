@@ -693,7 +693,37 @@
             document.body.removeChild(link);
         }
 
-        function deletePPMP(id) { if(confirm("Delete this file?")) db.collection('ppmp_uploads').doc(id).delete(); }
+       async function deletePPMP(id) {
+            if(!confirm("🚨 WARNING: Are you sure you want to delete this PPMP?\n\nThis will permanently remove ALL inventory items and ALL past requests (RIS) for this specific division, clearing them from the Consolidated Supplies and Consumption Reports. Proceed?")) return;
+
+            try {
+                // 1. Get the PPMP document to find out which division it belongs to
+                const ppmpDoc = await db.collection('ppmp_uploads').doc(id).get();
+                if (!ppmpDoc.exists) return;
+                
+                const division = ppmpDoc.data().division;
+                const batch = db.batch();
+
+                // 2. Find and queue deletion for ALL inventory items belonging to this division
+                const invSnap = await db.collection('inventory').where('division', '==', division).get();
+                invSnap.forEach(doc => batch.delete(doc.ref));
+
+                // 3. Find and queue deletion for ALL Requisition (RIS) history for this division
+                const reqSnap = await db.collection('requisitions').where('division', '==', division).get();
+                reqSnap.forEach(doc => batch.delete(doc.ref));
+
+                // 4. Delete the PPMP upload record itself
+                batch.delete(db.collection('ppmp_uploads').doc(id));
+
+                // 5. Execute all deletions at exactly the same time
+                await batch.commit();
+                alert(`Success: The PPMP and all associated data for ${division} have been deleted.`);
+                
+            } catch (error) {
+                console.error("Error deleting PPMP data: ", error);
+                alert("Error deleting PPMP: " + error.message);
+            }
+        }
 
         function initConsolidatedSupplies() {
             db.collection('inventory').onSnapshot(snap => {
