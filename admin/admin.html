@@ -1010,213 +1010,255 @@
             }
         }
 
-     // --- DYNAMIC CONSUMPTION REPORT LOGIC ---
-const monthNames = {
-    '01': 'January', '02': 'February', '03': 'March', '04': 'April',
-    '05': 'May', '06': 'June', '07': 'July', '08': 'August',
-    '09': 'September', '10': 'October', '11': 'November', '12': 'December'
-};
+// --- DYNAMIC CONSUMPTION REPORT LOGIC ---
+        const monthNames = {
+            '01': 'January', '02': 'February', '03': 'March', '04': 'April',
+            '05': 'May', '06': 'June', '07': 'July', '08': 'August',
+            '09': 'September', '10': 'October', '11': 'November', '12': 'December'
+        };
 
-async function generateConsumptionReport() {
-    const divSelect = document.getElementById('cons-division').value;
-    const yearSelect = document.getElementById('cons-year').value;
-    const periodSelect = document.getElementById('cons-period').value;
-    const thead = document.getElementById('consumptionTableHead');
-    const tbody = document.getElementById('consumptionTableBody');
+        async function generateConsumptionReport() {
+            const divSelect = document.getElementById('cons-division').value;
+            const yearSelect = document.getElementById('cons-year').value;
+            const periodSelect = document.getElementById('cons-period').value;
+            const thead = document.getElementById('consumptionTableHead');
+            const tbody = document.getElementById('consumptionTableBody');
 
-    tbody.innerHTML = '<tr><td colspan="100%" style="text-align:center;">Fetching and consolidating data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="100%" style="text-align:center;">Fetching and consolidating data...</td></tr>';
 
-    // 1. Determine target months
-    let targetMonths = [];
-    if (periodSelect === 'ALL') { targetMonths = ['01','02','03','04','05','06','07','08','09','10','11','12']; } 
-    else if (periodSelect === 'Q1') { targetMonths = ['01','02','03']; }
-    else if (periodSelect === 'Q2') { targetMonths = ['04','05','06']; }
-    else if (periodSelect === 'Q3') { targetMonths = ['07','08','09']; }
-    else if (periodSelect === 'Q4') { targetMonths = ['10','11','12']; }
-    else { targetMonths = [periodSelect]; }
+            let targetMonths = [];
+            if (periodSelect === 'ALL') { targetMonths = ['01','02','03','04','05','06','07','08','09','10','11','12']; } 
+            else if (periodSelect === 'Q1') { targetMonths = ['01','02','03']; }
+            else if (periodSelect === 'Q2') { targetMonths = ['04','05','06']; }
+            else if (periodSelect === 'Q3') { targetMonths = ['07','08','09']; }
+            else if (periodSelect === 'Q4') { targetMonths = ['10','11','12']; }
+            else { targetMonths = [periodSelect]; }
 
-    // 2. Generate the Top Banner Text
-    let periodTopHeader = "";
-    if (periodSelect === 'ALL') periodTopHeader = "ENTIRE YEAR CONSOLIDATION";
-    else if (periodSelect === 'Q1') periodTopHeader = "1st Quarter";
-    else if (periodSelect === 'Q2') periodTopHeader = "2nd Quarter";
-    else if (periodSelect === 'Q3') periodTopHeader = "3rd Quarter";
-    else if (periodSelect === 'Q4') periodTopHeader = "4th Quarter";
-    else periodTopHeader = monthNames[periodSelect].toUpperCase();
-
-    // 3. Build the 2-Tier Table Header
-    let theadHtml = `
-        <tr>
-            <th width="25%" rowspan="2" style="vertical-align:middle;">Item Name</th>
-            <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center;">Unit</th>
-            <th colspan="${targetMonths.length}" style="text-align:center; background:#d9edf7; padding:10px; font-size:14px;">${periodTopHeader}</th>
-            <th width="10%" rowspan="2" style="vertical-align:middle; text-align:center; background:#e8f4f8;">Total</th>
-            <th width="22%" rowspan="2" style="vertical-align:middle;">Remarks (Editable)</th>
-        </tr>
-        <tr>
-    `;
-    targetMonths.forEach(m => { 
-        theadHtml += `<th style="text-align:center; font-size:13px; background:#f4f9f9;">${monthNames[m]}</th>`; 
-    });
-    theadHtml += `</tr>`;
-    thead.innerHTML = theadHtml;
-
-    try {
-        // 4. Query & Consolidate Data
-        const snap = await db.collection('requisitions').where('status', '==', 'Approved').get();
-        const consolidated = {};
-
-        snap.forEach(doc => {
-            const data = doc.data();
-            if(!data.date || !data.items) return;
-            if(divSelect !== 'ALL' && data.division !== divSelect) return;
-
-            const dateObj = new Date(data.date);
-            const reqYear = dateObj.getFullYear().toString();
-            const reqMonth = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            let theadHtml = '';
             
-            if(reqYear !== yearSelect) return;
-            if(!targetMonths.includes(reqMonth)) return; 
+            if (periodSelect === 'ALL') {
+                // 3-Tier Header specifically for Entire Year
+                theadHtml = `
+                    <tr>
+                        <th width="15%" rowspan="3" style="vertical-align:middle;">Item Name</th>
+                        <th width="5%" rowspan="3" style="vertical-align:middle; text-align:center;">Unit</th>
+                        <th colspan="12" style="text-align:center; background:#d9edf7; padding:8px; font-size:14px;">ENTIRE YEAR CONSOLIDATION</th>
+                        <th width="8%" rowspan="3" style="vertical-align:middle; text-align:center; background:#e8f4f8;">Total</th>
+                        <th width="15%" rowspan="3" style="vertical-align:middle;">Remarks (Editable)</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" style="text-align:center; background:#e2f0d9; font-size:12px; padding:4px;">1st Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#fff2cc; font-size:12px; padding:4px;">2nd Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#fce4d6; font-size:12px; padding:4px;">3rd Quarter</th>
+                        <th colspan="3" style="text-align:center; background:#e6e6fa; font-size:12px; padding:4px;">4th Quarter</th>
+                    </tr>
+                    <tr>
+                `;
+                targetMonths.forEach(m => { 
+                    // Abbreviate month names to 3 letters to save space (e.g., Jan, Feb)
+                    theadHtml += `<th style="text-align:center; font-size:11px; background:#f4f9f9; padding:4px;">${monthNames[m].substring(0,3)}</th>`; 
+                });
+                theadHtml += `</tr>`;
+            } else {
+                // Standard 2-Tier Header for Quarters / Months
+                let periodTopHeader = "";
+                if (periodSelect === 'Q1') periodTopHeader = "1st Quarter (Jan, Feb., March)";
+                else if (periodSelect === 'Q2') periodTopHeader = "2nd Quarter (April, May, June)";
+                else if (periodSelect === 'Q3') periodTopHeader = "3rd Quarter (July, Aug., Sept.)";
+                else if (periodSelect === 'Q4') periodTopHeader = "4th Quarter (Oct., Nov., Dec.)";
+                else periodTopHeader = monthNames[periodSelect].toUpperCase();
 
-            data.items.forEach(item => {
-                const itemName = item.itemName;
-                if(!consolidated[itemName]) {
-                    consolidated[itemName] = { unit: item.unit || 'pc', monthly: {}, total: 0 };
-                    targetMonths.forEach(m => consolidated[itemName].monthly[m] = 0);
-                }
-                const qty = parseInt(item.reqQty) || 0;
-                consolidated[itemName].monthly[reqMonth] += qty;
-                consolidated[itemName].total += qty;
-            });
-        });
+                theadHtml = `
+                    <tr>
+                        <th width="25%" rowspan="2" style="vertical-align:middle;">Item Name</th>
+                        <th width="8%" rowspan="2" style="vertical-align:middle; text-align:center;">Unit</th>
+                        <th colspan="${targetMonths.length}" style="text-align:center; background:#d9edf7; padding:10px; font-size:14px;">${periodTopHeader}</th>
+                        <th width="10%" rowspan="2" style="vertical-align:middle; text-align:center; background:#e8f4f8;">Total</th>
+                        <th width="22%" rowspan="2" style="vertical-align:middle;">Remarks (Editable)</th>
+                    </tr>
+                    <tr>
+                `;
+                targetMonths.forEach(m => { 
+                    theadHtml += `<th style="text-align:center; font-size:13px; background:#f4f9f9;">${monthNames[m]}</th>`; 
+                });
+                theadHtml += `</tr>`;
+            }
 
-        // 5. Render Rows
-        let html = '';
-        const keys = Object.keys(consolidated).sort();
-        
-        if(keys.length === 0) {
-            html = `<tr><td colspan="${targetMonths.length + 4}" style="text-align:center; padding:30px;">No approved consumption found for the selected parameters.</td></tr>`;
-        } else {
-            keys.forEach(key => {
-                const row = consolidated[key];
-                html += `<tr><td style="font-weight:600;">${key}</td><td style="text-align:center;">${row.unit}</td>`;
-                targetMonths.forEach(m => { html += `<td style="text-align:center;">${row.monthly[m]}</td>`; });
-                html += `
-                    <td style="text-align:center; font-weight:bold; color:var(--primary); background:#f4f9f9;">${row.total}</td>
-                    <td><input type="text" class="edit-input" placeholder="Type notes here..."></td>
-                </tr>`;
-            });
-        }
-        tbody.innerHTML = html;
+            thead.innerHTML = theadHtml;
 
-    } catch(error) {
-        console.error(error);
-        tbody.innerHTML = `<tr><td colspan="100%" style="text-align:center; color:red;">Error loading report. Check console.</td></tr>`;
-    }
-}
+            try {
+                const snap = await db.collection('requisitions').where('status', '==', 'Approved').get();
+                const consolidated = {};
 
-function printConsumptionReport() {
-    const tbodyHTML = document.getElementById('consumptionTableBody').innerHTML;
-    if(tbodyHTML.includes('Fetching') || tbodyHTML.includes('Select filters')) {
-        return alert("Please click 'Consolidate' to generate a report first.");
-    }
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if(!data.date || !data.items) return;
+                    if(divSelect !== 'ALL' && data.division !== divSelect) return;
 
-    const divSelect = document.getElementById('cons-division');
-    const divText = divSelect.options[divSelect.selectedIndex].text;
-    const yearText = document.getElementById('cons-year').value;
+                    const dateObj = new Date(data.date);
+                    const reqYear = dateObj.getFullYear().toString();
+                    const reqMonth = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    
+                    if(reqYear !== yearSelect) return;
+                    if(!targetMonths.includes(reqMonth)) return; 
 
-    // Grab the multi-tier header directly from the generated UI
-    const printHeaders = document.getElementById('consumptionTableHead').innerHTML;
+                    data.items.forEach(item => {
+                        const itemName = item.itemName;
+                        if(!consolidated[itemName]) {
+                            consolidated[itemName] = { unit: item.unit || 'pc', monthly: {}, total: 0 };
+                            targetMonths.forEach(m => consolidated[itemName].monthly[m] = 0);
+                        }
+                        const qty = parseInt(item.reqQty) || 0;
+                        consolidated[itemName].monthly[reqMonth] += qty;
+                        consolidated[itemName].total += qty;
+                    });
+                });
 
-    // Rebuild Rows for Print (locking in the input values)
-    let printRows = '';
-    document.getElementById('consumptionTableBody').querySelectorAll('tr').forEach(row => {
-        const cols = row.querySelectorAll('td');
-        if (cols.length > 1) { 
-            let rowHtml = '<tr>';
-            cols.forEach((col, index) => {
-                if (index === cols.length - 1) { 
-                    const input = col.querySelector('input');
-                    const val = input ? input.value : '';
-                    rowHtml += `<td>${val}</td>`;
+                let html = '';
+                const keys = Object.keys(consolidated).sort();
+                
+                if(keys.length === 0) {
+                    html = `<tr><td colspan="${targetMonths.length + 4}" style="text-align:center; padding:30px;">No approved consumption found for the selected parameters.</td></tr>`;
                 } else {
-                    const align = (index === 1 || index >= 2) ? 'center' : 'left';
-                    const bold = index === cols.length - 2 ? 'font-weight:bold; background:#f9f9f9;' : '';
-                    rowHtml += `<td style="text-align:${align}; ${bold}">${col.innerText}</td>`;
+                    keys.forEach(key => {
+                        const row = consolidated[key];
+                        html += `<tr><td style="font-weight:600;">${key}</td><td style="text-align:center;">${row.unit}</td>`;
+                        targetMonths.forEach(m => { html += `<td style="text-align:center;">${row.monthly[m]}</td>`; });
+                        html += `
+                            <td style="text-align:center; font-weight:bold; color:var(--primary); background:#f4f9f9;">${row.total}</td>
+                            <td><input type="text" class="edit-input" placeholder="Type notes here..."></td>
+                        </tr>`;
+                    });
+                }
+                tbody.innerHTML = html;
+
+            } catch(error) {
+                console.error(error);
+                tbody.innerHTML = `<tr><td colspan="100%" style="text-align:center; color:red;">Error loading report. Check console.</td></tr>`;
+            }
+        }
+
+        function printConsumptionReport() {
+            const tbodyHTML = document.getElementById('consumptionTableBody').innerHTML;
+            if(tbodyHTML.includes('Fetching') || tbodyHTML.includes('Select filters')) {
+                return alert("Please click 'Consolidate' to generate a report first.");
+            }
+
+            const divSelect = document.getElementById('cons-division');
+            const divText = divSelect.options[divSelect.selectedIndex].text;
+            const yearText = document.getElementById('cons-year').value;
+            const periodSelect = document.getElementById('cons-period').value;
+
+            // Generate Custom Header based on Period Selection
+            let reportHeaderTitle = "";
+            if (periodSelect === 'ALL') {
+                reportHeaderTitle = `
+                    <h2 style="text-align:center; text-transform:uppercase;">Supply Consumption Report</h2>
+                    <h4 style="text-align:center; margin-bottom:30px; color:#333;">
+                        Department of Education Regional Office I <br>
+                        F.Y. ${yearText}
+                    </h4>
+                `;
+            } else {
+                let periodLabel = "";
+                if (periodSelect === 'Q1') periodLabel = "1st QUARTER (January, February, March)";
+                else if (periodSelect === 'Q2') periodLabel = "2nd QUARTER (April, May, June)";
+                else if (periodSelect === 'Q3') periodLabel = "3rd QUARTER (July, August, September)";
+                else if (periodSelect === 'Q4') periodLabel = "4th QUARTER (October, November, December)";
+                else periodLabel = monthNames[periodSelect].toUpperCase();
+
+                reportHeaderTitle = `
+                    <h2 style="text-align:center; text-transform:uppercase;">Supply Consumption Report</h2>
+                    <h4 style="text-align:center; margin-bottom:30px; color:#333;">
+                        Division/Office: ${divText} <br>
+                        Period: ${periodLabel} ${yearText}
+                    </h4>
+                `;
+            }
+
+            const printHeaders = document.getElementById('consumptionTableHead').innerHTML;
+
+            let printRows = '';
+            document.getElementById('consumptionTableBody').querySelectorAll('tr').forEach(row => {
+                const cols = row.querySelectorAll('td');
+                if (cols.length > 1) { 
+                    let rowHtml = '<tr>';
+                    cols.forEach((col, index) => {
+                        if (index === cols.length - 1) { 
+                            const input = col.querySelector('input');
+                            const val = input ? input.value : '';
+                            rowHtml += `<td>${val}</td>`;
+                        } else {
+                            const align = (index === 1 || index >= 2) ? 'center' : 'left';
+                            const bold = index === cols.length - 2 ? 'font-weight:bold; background:#f9f9f9;' : '';
+                            rowHtml += `<td style="text-align:${align}; ${bold}">${col.innerText}</td>`;
+                        }
+                    });
+                    rowHtml += '</tr>';
+                    printRows += rowHtml;
+                } else {
+                    printRows += `<tr><td colspan="100%" style="padding:15px; text-align:center;">${cols[0].innerText}</td></tr>`;
                 }
             });
-            rowHtml += '</tr>';
-            printRows += rowHtml;
-        } else {
-            printRows += `<tr><td colspan="100%" style="padding:15px; text-align:center;">${cols[0].innerText}</td></tr>`;
-        }
-    });
 
-    const printWindow = window.open('', '_blank');
-    
-    // Safely parse script tags to prevent DOM rendering errors
-    const scriptStart = "<script>";
-    const scriptEnd = "</scr" + "ipt>";
-    
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Consumption Report - ${divText}</title>
-            <style>
-                @media print {
-                    @page { size: A4 landscape; margin: 15mm; }
-                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                }
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
-                tr { page-break-inside: avoid; page-break-after: auto; }
-                thead { display: table-header-group; }
-                
-                /* Force bold black borders on everything for the printout */
-                th { border: 1px solid #000 !important; padding: 8px; background: #f0f0f0 !important; font-size: 12px; }
-                td { border: 1px solid #000 !important; padding: 6px; font-size: 12px; }
-                
-                h2, h4 { margin: 5px 0; color: #000; }
-            </style>
-        </head>
-        <body>
-            <h2 style="text-align:center; text-transform:uppercase;">Supply Consumption Report</h2>
-            <h4 style="text-align:center; margin-bottom:30px;">
-                Division/Office: ${divText} <br>
-                Year: ${yearText}
-            </h4>
+            const printWindow = window.open('', '_blank');
+            const scriptStart = "<script>";
+            const scriptEnd = "</scr" + "ipt>";
             
-            <table>
-                <thead>${printHeaders}</thead>
-                <tbody>${printRows}</tbody>
-            </table>
-            
-            <table style="width:100%; margin-top:50px; border:none; page-break-inside: avoid;">
-                <tr>
-                    <td style="border:none !important; text-align:center; width:50%;">
-                        Prepared by:<br><br><br>
-                        ___________________________<br>
-                        <b>Admin / Supply Officer</b>
-                    </td>
-                    <td style="border:none !important; text-align:center; width:50%;">
-                        Noted by:<br><br><br>
-                        ___________________________<br>
-                        <b>Chief / Head of Office</b>
-                    </td>
-                </tr>
-            </table>
-            
-            ${scriptStart}
-                setTimeout(() => {
-                    window.print();
-                    window.close();
-                }, 500);
-            ${scriptEnd}
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-}
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Consumption Report</title>
+                    <style>
+                        @media print {
+                            @page { size: A4 landscape; margin: 10mm; }
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        }
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                        table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+                        tr { page-break-inside: avoid; page-break-after: auto; }
+                        thead { display: table-header-group; }
+                        
+                        th { border: 1px solid #000 !important; padding: 6px; background: #f0f0f0 !important; font-size: 11px; }
+                        td { border: 1px solid #000 !important; padding: 5px; font-size: 11px; }
+                        
+                        h2, h4 { margin: 5px 0; color: #000; }
+                    </style>
+                </head>
+                <body>
+                    ${reportHeaderTitle}
+                    
+                    <table>
+                        <thead>${printHeaders}</thead>
+                        <tbody>${printRows}</tbody>
+                    </table>
+                    
+                    <table style="width:100%; margin-top:50px; border:none; page-break-inside: avoid;">
+                        <tr>
+                            <td style="border:none !important; text-align:center; width:50%;">
+                                Prepared by:<br><br><br>
+                                ___________________________<br>
+                                <b>Admin / Supply Officer</b>
+                            </td>
+                            <td style="border:none !important; text-align:center; width:50%;">
+                                Noted by:<br><br><br>
+                                ___________________________<br>
+                                <b>Chief / Head of Office</b>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    ${scriptStart}
+                        setTimeout(() => {
+                            window.print();
+                            window.close();
+                        }, 500);
+                    ${scriptEnd}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
     </script>
 </body>
 </html>
