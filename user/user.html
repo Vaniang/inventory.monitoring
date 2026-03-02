@@ -160,7 +160,7 @@
                     <div class="notif-header">
                         <span>Notifications</span>
                         <button class="btn-clear-notif" onclick="markAllRead()" title="Mark all as read">
-                            <i class="fas fa-check-double"></i> Clear All
+                            <button onclick="clearAllNotifications()" style="float:right; border:none; background:none; color:var(--accent); cursor:pointer; font-weight:bold;">Clear All</button>
                         </button>
                     </div>
                     <div id="notif-list" class="notif-list"><div style="padding:15px; color:#777;">No notifications</div></div>
@@ -396,6 +396,36 @@
                 });
             } else window.location.href = "../index.html";
         });
+
+       // --- CLEAR ALL NOTIFICATIONS ---
+        async function clearAllNotifications() {
+            if(!confirm("Are you sure you want to delete all notifications?")) return;
+            
+            try {
+                // Find all notifications belonging strictly to the logged-in user
+                const snap = await db.collection('notifications').where('userId', '==', currentUserId).get();
+                
+                if (snap.empty) {
+                    return alert("You have no notifications to clear.");
+                }
+
+                // Batch delete them all at once
+                const batch = db.batch();
+                snap.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                
+                // Immediately update the UI so the user sees it vanish
+                document.getElementById('notif-list').innerHTML = '<div style="padding:15px; color:#777;">No notifications</div>';
+                document.getElementById('notif-badge').style.display = 'none';
+                
+            } catch (error) {
+                console.error("Error clearing notifications: ", error);
+                alert("Error clearing notifications: " + error.message);
+            }
+        }
 
         function initAnnouncements() {
             db.collection('announcements').orderBy('timestamp', 'desc').limit(1).onSnapshot(snap => {
@@ -843,6 +873,7 @@ function addItemToSlip() {
     </script>
 </body>
 </html>
+
 
 
 
